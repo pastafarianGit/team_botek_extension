@@ -14,7 +14,7 @@
   "externally_connectable": {
     "matches": ["http://localhost:8080/*"]
   },
-  "permissions": [ "webRequest", "webRequestBlocking", "cookies", "http://localhost:8080/*"],
+  "permissions": [ "webRequest", "webRequestBlocking", "cookies", "http://localhost:8080/*", "tabs", "https://tx3.travian.com/*"],
   "browser_action": {
     "default_icon": "botek.png"
   }
