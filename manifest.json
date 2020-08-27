@@ -9,7 +9,7 @@
     }
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["main.js","constants.js","background.js"]
   },
   "externally_connectable": {
     "matches": ["http://localhost:8080/*"]
