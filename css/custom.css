@@ -1,0 +1,10 @@
+body{
+    width:200px;
+}
+
+.toggle-switches{
+    float: left;
+    margin: 10px;
+    text-align: center;
+}
+
