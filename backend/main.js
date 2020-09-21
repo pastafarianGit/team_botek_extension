@@ -1,11 +1,30 @@
 let queue = [];
 let referer;
+let travianServer = "";
+let botTabId;
+let villages;
 onStartUp();
 
 function onStartUp() {
-    analyse().then(r => console.log("analysed data", r));
+    analyseVillageProfile().then(r => console.log("analysed data", r));
     setInterval(mainLoop, 5000);
 }
+
+function openBot() {
+    runOnActiveId((tab) => {
+        console.log("open bot1 result", tab);
+        travianServer = tab.url;
+        // chrome.tabs.create({ url: tab.url });
+        chrome.tabs.update(tab.id, {url:"http://localhost:4200/"});
+        botTabId = tab.id;
+        analyseVillageProfile().then(villages => {
+            this.villages = villages;
+            console.log("result ", villages);
+            // TODO  open new tab
+        });
+    })
+}
+
 
 function mainLoop (){
     let task = queue.shift();

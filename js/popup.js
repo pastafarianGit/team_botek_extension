@@ -33,3 +33,8 @@ document.getElementById("disable-tab").onclick = () => {
     let bgPage = chrome.extension.getBackgroundPage();
     bgPage.toggleTab(false);
 }
+
+document.getElementById("start-bot").onclick = () => {
+    let bgPage = chrome.extension.getBackgroundPage();
+    bgPage.openBot();
+}

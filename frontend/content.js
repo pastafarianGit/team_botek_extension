@@ -8,6 +8,7 @@ chrome.runtime.sendMessage({isActiveTab: "is"}, function(isActive) {
     console.log("is active", isActive);
     if(isActive){
         showUi();
+        showBuildUI();
     }
 });
 

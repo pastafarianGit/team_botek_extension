@@ -1,5 +1,4 @@
 console.log("background botek ext")
-let travianServer = "";
 
 chrome.browserAction.onClicked.addListener(tab =>{
     console.log("background button clicked1", tab);

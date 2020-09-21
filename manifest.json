@@ -4,12 +4,12 @@
   "version": "0.1",
   "content_scripts": [
     {"matches": ["<all_urls>", "*://*.travian.ae/*", "*://*.travian.com/*", "*://*.travian.asia/*", "*://*.travian.com.au/*", "*://*.travian.ba/*", "*://*.travian.bg/*", "*://*.travian.com.br/*", "*://*.travian.cl/*", "*://*.travian.cz/*", "*://*.travian.de/*", "*://*.travian.dk/*", "*://*.travian.com.eg/*", "*://*.travian.fi/*", "*://*.travian.fr/*", "*://*.travian.gr/*", "*://*.travian.hk/*", "*://*.travian.com.hr/*", "*://*.travian.hu/*", "*://*.travian.co.id/*", "*://*.travian.co.il/*", "*://*.travian.ir/*", "*://*.travian.it/*", "*://*.travian.jp/*", "*://*.travian.lt/*", "*://*.travian.com.my/*", "*://*.travian.net/*", "*://*.travian.nl/*", "*://*.travian.no/*", "*://*.travian.pl/*", "*://*.travian.pt/*", "*://*.travian.ro/*", "*://*.travian.rs/*", "*://*.travian.ru/*", "*://*.travian.com.sa/*", "*://*.travian.se/*", "*://*.travian.si/*", "*://*.travian.sk/*", "*://*.travian.com.tr/*", "*://*.travian.tw/*", "*://*.travian.co.uk/*", "*://*.travian.us/*", "*://*.travian.vn/*"],
-      "js": ["content.js"],
+      "js": ["frontend/const_front.js","frontend/build.js","frontend/content.js"],
       "all_frames": false
     }
   ],
   "background": {
-    "scripts": ["constants.js", "tabs.js","analyse.js","main.js","background.js"]
+    "scripts": ["backend/constants.js", "backend/classes.js", "backend/tabs.js","backend/analyse.js","backend/main.js","backend/background.js"]
   },
   "externally_connectable": {
     "matches": ["http://localhost:8080/*", "http://localhost:4200/"]
