@@ -3,15 +3,15 @@ const analyseVillageProfile = async () => {
     let villages = [];
     let profileCall = await callFetch(PROFILE_URL);
     let htmlString = await profileCall.text();
-    let villagesLinks  = parseTextMultiple(REGEX_VILLAGE_LINK, htmlString);
+    let villagesLinks  = regexTextMultiple(REGEX_VILLAGE_LINK, htmlString);
 
-    let headings = xPathSearch(htmlString);
-    let villageHtml = headings.iterateNext();
+    let results = xPathSearch(XPATH_PROFILE_VILLAGES, htmlString);
+    let villageHtml = results.iterateNext();
     while (villageHtml) {
         const villageLink = villagesLinks.shift();
         const village = parseBasicVillageData(villageHtml, new Village(villageLink));
         villages.push(village);
-        villageHtml = headings.iterateNext();
+        villageHtml = results.iterateNext();
     }
     console.log("villages", villages);
     return villages;
@@ -31,16 +31,15 @@ const parseBasicVillageData = (villageHtml, village) => {
 
 const setVillageCoordinates = (coordinateChild, village) => {
     const text = coordinateChild.innerText;
-    let coordinateXY  = parseTextMultiple(REGEX_COORDINATE_XY, text);
+    let coordinateXY  = regexTextMultiple(REGEX_COORDINATE_XY, text);
     village.x = coordinateXY[0];
     village.y = coordinateXY[1];
 }
 
-const xPathSearch = (htmlString) => {
+const xPathSearch = (xPath, htmlString) => {
     let parser =  new DOMParser();
     let doc = parser.parseFromString(htmlString, 'text/html');
-    let headings = doc.evaluate(XPATH_PROFILE_VILLAGES, doc.body, null, XPathResult.ANY_TYPE, null);
-    return headings;
+    return doc.evaluate(xPath, doc.body, null, XPathResult.ANY_TYPE, null);
 }
 
 const setVillageNameCapital = (nameChildren, village) => {
@@ -65,7 +64,7 @@ const parseVillage = (thisHeading) => {
     let coordinateY  = parseTextSingle(REGEX_COORDINATE_Y, thisHeading);
 }*/
 
-const parseTextSingle = (regex, text) => {
+const regexTextSingle = (regex, text) => {
     let re = new RegExp(regex,"g");
     let result = re.exec(text);
     if(result !== null && result.length > 1){
@@ -74,7 +73,7 @@ const parseTextSingle = (regex, text) => {
     return null;
 }
 
-const parseTextMultiple = (regex, text) => {
+const regexTextMultiple = (regex, text) => {
     let results = [];
     let re = new RegExp(regex,"g");
     let matches = re[Symbol.matchAll](text);

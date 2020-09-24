@@ -2,12 +2,25 @@ let queue = [];
 let referer;
 let travianServer = "";
 let botTabId;
-let villages;
+let villages = null;
 onStartUp();
 
 function onStartUp() {
-    analyseVillageProfile().then(r => console.log("analysed data", r));
+    //analyseVillageProfile().then(r => console.log("analysed data", r));
+    //openBot();
+    testStartup();
     setInterval(mainLoop, 5000);
+}
+
+function testStartup() {
+    let village1 = new Village("12744");
+    let village2 = new Village("14562");
+    village1.addParams(23, -63, true, "qwe");
+    village2.addParams(25, -74, false, "qwe2");
+
+    let villagesTest = [village1, village2];
+    console.log("test villages", villagesTest);
+    villages = new Villages(villagesTest);
 }
 
 function openBot() {
@@ -17,9 +30,11 @@ function openBot() {
         // chrome.tabs.create({ url: tab.url });
         chrome.tabs.update(tab.id, {url:"http://localhost:4200/"});
         botTabId = tab.id;
-        analyseVillageProfile().then(villages => {
-            this.villages = villages;
-            console.log("result ", villages);
+        analyseVillageProfile().then(result => {
+            villages = new Villages(result);
+            //= new Villages(result);
+            console.log("villages ", villages);
+            chrome.tabs.create({ url: tab.url });
             // TODO  open new tab
         });
     })
@@ -29,6 +44,7 @@ function openBot() {
 function mainLoop (){
     let task = queue.shift();
     console.log("task: ", task);
+    console.log("villages: ", villages);
     if(task === undefined)
         return;
 

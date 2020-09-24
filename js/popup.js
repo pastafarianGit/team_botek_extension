@@ -12,6 +12,7 @@ chrome.storage.sync.get(['allActiveTabs'], function(result) {
     if (result.allActiveTabs === undefined){
         // set default
         result.allActiveTabs = true;
+        saveActiveTabsState(result.allActiveTabs);
     }
     log.toggleAttribute("checked", result.allActiveTabs);
 });
@@ -19,8 +20,8 @@ chrome.storage.sync.get(['allActiveTabs'], function(result) {
 function saveActiveTabsState(state) {
     chrome.storage.sync.set({allActiveTabs: state}, function() {
         /*let log = document.getElementById("console-event");
-    log.innerText = "value is1 "+state; //+ result.key;
-    */
+    log.innerText = "value is12 "+state; //+ result.key;
+*/
     });
 }
 

@@ -6,14 +6,22 @@ chrome.browserAction.onClicked.addListener(tab =>{
     //chrome.tabs.update(tab.id, {url:"http://localhost:4200/"});
 });
 
+function addBuildTask(data, sendResponse) {
+    console.log("build task  data", data)
+}
+
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         console.log("from a content script:" + sender.tab.url);
         console.log("request:", request);
-        if (request.greeting) {
-            sendResponse({url: travianServer});
-        }else if(request.isActiveTab){
-            isTabActive(sendResponse)
+        console.log("villages2:", this.villages);
+        switch (request.action) {
+            case "isTabActive":
+                isTabActive(sendResponse);
+                break;
+            case "build":
+                addBuildTask(request.data, sendResponse);
+                break;
         }
         return true;
     });
@@ -29,15 +37,6 @@ function(request, sender, sendResponse) {
             "response":sendResponse
         };
         queue.push(testBuild);
-
-
-
-        // al pustit queue, al vrnt promise???? TODO
-        //let myPromise = build(10);
-
-
-        //console.log("type:", typeof(myPromise));
-        //sendResponse(myPromise);
         return true;
 });
 
