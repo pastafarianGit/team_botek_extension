@@ -13,8 +13,6 @@ const showBuildUI = () => {
     }
 }
 
-
-
 const showOnBuildPhp = () => {
     const {buildingType, buildingLvl} = getBuildingTypeLevel();
     if (buildingType <= 4){
@@ -28,7 +26,7 @@ const showOnBuildPhp = () => {
 
 const onBuildDropdownSelected = (lvl, type) => {
     const locationId = getParamFromUrl("id");
-    const buildTask = {lvl: lvl, type:type, locationId: locationId};
+    const buildTask = {lvl: parseInt(lvl), type: type, locationId: locationId, villageDid: activeVillage.did};
     console.log("selected 1:  location", locationId);
     console.log("selected 2:  lvl", lvl);
     console.log("selected 3:  type", type);
@@ -71,6 +69,7 @@ const createDropDown = (minLvl, maxLvl, onSelectedFun, buildingType) => {
 
 const getMaxResourceLvl = () => {
     let maxLvl  = MAX_RESOURCE_LVL;
+    console.log("active village", activeVillage);
     if(activeVillage.isCapital){
         maxLvl = MAX_CAPITAL_RESOURCE_LVL;
     }
@@ -98,16 +97,6 @@ const getItemLI = (text) => {
     a.appendChild(document.createTextNode(text));
     li.appendChild(a);
     return li;
-}
-
-const parseText = (regex, text) => {
-    let re = new RegExp(regex,"g");
-    let result = re.exec(text);
-
-    if(result !== null && result.length > 1){
-        return  result[1];
-    }
-    return null;
 }
 
 const toHtmlElement = (str) => {

@@ -2,14 +2,15 @@ let queue = [];
 let referer;
 let travianServer = "";
 let botTabId;
-let villages = null;
+let villagesController = null;
 onStartUp();
 
 function onStartUp() {
     //analyseVillageProfile().then(r => console.log("analysed data", r));
     //openBot();
     testStartup();
-    setInterval(mainLoop, 5000);
+    analyseVillages().then(r => console.log("anal r", r));
+    setInterval(mainLoop, 10000);
 }
 
 function testStartup() {
@@ -20,7 +21,7 @@ function testStartup() {
 
     let villagesTest = [village1, village2];
     console.log("test villages", villagesTest);
-    villages = new Villages(villagesTest);
+    villagesController = new VillagesController(villagesTest);
 }
 
 function openBot() {
@@ -31,44 +32,50 @@ function openBot() {
         chrome.tabs.update(tab.id, {url:"http://localhost:4200/"});
         botTabId = tab.id;
         analyseVillageProfile().then(result => {
-            villages = new Villages(result);
+            villagesController = new VillagesController(result);
             //= new Villages(result);
-            console.log("villages ", villages);
+            console.log("villages ", villagesController);
             chrome.tabs.create({ url: tab.url });
-            // TODO  open new tab
         });
     })
 }
 
 
-function mainLoop (){
-    let task = queue.shift();
-    console.log("task: ", task);
-    console.log("villages: ", villages);
-    if(task === undefined)
-        return;
+/*function parseResourcesOnPage(village, pageText) {
+    let resourceText = regexTextSingle(REGEX_RESOURCES_VAR, pageText, "gs");
+    resourceText = makeValidJsonResource(resourceText);
+    return JSON.parse(resourceText);
+}*/
 
-    if (task.type === BUILD_TYPE){
-        let buildTask = task.value;
-        build(buildTask.id)
-            .then(data => {
-                console.log("build works:", data)
-                task.response({"type": "success"});
-            }).catch(err => {
-                task.response(err);
-                console.error("my: ", err)
-            });
+async function analyseDorf1BuildTest(village) {
+    /*const params =  NEW_DID_PARAM + village.did;
+    let pageText = await getPageText(DORF1_URL, params);
+    village.parseResources(pageText);
+    village.parseResourceLvls(pageText);*/
+    let task = village.getNextTask();// TODO narest groupe taskov
+
+    console.log("village status", village);
+    if(task !== null){
+        console.log("started building task", task);
+        village.nextCheckTime += 60000; // TODO check building time + main building lvl
+        let buildingCall = await callFetch(BUILD_URL + task.locationId, {});
+        let c = await retrieveC(buildingCall);
+        console.log("c",c);
+        let buildStart = await callFetch(DORF1_URL+"?a="+task.locationId+"&c="+c, {});
+        return buildStart;
     }
 }
 
-async function callFetch (url, headers) {
-    let myPromise = await fetch(url, headers);
-    await new Promise((resolve, reject) => setTimeout(resolve, 3000));
-    return myPromise;
-}
-
-function find() {
-
+function mainLoop (){
+    console.log("main loop");
+    for (let village of villagesController.villages){
+        if(village.isNextCheckTime()){
+            if(village.isNextBuildTask()){
+                console.log("next build task", village);
+                analyseDorf1BuildTest(village).then(result => console.log("result analyseDorf1Build", result));
+            }
+        }
+    }
 }
 
 const build = async(id) => {
@@ -76,8 +83,7 @@ const build = async(id) => {
     let buildingCall = await callFetch(BUILD_URL + id, {});
     let c = await retrieveC(buildingCall);
     console.log("c",c);
-    let buildStart = await callFetch(DORF1_URL+"?a="+id+"&c="+c, {});
-    return buildStart;
+    return await callFetch(DORF1_URL+"?a="+id+"&c="+c, {});
 }
 
 const retrieveC = async (buildingCall) => {

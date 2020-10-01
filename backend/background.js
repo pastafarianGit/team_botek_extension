@@ -7,14 +7,21 @@ chrome.browserAction.onClicked.addListener(tab =>{
 });
 
 function addBuildTask(data, sendResponse) {
-    console.log("build task  data", data)
+    console.log("build task  data", data);
+    for(let village of villagesController.villages){
+        if(village.did === data.villageDid){
+            village.buildTasks.push(data);
+        }
+        console.log("village is ", village);
+    }
+
 }
 
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         console.log("from a content script:" + sender.tab.url);
         console.log("request:", request);
-        console.log("villages2:", this.villages);
+        console.log("villages2:", this.villagesController);
         switch (request.action) {
             case "isTabActive":
                 isTabActive(sendResponse);

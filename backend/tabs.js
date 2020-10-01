@@ -5,11 +5,11 @@ const isTabActive = (sendResponse) =>{
         {currentWindow: true, active : true}, (result) => {
             if (result[0] !== undefined && enabledTabs[result[0].id] !== undefined) {
                 console.log("enabledTabs[result[0].id]", enabledTabs[result[0].id]);
-                sendResponse({isActive: enabledTabs[result[0].id], villages : villages.allVillages});
+                sendResponse({isActive: enabledTabs[result[0].id], villages : villagesController.villages});
             } else {
                 chrome.storage.sync.get(['allActiveTabs'], function (result) {
                     console.log("is server storage", result.allActiveTabs);
-                    sendResponse({isActive: result.allActiveTabs, villages : villages.allVillages});
+                    sendResponse({isActive: result.allActiveTabs, villages : villagesController.villages});
                 })
             }
 
@@ -21,13 +21,6 @@ function toggleTab(isTabEnabled) {
         enabledTabs[tab.id] = isTabEnabled;
         chrome.tabs.reload(tab.id);
     })
-    /*chrome.tabs.query(
-        {currentWindow: true, active : true}, (result) =>{
-            const id = result[0].id;
-            enabledTabs[id] = isTabEnabled;
-            chrome.tabs.reload(id);
-        }
-    )*/
 }
 
 function runOnActiveId(runFun) {
@@ -39,13 +32,3 @@ function runOnActiveId(runFun) {
         }
     )
 }
-/*            const id = result.id;
-            if (enabledTabs[id]){
-                 console.log("is server tab enabledTabs[id]", enabledTabs[id]);
-                callback(enabledTabs[id]);
-             }else{
-                 chrome.storage.sync.get(['allActiveTabs'], function(result) {
-                     console.log("is server storage", result.allActiveTabs);
-                     callback1({test:true});
-                 })
-             }*/

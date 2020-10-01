@@ -5,8 +5,9 @@ const findActiveVillage = () => {
     let next = result.iterateNext();
     if(next){
         const text = next.getAttribute("href");
+        console.log("text active v: ", text);
         const linkId = regexSearchSingle(REGEX_VILLAGE_LINK_F, text);
-        return villages.findVillage(linkId);
+        return villagesController.findVillage(linkId);
     }
     return null;
 }

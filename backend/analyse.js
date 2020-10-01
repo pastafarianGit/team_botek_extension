@@ -1,5 +1,5 @@
 
-const analyseVillageProfile = async () => {
+const analyseVillageProfile = async () => { //get all villages -> link, name, coordinates
     let villages = [];
     let profileCall = await callFetch(PROFILE_URL);
     let htmlString = await profileCall.text();
@@ -9,93 +9,40 @@ const analyseVillageProfile = async () => {
     let villageHtml = results.iterateNext();
     while (villageHtml) {
         const villageLink = villagesLinks.shift();
-        const village = parseBasicVillageData(villageHtml, new Village(villageLink));
+        const village = analyseBasicVillageData(villageHtml, new Village(villageLink));
         villages.push(village);
         villageHtml = results.iterateNext();
     }
-    console.log("villages", villages);
     return villages;
 }
 
-const parseBasicVillageData = (villageHtml, village) => {
+async function analyseVillages() {
+    let village = villagesController.villages[0];
+    await analyseDorf2Buildings(village);
+    await analyseDorf1Buildings(village);
+    console.log("village at start ", village);
+}
+
+async function analyseDorf2Buildings(village){
+    let pageText = await getTextFromPage(DORF2_URL, NEW_DID_PARAM + village.did);
+    village.parseBuildingLvls(pageText);
+    village.parseResources(pageText);
+}
+
+async function analyseDorf1Buildings(village) {
+    let pageText = await getTextFromPage(DORF1_URL, NEW_DID_PARAM + village.did);
+    village.parseResourceLvls(pageText);
+    village.parseResources(pageText);
+}
+
+const analyseBasicVillageData = (villageHtml, village) => {
     let children = villageHtml.childNodes;
-    (children).forEach((item, index) => {
+    (children).forEach((item) => {
         if(item.className === "name"){
-            setVillageNameCapital(item.childNodes, village);
+            village.setNameAndCapital(item.childNodes);
         }else if(item.className === "coords"){
-            setVillageCoordinates(item, village);
+            village.setCoordinates(item);
         }
     })
     return village;
 }
-
-const setVillageCoordinates = (coordinateChild, village) => {
-    const text = coordinateChild.innerText;
-    let coordinateXY  = regexTextMultiple(REGEX_COORDINATE_XY, text);
-    village.x = coordinateXY[0];
-    village.y = coordinateXY[1];
-}
-
-const xPathSearch = (xPath, htmlString) => {
-    let parser =  new DOMParser();
-    let doc = parser.parseFromString(htmlString, 'text/html');
-    return doc.evaluate(xPath, doc.body, null, XPathResult.ANY_TYPE, null);
-}
-
-const setVillageNameCapital = (nameChildren, village) => {
-    let name = '';
-    let isCapital = false;
-    (nameChildren).forEach((child) => {
-        if(child.tagName === 'A'){
-            name = child.textContent;
-        }else if(child.tagName === 'SPAN' && child.className === 'mainVillage'){
-            isCapital = true;
-        }
-    });
-    village.name = name;
-    village.isCapital = isCapital;
-    //return {name:name, isCapital:isCapital};
-}
-
-/*
-const parseVillage = (thisHeading) => {
-    let name  = parseTextSingle(REGEX_VILLAGE_NAME, thisHeading);
-    let coordinateX  = parseTextSingle(REGEX_COORDINATE_X, thisHeading);
-    let coordinateY  = parseTextSingle(REGEX_COORDINATE_Y, thisHeading);
-}*/
-
-const regexTextSingle = (regex, text) => {
-    let re = new RegExp(regex,"g");
-    let result = re.exec(text);
-    if(result !== null && result.length > 1){
-        return  result[1];
-    }
-    return null;
-}
-
-const regexTextMultiple = (regex, text) => {
-    let results = [];
-    let re = new RegExp(regex,"g");
-    let matches = re[Symbol.matchAll](text);
-    for (const match of matches) {
-        //console.log("multiple matches", match);
-        if(match !== null && match.length > 1){
-            results.push(match[1]);
-        }
-    }
-    return results;
-}
-/*
-const parseProfilePage = async () => {
-    let dorf1Call = await callFetch(PROFILE_URL);
-    let html = await dorf1Call.text();
-    let parser =  new DOMParser();
-    let doc = parser.parseFromString(html, 'text/html');
-    let headings = doc.evaluate("//span[@class=\"mainVillage\"]", doc.body, null, XPathResult.ANY_TYPE, null);
-    let thisHeading = headings.iterateNext();
-}*/
-
-
-
-
-
