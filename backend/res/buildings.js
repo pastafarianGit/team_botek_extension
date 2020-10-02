@@ -9,7 +9,9 @@ let BUILDING_CATEGORY = {
     RESOURCES: 3,
   };
 
-let buildings = {
+
+
+let buildingsData = {
   1: {
     name: "Woodcutter",
     category: BUILDING_CATEGORY.RESOURCES,
@@ -1985,6 +1987,29 @@ let buildings = {
     name: "Main Building",
     category: BUILDING_CATEGORY.INFRASTRUCTURE,
     buildingType: BUILDING_TYPE.BUILDING,
+    reduceTime: {
+      0: 5,
+      1: 1,
+      2: 0.96,
+      3: 0.93,
+      4: 0.90,
+      5: 0.86,
+      6: 0.83,
+      7: 0.80,
+      8: 0.77,
+      9: 0.75,
+      10: 0.72,
+      11: 0.69,
+      12: 0.67,
+      13: 0.64,
+      14: 0.62,
+      15: 0.60,
+      16: 0.58,
+      17: 0.56,
+      18: 0.54,
+      19: 0.52,
+      20: 0.50,
+    },
     cost: {
 
       1: {

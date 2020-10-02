@@ -4,11 +4,11 @@ let Village = class {
     y;
     isCapital;
     name;
-    buildTasks = [];
+    //buildTasks = []; // TODO change to map da lahko normalno deletas
     nextCheckTime;
     resources;
-    resourcesLvls;
-    buildingLvls;
+    buildingsInfo = new Map();
+
     constructor(did) {
         this.did  = did;
     }
@@ -18,60 +18,75 @@ let Village = class {
         this.y  = y;
         this.isCapital  = isCapital;
         this.name  = name;
-        this.nextCheckTime = Date.now() + 10000;
+        this.nextCheckTime = Date.now() + 1000;
+        this.buildingsInfo = new Map();
+        this.buildTasks = new Map();
     }
 
     isNextCheckTime() {
+        console.log("time diff: " ,  this.nextCheckTime - Date.now());
         return (this.nextCheckTime < Date.now());
     }
 
     isNextBuildTask() {
-        return (this.buildTasks.length > 0);
+        return (this.buildTasks.size > 0);
+    }
+
+    updateBuildingInfo(updatedBuildings){
+        this.buildingsInfo = new Map([...this.buildingsInfo, ...updatedBuildings]);
     }
 
     getNextTask(){
-        for (let task of this.buildTasks){
-            const building = this.resourcesLvls.get(task.locationId);
-
-            console.log(" task.lvl", task.lvl);
-            console.log(" task.lvl type", typeof task.lvl);
-
-            if(building.lvl < task.lvl){
-                let cost = buildings[building.gid].cost[building.lvl + 1];
-                console.log("cost", cost);
+        for (const [key, task] of this.buildTasks.entries()) {
+            const building = this.buildingsInfo.get(task.locationId);
+            console.log("building lvl", building);
+            console.log("task lvl", task);
+            if((building.lvl) < task.lvl){
+                let cost = buildingsData[building.gid].cost[building.lvl + 1];
                 if(this.isEnoughResources(cost)){
                     return task;
                 }
             }else{
+                this.buildTasks.delete(key);
+                console.log("deleted task ",  this.buildTasks);
+
                 // remove task from array
             }
         }
         return null;
     }
 
-    setNameAndCapital(children){
-        let name = '';
-        let isCapital = false;
-        (children).forEach((child) => {
-            if(child.tagName === 'A'){
-                name = child.textContent;
-            }else if(child.tagName === 'SPAN' && child.className === 'mainVillage'){
-                isCapital = true;
-            }
-        });
-        this.name = name;
-        this.isCapital = isCapital;
+    setCoordinates(coordinates){
+        const {x,y} = coordinates;
+        this.x = x;
+        this.y = y;
     }
 
-    setCoordinates(coordinateChild){
-        const text = coordinateChild.innerText;
-        let coordinateXY  = regexTextMultiple(REGEX_COORDINATE_XY, text);
-        this.x = coordinateXY[0];
-        this.y = coordinateXY[1];
+
+
+    getMainBuildingSpeed(){
+        const lvl = this.getMainBuildingLvl();
+        return buildingsData[MAIN_BUILDING_ID].reduceTime[lvl];
     }
+
+    setNextCheckTime(time){
+        let reduceTime = this.getMainBuildingSpeed();
+        let serverSpeed = this.getMainBuildingSpeed();
+    }
+
+    /*getMainBuildingLvl(){
+        const mainBuilding = this.getMainBuilding();
+        return mainBuilding.lvl;
+    }*/
 
     getMainBuildingLvl(){
-        //const building = this.resourcesLvls.get();
+        let lvl = 0;
+        this.buildingsInfo.forEach((value, key) => {
+            if(value.gid === MAIN_BUILDING_ID){
+                lvl = value.lvl;
+            }
+        })
+        return lvl;
     }
 
     isEnoughResources(cost){
@@ -81,72 +96,7 @@ let Village = class {
         const crop = this.resources.storage.l4 >= cost.crop;
         return (wood && clay && iron && crop);
     }
-
-
-    parseResources(pageText) {
-        let resourceText = regexTextSingle(REGEX_RESOURCES_VAR, pageText, "gs");
-        resourceText = makeValidJsonResource(resourceText);
-        this.resources = JSON.parse(resourceText);
-    }
-
-    parseResourceLvls(pageText){
-        let parser =  new DOMParser();
-        let doc = parser.parseFromString(pageText, 'text/html');
-        const resContainer = doc.getElementById("resourceFieldContainer");
-        let map = new Map();
-
-        for (let child of resContainer.childNodes){
-            if(child.tagName === 'DIV'){
-                let locationID, lvl, gid;
-                for(let divClass of child.classList){
-                    if(divClass.startsWith(BUILDING_LOCATION_ID)){
-                        locationID = divClass.substring(BUILDING_LOCATION_ID.length);
-                    }
-                    if(divClass.startsWith(BUILDING_GID)){
-                        gid = divClass.substring(BUILDING_GID.length);
-                    }
-                }
-                lvl = child.getElementsByTagName('div')[0].innerText;
-                map.set(locationID, {lvl:parseInt(lvl), gid: gid});
-                //fields.push({lvl:lvl, locationID: locationID, gid: gid});
-            }
-        }
-        this.resourcesLvls = map;
-    }
-
-    parseBuildingLvls(pageText){
-        let parser =  new DOMParser();
-        let doc = parser.parseFromString(pageText, 'text/html');
-        const resContainer = doc.getElementById("village_map");
-        let map = new Map();
-
-        for (let child of resContainer.childNodes) {
-            if(child.classList !== undefined){
-                if (child.tagName === 'DIV') {
-                    const classList = child.classList.toString();
-                    const locationID = parseInt(regexTextSingle(REGEX_DORF2_BUILDING_LOCATION, classList, "g"));
-                    const type = parseInt(regexTextSingle(REGEX_DORF2_BUILDING_TYPE, classList, "g"));
-                    let lvl = 0;
-                    if( (locationID > 18 && locationID < 40)
-                        || (locationID === 40 && classList.includes("bottom"))
-                    ){
-                        const labelLayer = child.getElementsByClassName("labelLayer")[0];
-                        if(labelLayer){
-                            lvl = parseInt(labelLayer.innerText);
-                        }
-                        map.set(locationID, {lvl:lvl, gid: type});
-
-                    }
-                }
-            }
-        }
-        this.buildingLvls = map;
-    }
 };
-
-
-
-
 
 let VillagesController = class {
 
@@ -164,4 +114,13 @@ let VillagesController = class {
         return null;
     }
 
+}
+
+let ServerSettings = class {
+
+    constructor(speed, version, worldId) {
+        this.speed = speed;
+        this.version = version;
+        this.worldId = worldId;
+    }
 }

@@ -38,11 +38,19 @@ const REGEX_VILLAGE_NAME = "<span class=\"name\">(.*)<\\/span>";
 const REGEX_COORDINATE_Y = "<span class=\"coordinateY\">(.*)\\)";*/
 const REGEX_COORDINATE_XY = "(−?‭\\d+)";
 const XPATH_PROFILE_VILLAGES = "//*[@id='villages']/tbody/tr";
+const XPATH_CURRENTLY_BUILDING = "//*[@id='content']/div[2]/ul";
 const REGEX_VILLAGE_LINK = '<a  href="\\?newdid=(.*)&';
-const REGEX_RESOURCES_VAR = ' var resources = (\\{.*?)<\\/script>';
+const REGEX_RESOURCES_VAR = 'var resources = (\\{.*?)<\\/script>';
+const REGEX_CURRENTLY_BUILDING = 'var bld=(.*?)<\\/script>';
 const REGEX_DORF2_BUILDING_LOCATION = 'a(\\d\\d)';
 const REGEX_DORF2_BUILDING_TYPE = 'g(\\d+)';
+const REGEX_SERVER_SETTINGS = 'Travian.Translation.add\\((.*?)<\\/script>';
 
+const REGEX_SERVER_SPEED = 'Travian.Game.speed = (\\d);';
+const REGEX_SERVER_VERSION = 'Travian.Game.version = (.*);';
+const REGEX_SERVER_WORLD_ID = 'Travian.Game.worldId = (.*);';
+
+const MAIN_BUILDING_ID = 15;
 
 
 

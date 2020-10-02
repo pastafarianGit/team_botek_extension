@@ -10,11 +10,17 @@ function addBuildTask(data, sendResponse) {
     console.log("build task  data", data);
     for(let village of villagesController.villages){
         if(village.did === data.villageDid){
-            village.buildTasks.push(data);
+            village.buildTasks.set(getUuidv4(), data); // TODO generate random key
+            village.nextCheckTime = calcNextCheckTime(30);
         }
         console.log("village is ", village);
     }
+}
 
+function getUuidv4() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
 }
 
 chrome.runtime.onMessage.addListener(
@@ -96,7 +102,7 @@ const modifyHeaderOrigin = (url, requestHeaders) => {
     console.log("modify header origin", requestHeaders);
 }
 
-
+/*
 chrome.tabs.getCurrent((result1)=>{
     console.log("current time", result1);
-})
+})*/

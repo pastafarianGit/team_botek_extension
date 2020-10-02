@@ -1,4 +1,4 @@
-const regexTextSingle = (regex, text, flags) => {
+const regexSearchOne = (regex, text, flags) => {
     let re = new RegExp(regex,flags);
     let result = re.exec(text);
     if(result !== null && result.length > 1){
@@ -7,7 +7,7 @@ const regexTextSingle = (regex, text, flags) => {
     return null;
 }
 
-const regexTextMultiple = (regex, text) => {
+const regexSearchMultiple = (regex, text) => {
     let results = [];
     let re = new RegExp(regex,"g");
     let matches = re[Symbol.matchAll](text);
@@ -19,17 +19,6 @@ const regexTextMultiple = (regex, text) => {
     }
     return results;
 }
-
-/*
-const parseText = (regex, text) => {
-    let re = new RegExp(regex,"g");
-    let result = re.exec(text);
-
-    if(result !== null && result.length > 1){
-        return  result[1];
-    }
-    return null;
-}*/
 
 const xPathSearch = (xPath, htmlString) => {
     let parser =  new DOMParser();
@@ -57,4 +46,8 @@ async function callFetch (url, headers) {
     let myPromise = await fetch(url, headers);
     await new Promise((resolve, reject) => setTimeout(resolve, 3000));
     return myPromise;
+}
+
+const calcNextCheckTime = (secTimeToDo) => { // in sec
+    return Date.now() + (secTimeToDo * 1000);
 }

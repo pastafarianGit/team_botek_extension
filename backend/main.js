@@ -3,6 +3,7 @@ let referer;
 let travianServer = "";
 let botTabId;
 let villagesController = null;
+let serverSettings = null;
 onStartUp();
 
 function onStartUp() {
@@ -11,6 +12,7 @@ function onStartUp() {
     testStartup();
     analyseVillages().then(r => console.log("anal r", r));
     setInterval(mainLoop, 10000);
+
 }
 
 function testStartup() {
@@ -22,6 +24,10 @@ function testStartup() {
     let villagesTest = [village1, village2];
     console.log("test villages", villagesTest);
     villagesController = new VillagesController(villagesTest);
+
+    analyseVillageProfile().then(r => {
+        console.log("analyse profile done", r);
+    })
 }
 
 function openBot() {
@@ -40,57 +46,25 @@ function openBot() {
     })
 }
 
-
-/*function parseResourcesOnPage(village, pageText) {
-    let resourceText = regexTextSingle(REGEX_RESOURCES_VAR, pageText, "gs");
-    resourceText = makeValidJsonResource(resourceText);
-    return JSON.parse(resourceText);
-}*/
-
-async function analyseDorf1BuildTest(village) {
-    /*const params =  NEW_DID_PARAM + village.did;
-    let pageText = await getPageText(DORF1_URL, params);
-    village.parseResources(pageText);
-    village.parseResourceLvls(pageText);*/
-    let task = village.getNextTask();// TODO narest groupe taskov
-
-    console.log("village status", village);
-    if(task !== null){
-        console.log("started building task", task);
-        village.nextCheckTime += 60000; // TODO check building time + main building lvl
-        let buildingCall = await callFetch(BUILD_URL + task.locationId, {});
-        let c = await retrieveC(buildingCall);
-        console.log("c",c);
-        let buildStart = await callFetch(DORF1_URL+"?a="+task.locationId+"&c="+c, {});
-        return buildStart;
-    }
-}
-
 function mainLoop (){
-    console.log("main loop");
+    console.log("main loop", villagesController.villages);
     for (let village of villagesController.villages){
-        if(village.isNextCheckTime()){
-            if(village.isNextBuildTask()){
-                console.log("next build task", village);
-                analyseDorf1BuildTest(village).then(result => console.log("result analyseDorf1Build", result));
+        if(village.isNextBuildTask()){
+            const isNextCheckTime = village.isNextCheckTime();
+
+            if(isNextCheckTime){
+                console.log("is next checkTime", isNextCheckTime);
+                buildResources(village).then(result => console.log("result analyseDorf1Build", result));
             }
         }
     }
 }
-
+/*
 const build = async(id) => {
-    let dorf1Call = await callFetch(DORF1_URL, /*{headers:{request:"true"}}*/);
+
     let buildingCall = await callFetch(BUILD_URL + id, {});
     let c = await retrieveC(buildingCall);
     console.log("c",c);
     return await callFetch(DORF1_URL+"?a="+id+"&c="+c, {});
-}
+}*/
 
-const retrieveC = async (buildingCall) => {
-    let body = await buildingCall.text();
-    let cArray = /c=(.*)\'/g.exec(body);
-    if(cArray !== null && cArray.length > 1){
-        return  cArray[1];
-    }
-    throw new Error(ERROR_BUILDING_C);
-}

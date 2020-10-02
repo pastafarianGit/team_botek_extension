@@ -1,48 +1,61 @@
 
 const analyseVillageProfile = async () => { //get all villages -> link, name, coordinates
-    let villages = [];
     let profileCall = await callFetch(PROFILE_URL);
-    let htmlString = await profileCall.text();
-    let villagesLinks  = regexTextMultiple(REGEX_VILLAGE_LINK, htmlString);
-
-    let results = xPathSearch(XPATH_PROFILE_VILLAGES, htmlString);
-    let villageHtml = results.iterateNext();
-    while (villageHtml) {
-        const villageLink = villagesLinks.shift();
-        const village = analyseBasicVillageData(villageHtml, new Village(villageLink));
-        villages.push(village);
-        villageHtml = results.iterateNext();
-    }
-    return villages;
+    let pageString = await profileCall.text();
+    serverSettings = parseServerSettings(pageString);
+    console.log("server settings", serverSettings);
+    let villagesLinks  = regexSearchMultiple(REGEX_VILLAGE_LINK, pageString);
+    return parseVillages(pageString, villagesLinks);
 }
 
-async function analyseVillages() {
+const analyseVillages = async () => {
     let village = villagesController.villages[0];
     await analyseDorf2Buildings(village);
     await analyseDorf1Buildings(village);
     console.log("village at start ", village);
 }
 
-async function analyseDorf2Buildings(village){
-    let pageText = await getTextFromPage(DORF2_URL, NEW_DID_PARAM + village.did);
-    village.parseBuildingLvls(pageText);
-    village.parseResources(pageText);
+const analyseDorf2Buildings = async (village) => {
+    let pageString = await getTextFromPage(DORF2_URL, NEW_DID_PARAM + village.did);
+    let townBuildings = parseBuildingLvls(pageString);
+    village.updateBuildingInfo(townBuildings);
+    village.resources = parseResources(pageString);
+
 }
 
-async function analyseDorf1Buildings(village) {
-    let pageText = await getTextFromPage(DORF1_URL, NEW_DID_PARAM + village.did);
-    village.parseResourceLvls(pageText);
-    village.parseResources(pageText);
+const analyseDorf1Buildings = async (village) => {
+    let pageString = await getTextFromPage(DORF1_URL, NEW_DID_PARAM + village.did);
+    let resourceBuildings = parseResourceLvls(pageString);
+    village.updateBuildingInfo(resourceBuildings);
+    village.resources = parseResources(pageString);
+    parseCurrentlyBuilding(pageString);
 }
 
-const analyseBasicVillageData = (villageHtml, village) => {
-    let children = villageHtml.childNodes;
-    (children).forEach((item) => {
-        if(item.className === "name"){
-            village.setNameAndCapital(item.childNodes);
-        }else if(item.className === "coords"){
-            village.setCoordinates(item);
-        }
-    })
-    return village;
+
+const parseCurrentlyBuilding = (pageString) => {
+    const timers = parseCurrentlyBuildingHtml(pageString);
+    const buildings = parseCurrentlyBuildingJS(pageString);
+    console.log("timers", timers);
+    console.log("buildings", buildings);
 }
+
+
+const parseCurrentlyBuildingHtml = (pageString) => {
+    let values = [];
+    let results = xPathSearch(XPATH_CURRENTLY_BUILDING, pageString);
+    let ul = results.iterateNext();
+    let children = ul.getElementsByClassName("timer");
+
+    for (let child of children){
+        values.push(child.getAttribute("value"));
+        console.log("buildDuration child", child.getAttribute("value"));
+    }
+    return values;
+}
+
+const parseCurrentlyBuildingJS = (pageString) => {
+    let currentlyText = regexSearchOne(REGEX_CURRENTLY_BUILDING, pageString, "gs");
+    console.log("current building Text", currentlyText);
+    return JSON.parse(currentlyText);
+}
+
