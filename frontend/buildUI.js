@@ -6,25 +6,28 @@ let dropDown = '    <div class="bootstrap">\n' +
         '      </div>\n' +
         '</div>\n';
 
-const showBuildUI = () => {
+function showBuildUI() {
     const pathname = window.location.pathname;
     if(pathname === BUILD_PATH_F){
         showOnBuildPhp();
     }
 }
 
-const showOnBuildPhp = () => {
+function showOnBuildPhp() {
     const {buildingType, buildingLvl} = getBuildingTypeLevel();
     if (buildingType <= 4){
         const maxLvl = getMaxResourceLvl();
         const dropDownNode = createDropDown(buildingLvl+1, maxLvl, onBuildDropdownSelected, buildingType);
         document.getElementsByClassName("section1")[0].append(dropDownNode);
     }else{
-
+        const maxLvl = Object.keys(buildingsData[buildingType].cost).length;
+        const dropDownNode = createDropDown(buildingLvl+1, maxLvl, onBuildDropdownSelected, buildingType);
+        document.getElementsByClassName("upgradeBuilding")[0].append(dropDownNode);
     }
 }
 
-const onBuildDropdownSelected = (lvl, type) => {
+
+function onBuildDropdownSelected(lvl, type) {
     const locationId = getParamFromUrl("id");
     const buildTask = {lvl: parseInt(lvl), type: type, locationId: parseInt(locationId), villageDid: activeVillage.did};
     console.log("selected 1:  location", locationId);
@@ -43,13 +46,13 @@ const onBuildDropdownSelected = (lvl, type) => {
     });
 }
 
-const getParamFromUrl = (name) => {
+function getParamFromUrl (name) {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     return urlParams.get(name);
 }
 
-const createDropDown = (minLvl, maxLvl, onSelectedFun, buildingType) => {
+function createDropDown(minLvl, maxLvl, onSelectedFun, buildingType) {
     let dropDownNode = toHtmlElement(dropDown);
     let btnNode = dropDownNode.getElementsByTagName("button")[0];
     let ulNode = dropDownNode.getElementsByTagName("ul")[0];
@@ -67,7 +70,7 @@ const createDropDown = (minLvl, maxLvl, onSelectedFun, buildingType) => {
     return dropDownNode;
 }
 
-const getMaxResourceLvl = () => {
+function getMaxResourceLvl() {
     let maxLvl  = MAX_RESOURCE_LVL;
     if(activeVillage.isCapital){
         maxLvl = MAX_CAPITAL_RESOURCE_LVL;
@@ -75,7 +78,7 @@ const getMaxResourceLvl = () => {
     return maxLvl;
 }
 
-const getBuildingTypeLevel = () => {
+function getBuildingTypeLevel() {
     let buildingImg = document.getElementById("build");
     let list = buildingImg.classList;
     let type = -1;
@@ -90,7 +93,7 @@ const getBuildingTypeLevel = () => {
     return {buildingType: type, buildingLvl: parseInt(lvl)};
 }
 
-const getItemLI = (text) => {
+function getItemLI(text) {
     let li = document.createElement('li');
     let a = document.createElement('a');
     a.appendChild(document.createTextNode(text));
@@ -98,7 +101,7 @@ const getItemLI = (text) => {
     return li;
 }
 
-const toHtmlElement = (str) => {
+function toHtmlElement(str){
     let parser = new DOMParser();
     let doc =  parser.parseFromString(str, 'text/html');
     return doc.body.firstChild;

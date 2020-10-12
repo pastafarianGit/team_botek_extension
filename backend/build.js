@@ -1,39 +1,46 @@
-async function buildResources(village) {
-    let task = village.getNextTask();// TODO narest groupe taskov
 
-    console.log("build village status", village);
-    console.log("build task", task);
-    console.log("build serverSettings", serverSettings);
-    if(task !== null && serverSettings !== null){
-        console.log("started building task", task);
-        console.log("started village.buildingLvls", village.buildingsInfo);
+async function build (task) {
+    let village = villagesHelper.findVillage(task.villageDid);
+    await analyseAndSwitchTo(task.building, village);
 
-        let building = village.buildingsInfo.get(task.locationId);
-        let timeToBuild = calcTimeToBuild(village, building, serverSettings.speed);
-        village.nextCheckTime = calcNextCheckTime(timeToBuild);
 
-        console.log("village next check Time", village.nextCheckTime);
+    // after analyse check If task is doable
+    if(!village.isEnoughResAndLvl(task.uuid, task)){
+        return Promise.reject("Not enough res or lvl");
+    }
 
-        let buildingCall = await callFetch(BUILD_URL + task.locationId, {});
-        let c = await retrieveC(buildingCall);
-        console.log("c",c);
-        let buildStart = await callFetch(DORF1_URL+"?a="+task.locationId+"&c="+c, {});
-        // TODO parse buildSTart da dobis, ce se gradi in koliko casa se gradi
-        return buildStart;
+    if (village.currBuilding.isBuildSlotFree(task.building)) {
+        simulateClickBuildingAndPressUpgrade(task.building)
+            .then(pageString => {
+                analysePageStringDorf12(pageString, village, task.building.isResourceBuilding());
+                village.timers.updateTimers(village.currBuilding.tasks);
+                village.updateIfTaskDone(village.currBuilding.tasks);
+            });
+    } else {
+        //let time = village.currBuilding.getFinishBuildingTime(task.building.isResourceBuilding());
+        //village.timers.addTimeFromNow(task.timerType, time);
+        return Promise.reject(ERR_ALREADY_BUILDING)
     }
 }
 
-const calcTimeToBuild = (village, building, serverSpeed) => {
-    let timeToBuild = buildingsData[building.gid].cost[building.lvl + 1].timeToBuild;  // + 1 to get for next lvl
+function calcTimeToBuild (village, building, serverSpeed) {
+    let timeToBuild = buildingsData[building.type].cost[building.lvl + 1].timeToBuild;  // + 1 to get for next lvl
     let decreaseMB = village.getMainBuildingSpeed();
     return  timeToBuild * decreaseMB / serverSpeed;
 }
 
-const retrieveC = async (buildingCall) => {
+async function  retrieveC (buildingCall){
     let body = await buildingCall.text();
-    let cArray = /c=(.*)\'/g.exec(body);
+    let cArray = /;c=(.*?)\';/g.exec(body);
     if(cArray !== null && cArray.length > 1){
         return  cArray[1];
     }
     throw new Error(ERROR_BUILDING_C);
+}
+
+async function simulateClickBuildingAndPressUpgrade (building) {
+    let buildingCall = await callFetch(BUILD_URL + building.locationId, {});
+    let c = await retrieveC(buildingCall);
+    return await getTextFromPage(building.getLocationTypeURL(), "?a="+building.locationId+"&c="+c)
+    // callFetch(DORF1_URL+"?a="+locationId+"&c="+c, {});
 }

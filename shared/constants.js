@@ -1,7 +1,11 @@
+const TRIBE_ROMANS = 1;
+const TRIBE_GAULS = 3;
+const TRIBE_TEUTONS = 2;
+
 // FRONTEND
 const BUILD_PATH_F = "/build.php";
 const XPATH_ACTIVE_VILLAGE_F = '//*[@id="sidebarBoxVillagelist"]/div[2]/ul/li[@class=" active"]/a';
-const REGEX_VILLAGE_LINK_F = 'newdid=(.*)&';
+const REGEX_VILLAGE_LINK_F = 'newdid=(.*?)&';
 
 
 const MAX_RESOURCE_LVL = 10;
@@ -14,11 +18,22 @@ const BUILDING_LEVEL = "level";
 const BUILDING_LOCATION_ID = "buildingSlot";
 
 
+const RES_MAX_LOCATION = 18;
+
+const ERR_ALREADY_BUILDING = "already building";
+const ERR_NOT_ENOUGH_RES = "not enough resources no doable task";
+
+const BUILD_ID = 0;
+const RES_ID = 1;
+const TOWN_ID = 2;
+const RES_AND_TOWN_ID = 3;
+
+const ROMANS_DORF1_ID = 4;
+const ROMANS_DORF2_ID = 5;
 
 
 // BACKEND
 const EXTENSION_ID = "llkkcbnopngmldfgmlhepcbfpoooeaka";
-
 const BUILD_TYPE = "build_dorf1";
 const ANALYSE_TYPE = "build_dorf1";
 
@@ -49,6 +64,7 @@ const REGEX_SERVER_SETTINGS = 'Travian.Translation.add\\((.*?)<\\/script>';
 const REGEX_SERVER_SPEED = 'Travian.Game.speed = (\\d);';
 const REGEX_SERVER_VERSION = 'Travian.Game.version = (.*);';
 const REGEX_SERVER_WORLD_ID = 'Travian.Game.worldId = (.*);';
+const REGEX_TRIBE = 'tribe(\\d)"';
 
 const MAIN_BUILDING_ID = 15;
 

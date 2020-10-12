@@ -7,13 +7,12 @@ chrome.browserAction.onClicked.addListener(tab =>{
 });
 
 function addBuildTask(data, sendResponse) {
-    console.log("build task  data", data);
-    for(let village of villagesController.villages){
+    console.log("add build task", data);
+    for(let village of villagesHelper.villages){
         if(village.did === data.villageDid){
-            village.buildTasks.set(getUuidv4(), data); // TODO generate random key
-            village.nextCheckTime = calcNextCheckTime(30);
+            let building = new Building(data.locationId, data.type, data.lvl);
+            village.buildTasks.push(new BuildTask(building, data.villageDid, getUuidv4()));
         }
-        console.log("village is ", village);
     }
 }
 
@@ -23,11 +22,10 @@ function getUuidv4() {
     );
 }
 
-chrome.runtime.onMessage.addListener(
+chrome.runtime.onMessage.addListener(  // from inside content extension
     function(request, sender, sendResponse) {
         console.log("from a content script:" + sender.tab.url);
         console.log("request:", request);
-        console.log("villages2:", this.villagesController);
         switch (request.action) {
             case "isTabActive":
                 isTabActive(sendResponse);
@@ -39,17 +37,27 @@ chrome.runtime.onMessage.addListener(
         return true;
     });
 
-chrome.runtime.onMessageExternal.addListener(
+chrome.runtime.onMessageExternal.addListener(   // from botkeGui
 function(request, sender, sendResponse) {
-        console.log("onMessageExternal");
-        let testBuild = {
+        console.log("onMessageExternal", request);
+        switch (request.type) {
+            case "updateTasks":
+                let village = villagesHelper.findVillage(request.data.villageDid);
+                village.buildTasks = request.data.buildTasks;
+                // TODO build.isResouceBuilding spremenit v BuildingHelper.isResouceBuilding(buildType);
+                console.log("build tasks: ", request.data);
+                console.log("build tasks village: ", village);
+                break;
+        }
+
+       /* let testBuild = {
             "type":BUILD_TYPE,
             "value":{
                 id:13,
             },
             "response":sendResponse
-        };
-        queue.push(testBuild);
+        };*/
+        // queue.push(testBuild);
         return true;
 });
 
@@ -72,7 +80,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     [ 'blocking', 'requestHeaders', 'extraHeaders']
 )
 
-const addHeader = (newHeader, headers) => {
+function addHeader (newHeader, headers) {
     //console.log("new header", newHeader);
     for (let index in headers){
         if (newHeader.name === headers[index].name){
@@ -83,7 +91,7 @@ const addHeader = (newHeader, headers) => {
     headers.push(newHeader);
 }
 
-const modifyHeaders = (pathname, reqHeaders) => {
+function modifyHeaders (pathname, reqHeaders) {
     let constHeaders = REQUESTS_INFO[pathname];
     if(constHeaders){
         constHeaders.headers.forEach(header => {
@@ -92,7 +100,7 @@ const modifyHeaders = (pathname, reqHeaders) => {
     }
 }
 
-const modifyHeaderOrigin = (url, requestHeaders) => {
+function modifyHeaderOrigin (url, requestHeaders) {
     if(referer !== undefined){
         addHeader({name: 'referer', value: referer}, requestHeaders);
     }else{

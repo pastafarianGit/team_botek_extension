@@ -1,18 +1,18 @@
-let villagesController = null;
+let villagesHelper = null;
 let activeVillage = null;
 console.log("hey botek extension", window.location.toString());
 
 chrome.runtime.sendMessage({action: "isTabActive"}, function(data) {
     console.log("is active", data);
     if(data.isActive && data.villages !== null){
-        villagesController = new VillagesController(data.villages);
-        activeVillage = findActiveVillage();
+        villagesHelper = new VillagesHelper(data.villages);
+        activeVillage = findActiveVillage(); // TODO active village not working for drof2
         showUi();
         showBuildUI();
     }
 });
 
-const showUi = () => {
+function showUi(){
     let asd = document.getElementsByClassName("villageList production")
     console.log("inner html asd", asd)
     let custom = document.createElement('div');
