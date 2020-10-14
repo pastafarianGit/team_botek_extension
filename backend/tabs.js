@@ -5,10 +5,10 @@ function isTabActive (sendResponse){
         {currentWindow: true, active : true}, (result) => {
             if (result[0] !== undefined && enabledTabs[result[0].id] !== undefined) {
                 console.log("enabledTabs[result[0].id]", enabledTabs[result[0].id]);
-                sendResponse({isActive: enabledTabs[result[0].id], villages : villagesHelper.villages});
+                sendResponse({isActive: enabledTabs[result[0].id], villages : villages});
             } else {
                 chrome.storage.sync.get(['allActiveTabs'], function (result) {
-                    sendResponse({isActive: result.allActiveTabs, villages : villagesHelper.villages});
+                    sendResponse({isActive: result.allActiveTabs, villages : villages});
                 })
             }
 

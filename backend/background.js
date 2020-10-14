@@ -8,10 +8,12 @@ chrome.browserAction.onClicked.addListener(tab =>{
 
 function addBuildTask(data, sendResponse) {
     console.log("add build task", data);
-    for(let village of villagesHelper.villages){
+    for(let village of villages){
         if(village.did === data.villageDid){
             let building = new Building(data.locationId, data.type, data.lvl);
-            village.buildTasks.push(new BuildTask(building, data.villageDid, getUuidv4()));
+            let newBuildTask = new BuildTask(building, data.villageDid, getUuidv4());
+            village.buildTasks.push(newBuildTask);
+            village.timers.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask);
         }
     }
 }
@@ -42,11 +44,14 @@ function(request, sender, sendResponse) {
         console.log("onMessageExternal", request);
         switch (request.type) {
             case "updateTasks":
-                let village = villagesHelper.findVillage(request.data.villageDid);
-                village.buildTasks = request.data.buildTasks;
-                // TODO build.isResouceBuilding spremenit v BuildingHelper.isResouceBuilding(buildType);
+                let village = VillagesHelper.findVillage(villages, request.data.villageDid);
+                village.buildTasks = BuildHelper.convertToBuildTaskObject(request.data.buildTasks);
+                console.log("village builds tasks.", village.buildTasks);
                 console.log("build tasks: ", request.data);
                 console.log("build tasks village: ", village);
+                break;
+            case "getUpdateOnVillage":
+                sendResponse(villages);
                 break;
         }
 

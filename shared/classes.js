@@ -4,11 +4,10 @@ let Village = class {
     y;
     isCapital;
     name;
-    //buildTasks = []; // TODO change to map da lahko normalno deletas
     nextCheckTime;
     resources;
     buildingsInfo = new Map();
-    currBuilding;
+    currentlyBuilding;
     timers;
 
 
@@ -25,7 +24,6 @@ let Village = class {
         this.nextCheckTime = Date.now() + 1000;
         this.buildingsInfo = new Map();
         this.buildTasks = [];
-        //this.buildHelper = new BuildHelper([]);
     }
 
     /*isNextCheckTime() {
@@ -39,10 +37,10 @@ let Village = class {
     }
 
     updateIfTaskDone(){
-        console.log("update if done", this.currBuilding.tasks);
-        for (let currBuilding of this.currBuilding.tasks){
+        console.log("update if done", this.currentlyBuilding);
+        for (let currBuilding of this.currentlyBuilding){
             console.log("task ", currBuilding);
-            this.deleteTaskIfBuildingFinalLvl(currBuilding.building);
+            BuildHelper.currentlyBuildingTaskComplete(this.buildTasks, currBuilding.building);
         }
     }
 
@@ -89,7 +87,7 @@ let Village = class {
         return lvl;
     }
 
-    deleteTaskIfBuildingFinalLvl(currBuilding){
+    /*deleteTaskIfBuildingFinalLvl(currBuilding){
         for (let taskB of this.buildTasks){
             console.log("this building key", taskB);
             if(taskB.building.locationId === currBuilding.locationId){
@@ -102,7 +100,7 @@ let Village = class {
             }
         }
         return false;
-    }
+    }*/
 
     checkCostVsStorage(cost){
         const wood = this.resources.storage.l1 >= cost.wood;
@@ -115,13 +113,9 @@ let Village = class {
 
 class VillagesHelper {
 
-    constructor(villages) {
-        this.villages = villages;
-    }
-
-    findVillage(linkId){
-        for(let i = 0; i < this.villages.length; i++){
-            const village = this.villages[i];
+    static findVillage(villages, linkId){
+        for(let i = 0; i < villages.length; i++){
+            const village = villages[i];
             if(village.did === linkId){
                 return village;
             }
@@ -145,7 +139,6 @@ class ServerSettings {
 class Building {
 
     name;
-
     constructor(locationId, type, lvl) {
         this.locationId = locationId;
         this.type = type;
@@ -171,8 +164,8 @@ class Building {
         }
         return DORF2_URL;
     }
-
 }
+
 class BuildHelper {
 
     static deleteTask(uuid, tasks){
@@ -189,6 +182,25 @@ class BuildHelper {
             }
         }
         return false;
+    }
+
+    static currentlyBuildingTaskComplete(buildTasks, currentTask) {
+        for (let taskB of buildTasks) {
+            if (Array.isArray(taskB)) {
+                if (this.currentlyBuildingTaskComplete(taskB, currentTask)) {
+                    return true;
+                }
+            } else {
+                if (taskB.building.locationId === currentTask.locationId) {
+                    if (taskB.building.lvl <= currentTask.lvl) {
+                        BuildHelper.deleteTask(taskB.uuid, buildTasks);
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        }
+       return false;
     }
 
     static getNextTaskGroup(tasks){
@@ -230,7 +242,20 @@ class BuildHelper {
         }
         return null;
     }
+
+    static convertToBuildTaskObject(data){
+        let buildTasks = [];
+        for(let task of data){
+            if(Array.isArray(task)){
+                buildTasks.push(this.convertToBuildTaskObject(task));
+            }else{
+                buildTasks.push(new BuildTask(new Building(task.building.locationId, task.building.type, task.building.lvl), task.villageDid, task.uuid));
+            }
+        }
+        return buildTasks;
+    }
 }
+
 /*
 class BuildHelper1 {
 
@@ -338,39 +363,37 @@ class BuildTask {
 }
 
 
-class CurrentlyBuilding {
-    constructor(tasks) {
-        this.tasks = tasks;
-    }
+class CurrentlyBuildingHelper {
 
-    isBuildSlotFree(building){
-        if(this.tasks.length === 0) {
+
+    static isBuildSlotFree(building, tasks){
+        if(tasks.length === 0) {
             return true;
         }
 
         if(tribe === TRIBE_ROMANS){
-            return this.canRomansBuild(building);
+            return this.canRomansBuild(building, tasks);
         }
         return false;
     }
 
-    canRomansBuild(building){
+    static canRomansBuild(building, tasks){
         if(building.isResourceBuilding()){
-            return !this.isResourceCurrBuilding();
+            return !this.isResourceCurrentlyBuilding(tasks);
         }
-        return !this.isTownCurrBuilding();
+        return !this.isTownCurrentlyBuilding(tasks);
     }
 
-    isResourceCurrBuilding(){
-        return this.checkBuildingStatus(true);
+    static isResourceCurrentlyBuilding(tasks){
+        return this.checkBuildingStatus(true, tasks);
     }
 
-    isTownCurrBuilding(){
-        return this.checkBuildingStatus(false);
+    static isTownCurrentlyBuilding(tasks){
+        return this.checkBuildingStatus(false, tasks);
     }
 
-    checkBuildingStatus(isRes){
-        for(let task of this.tasks){
+    static checkBuildingStatus(isRes, tasks){
+        for(let task of tasks){
             if(task.building.isResourceBuilding() === isRes){
                 return true; // building already in progress
             }
@@ -378,9 +401,9 @@ class CurrentlyBuilding {
         return false;
     }
 
-    getFinishBuildingTime(isRes){
+    static getFinishBuildingTime(isRes, tasks){
         if(isRes){
-            for (let task of this.tasks){
+            for (let task of tasks){
                 if(task.building.isResourceBuilding() === isRes){
                     return task.timeToBuild;
                 }
@@ -443,10 +466,10 @@ class Timers {
         }
     }
 
-    updateTimers(currTasks) {
-        console.log("currBuildings", currTasks);
+    updateTimers(currentlyBuilding) {
+        console.log("currBuildings", currentlyBuilding);
         if (tribe === TRIBE_ROMANS) {
-            for (let buildTask of currTasks) {
+            for (let buildTask of currentlyBuilding) {
                 if (buildTask.building.isResourceBuilding()) {
                     this.romansDorf1Timer = buildTask.timeToBuild;
                 } else {
@@ -454,9 +477,16 @@ class Timers {
                 }
             }
         } else {
-            for (let buildTask of currTasks) {
+            for (let buildTask of currentlyBuilding) {
                 this.buildingTimer = buildTask.timeToBuild;
             }
+        }
+    }
+
+    updateTimerOnNewTask(currentlyBuilding, newTask){
+        let isBuildSlotFree = CurrentlyBuildingHelper.isBuildSlotFree(newTask.building, currentlyBuilding);
+        if(isBuildSlotFree){
+            this.add5Sec(newTask.timerType);
         }
     }
 
@@ -466,6 +496,10 @@ class Timers {
 
     add1Min(type){
         this.addTimeFromNow(type, 60000);
+    }
+
+    add5Sec(type){
+        this.addTimeFromNow(type, 5000);
     }
 
     add5Min(type){

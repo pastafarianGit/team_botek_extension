@@ -7,7 +7,7 @@ function findActiveVillage() {
         const text = next.getAttribute("href");
         console.log("text active v: ", text);
         const linkId = regexSearchOne(REGEX_VILLAGE_LINK_F, text, "g");
-        return villagesHelper.findVillage(linkId);
+        return VillagesHelper.findVillage(villages, linkId);
     }
     return null;
 }

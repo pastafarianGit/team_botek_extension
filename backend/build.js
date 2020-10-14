@@ -1,6 +1,6 @@
 
 async function build (task) {
-    let village = villagesHelper.findVillage(task.villageDid);
+    let village = VillagesHelper.findVillage(villages, task.villageDid);
     await analyseAndSwitchTo(task.building, village);
 
 
@@ -9,16 +9,14 @@ async function build (task) {
         return Promise.reject("Not enough res or lvl");
     }
 
-    if (village.currBuilding.isBuildSlotFree(task.building)) {
+    if (CurrentlyBuildingHelper.isBuildSlotFree(task.building, village.currentlyBuilding)) {
         simulateClickBuildingAndPressUpgrade(task.building)
             .then(pageString => {
                 analysePageStringDorf12(pageString, village, task.building.isResourceBuilding());
-                village.timers.updateTimers(village.currBuilding.tasks);
-                village.updateIfTaskDone(village.currBuilding.tasks);
+                village.timers.updateTimers(village.currentlyBuilding);
+                village.updateIfTaskDone(village.currentlyBuilding);
             });
     } else {
-        //let time = village.currBuilding.getFinishBuildingTime(task.building.isResourceBuilding());
-        //village.timers.addTimeFromNow(task.timerType, time);
         return Promise.reject(ERR_ALREADY_BUILDING)
     }
 }
@@ -43,4 +41,27 @@ async function simulateClickBuildingAndPressUpgrade (building) {
     let c = await retrieveC(buildingCall);
     return await getTextFromPage(building.getLocationTypeURL(), "?a="+building.locationId+"&c="+c)
     // callFetch(DORF1_URL+"?a="+locationId+"&c="+c, {});
+}
+
+function addBuildingTasks(village) {
+    if(village.buildTasks.length > 0){
+        if(tribe === TRIBE_ROMANS){
+            addRomanBuildTask(village, ROMANS_DORF1_ID);
+            addRomanBuildTask(village, ROMANS_DORF2_ID);
+        }else{
+            if(village.timers.isNextCheckTime(BUILD_ID)){
+                const resTask = BuildHelper.getNextTask(village);
+                addToQueueAndUpdateTimer(resTask, village, BUILD_ID);
+            }
+        }
+    }
+}
+
+function addRomanBuildTask (village, type) {
+    console.log("add building task!!", village.timers.isNextCheckTime(type), type);
+    if(village.timers.isNextCheckTime(type)){
+        console.log("isNextCheckTime", type, village);
+        const resTask = BuildHelper.getNextTaskWithType(village, type === ROMANS_DORF1_ID);
+        addToQueueAndUpdateTimer(resTask, village, type);
+    }
 }

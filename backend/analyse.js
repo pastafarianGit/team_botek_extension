@@ -16,7 +16,7 @@ async function analyseAndSwitchTo(building, village) {
 }
 
 async function analyseVillages() {
-    let village = villagesHelper.villages[0];
+    let village = villages[0];
     await getDorf1AndAnalyseBuildings(village);
     await getDorf2AndAnalyseBuildings(village);
     console.log("village at start ", village);
@@ -51,18 +51,18 @@ function analyseDorf1Buildings (pageString, village){
     let resourceBuildings = parseResourceLvls(pageString);
     village.updateBuildingInfo(resourceBuildings);
     analyseCurrResBuildings(village, pageString);
-    village.timers.updateTimers(village.currBuilding.tasks);
+    village.timers.updateTimers(village.currentlyBuilding);
 }
 
 function analyseDorf2Buildings (pageString, village) {
     let townBuildings = parseBuildingLvls(pageString);
     village.updateBuildingInfo(townBuildings);
     analyseCurrResBuildings(village, pageString);
-    village.timers.updateTimers(village.currBuilding.tasks);
+    village.timers.updateTimers(village.currentlyBuilding);
 }
 
 function analyseCurrResBuildings (village, pageString) {
     village.resources = parseResources(pageString);
-    village.currBuilding = parseCurrentlyBuilding(pageString, village);
+    village.currentlyBuilding = parseCurrentlyBuilding(pageString, village);
 }
 

@@ -115,16 +115,16 @@ function parseBasicVillageData (villageHtml, village) {
 
 
 function parseCurrentlyBuilding (pageString, village) {
-    let currBuildingData = [];
+    let currentlyBuildingData = [];
     const timers = parseCurrentlyBuildingHtml(pageString);
     const buildings = parseCurrentlyBuildingJS(pageString);
 
     for(let i = 0; i < timers.length; i++){
         let buildTask = new BuildTask(buildings[i], village.did, null);
         buildTask.setNewTimeToBuild(timers[i]);
-        currBuildingData.push(buildTask);
+        currentlyBuildingData.push(buildTask);
     }
-    return new CurrentlyBuilding(currBuildingData);
+    return currentlyBuildingData;
 }
 
 function parseCurrentlyBuildingHtml (pageString) {

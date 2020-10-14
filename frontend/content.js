@@ -1,11 +1,11 @@
-let villagesHelper = null;
+let villages = null;
 let activeVillage = null;
 console.log("hey botek extension", window.location.toString());
 
 chrome.runtime.sendMessage({action: "isTabActive"}, function(data) {
     console.log("is active", data);
     if(data.isActive && data.villages !== null){
-        villagesHelper = new VillagesHelper(data.villages);
+        villages = data.villages;
         activeVillage = findActiveVillage(); // TODO active village not working for drof2
         showUi();
         showBuildUI();

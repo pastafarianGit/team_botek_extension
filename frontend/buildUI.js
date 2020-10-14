@@ -35,7 +35,7 @@ function onBuildDropdownSelected(lvl, type) {
     console.log("selected 3:  type", type);
 
 
-    chrome.runtime.sendMessage({action: "build", "data": buildTask}, function(task) {
+    chrome.runtime.sendMessage({action: "build", "data": buildTask}, (task) => {
         console.log("is task complete", task);
         /*if(data.isActive && data.villages !== null){
             villages = new Villages(data.villages);

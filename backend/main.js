@@ -2,7 +2,7 @@ let queue = [];
 let referer;
 let travianServer = "";
 let botTabId;
-let villagesHelper = null;
+let villages = null;
 let serverSettings = null;
 let tribe = -1;
 
@@ -14,6 +14,7 @@ function onStartUp() {
     testStartup();
     analyseVillages().then(r => console.log("anal r", r));
     setInterval(mainLoop, 15000);
+    setInterval(frontEndUpdateLoop, 5000);
 
 }
 
@@ -25,7 +26,7 @@ function testStartup() {
 
     let villagesTest = [village1, village2];
     console.log("test villages", villagesTest);
-    villagesHelper = new VillagesHelper(villagesTest);
+    villages = villagesTest;
 
     analyseVillageProfile().then(r => {
         console.log("analyse profile done", r);
@@ -40,9 +41,9 @@ function openBot() {
         chrome.tabs.update(tab.id, {url:"http://localhost:4200/"});
         botTabId = tab.id;
         analyseVillageProfile().then(result => {
-            villagesHelper = new VillagesHelper(result);
+            villages = result;
             //= new Villages(result);
-            console.log("villages ", villagesHelper);
+            console.log("villages ", villages);
             chrome.tabs.create({ url: tab.url });
         });
     })
@@ -50,7 +51,7 @@ function openBot() {
 
 function mainLoop (){
     //ANALYSE WORK TODO
-    console.log("main loop", villagesHelper.villages);
+    console.log("main loop", villages);
     addTasksToQueue();
 
     //DO WORK TASK FROM QUEUE
@@ -65,33 +66,14 @@ function mainLoop (){
     }
 }
 
+
+function frontEndUpdateLoop() {
+        // should this be frontend?
+}
+
 function addTasksToQueue() {
-    for (let village of villagesHelper.villages){
+    for (let village of villages){
         addBuildingTasks(village);
-    }
-}
-
-function addBuildingTasks(village) {
-    if(village.buildTasks.length > 0){
-        if(tribe === TRIBE_ROMANS){
-            addRomanBuildTask(village, ROMANS_DORF1_ID);
-            addRomanBuildTask(village, ROMANS_DORF2_ID);
-        }else{
-            if(village.timers.isNextCheckTime(BUILD_ID)){
-                const resTask = BuildHelper.getNextTask(village);
-                addToQueueAndUpdateTimer(resTask, village, BUILD_ID);
-            }
-        }
-    }
-}
-
-function addRomanBuildTask (village, type) {
-    console.log("add building task!!", village.timers.isNextCheckTime(type), type);
-
-    if(village.timers.isNextCheckTime(type)){
-        console.log("isNextCheckTime", type, village);
-        const resTask = BuildHelper.getNextTaskWithType(village, type === ROMANS_DORF1_ID);
-        addToQueueAndUpdateTimer(resTask, village, type);
     }
 }
 
