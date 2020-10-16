@@ -11,7 +11,7 @@ function addBuildTask(data, sendResponse) {
     for(let village of villages){
         if(village.did === data.villageDid){
             let building = new Building(data.locationId, data.type, data.lvl);
-            let newBuildTask = new BuildTask(building, data.villageDid, getUuidv4());
+            let newBuildTask = new BuildTask(building, data.villageDid, getUuidv4(), false);
             village.buildTasks.push(newBuildTask);
             village.timers.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask);
         }
@@ -43,9 +43,9 @@ chrome.runtime.onMessageExternal.addListener(   // from botkeGui
 function(request, sender, sendResponse) {
         console.log("onMessageExternal", request);
         switch (request.type) {
-            case "updateTasks":
-                let village = VillagesHelper.findVillage(villages, request.data.villageDid);
-                village.buildTasks = BuildHelper.convertToBuildTaskObject(request.data.buildTasks);
+            case "updateBuildTasks":
+                let village = VillagesHelper.findVillage(villages, request.data.village.did);
+                village.buildTasks = BuildHelper.convertToBuildTaskObject(request.data.village.buildTasks);
                 console.log("village builds tasks.", village.buildTasks);
                 console.log("build tasks: ", request.data);
                 console.log("build tasks village: ", village);

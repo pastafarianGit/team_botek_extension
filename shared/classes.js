@@ -249,7 +249,7 @@ class BuildHelper {
             if(Array.isArray(task)){
                 buildTasks.push(this.convertToBuildTaskObject(task));
             }else{
-                buildTasks.push(new BuildTask(new Building(task.building.locationId, task.building.type, task.building.lvl), task.villageDid, task.uuid));
+                buildTasks.push(new BuildTask(new Building(task.building.locationId, task.building.type, task.building.lvl), task.villageDid, task.uuid, task.isChecked));
             }
         }
         return buildTasks;
@@ -336,13 +336,14 @@ class BuildTask {
     timeToBuild;
     timerType;
     uuid;
+    isChecked;
 
-    constructor(building, villageDid, uuid) {
+    constructor(building, villageDid, uuid, isChecked) {
         this.building = building;
         this.villageDid = villageDid;
         this.uuid = uuid;
         this.setTimerType();
-
+        this.isChecked = isChecked;
     }
 
     setNewTimeToBuild(secToBuild){

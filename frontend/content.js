@@ -5,6 +5,7 @@ console.log("hey botek extension", window.location.toString());
 chrome.runtime.sendMessage({action: "isTabActive"}, function(data) {
     console.log("is active", data);
     if(data.isActive && data.villages !== null){
+        document.getElementById('sidebarBeforeContent').style.visibility = 'hidden';
         villages = data.villages;
         activeVillage = findActiveVillage(); // TODO active village not working for drof2
         showUi();
@@ -13,13 +14,13 @@ chrome.runtime.sendMessage({action: "isTabActive"}, function(data) {
 });
 
 function showUi(){
-    let asd = document.getElementsByClassName("villageList production")
-    console.log("inner html asd", asd)
+    let villageProduction = document.getElementsByClassName("villageList production")
+    console.log("inner html asd", villageProduction)
     let custom = document.createElement('div');
     custom.innerHTML = '<button type="button">Click Me!</button>'
 
 
-    for (elt of asd){
+    for (elt of villageProduction){
         elt.style['background-color'] = '#ff00FF'
         elt.appendChild(custom)
     }

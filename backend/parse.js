@@ -120,7 +120,7 @@ function parseCurrentlyBuilding (pageString, village) {
     const buildings = parseCurrentlyBuildingJS(pageString);
 
     for(let i = 0; i < timers.length; i++){
-        let buildTask = new BuildTask(buildings[i], village.did, null);
+        let buildTask = new BuildTask(buildings[i], village.did, null, false);
         buildTask.setNewTimeToBuild(timers[i]);
         currentlyBuildingData.push(buildTask);
     }
