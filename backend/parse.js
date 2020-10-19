@@ -12,7 +12,8 @@ function parseResourceLvls (pageString) {
 
     for (let child of resContainer.childNodes){
         if(child.tagName === 'DIV'){
-            let locationId, lvl, gid;
+            let locationId, gid;
+            let lvl;
             for(let divClass of child.classList){
                 if(divClass.startsWith(BUILDING_LOCATION_ID)){
                     locationId = parseInt(divClass.substring(BUILDING_LOCATION_ID.length));

@@ -12,7 +12,7 @@ function addBuildTask(data, sendResponse) {
         if(village.did === data.villageDid){
             let building = new Building(data.locationId, data.type, data.lvl);
             let newBuildTask = new BuildTask(building, data.villageDid, getUuidv4(), false);
-            village.buildTasks.push(newBuildTask);
+            village.buildTasks = BuildTaskHelper.addTask(newBuildTask, village.buildTasks);
             village.timers.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask);
         }
     }
@@ -26,11 +26,14 @@ function getUuidv4() {
 
 chrome.runtime.onMessage.addListener(  // from inside content extension
     function(request, sender, sendResponse) {
-        console.log("from a content script:" + sender.tab.url);
-        console.log("request:", request);
+        // console.log("from a content script:" + sender.tab.url);
+        // console.log("request:", request);
         switch (request.action) {
-            case "isTabActive":
+            case IS_TAB_ACTIVE:
                 isTabActive(sendResponse);
+                break;
+            case GET_IFRAME_URL:
+                sendResponse(urlForFrontEnd);
                 break;
             case "build":
                 addBuildTask(request.data, sendResponse);
@@ -41,14 +44,14 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
 
 chrome.runtime.onMessageExternal.addListener(   // from botkeGui
 function(request, sender, sendResponse) {
-        console.log("onMessageExternal", request);
+        //console.log("onMessageExternal", request);
         switch (request.type) {
             case "updateBuildTasks":
                 let village = VillagesHelper.findVillage(villages, request.data.village.did);
-                village.buildTasks = BuildHelper.convertToBuildTaskObject(request.data.village.buildTasks);
-                console.log("village builds tasks.", village.buildTasks);
-                console.log("build tasks: ", request.data);
-                console.log("build tasks village: ", village);
+                village.buildTasks = BuildTaskHelper.convertToBuildTaskObject(request.data.village.buildTasks);
+                // console.log("village builds tasks.", village.buildTasks);
+                // console.log("build tasks: ", request.data);
+                // console.log("build tasks village: ", village);
                 break;
             case "getUpdateOnVillage":
                 sendResponse(villages);
@@ -68,7 +71,7 @@ function(request, sender, sendResponse) {
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
     (info) =>{
-        //console.log("info: ", info);
+        // console.log("info: ", info);
         let url = new URL(info.url);
         if(info.initiator !== undefined && info.initiator.includes(EXTENSION_ID)){
             console.log("jup", url);
@@ -84,6 +87,36 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     },
     [ 'blocking', 'requestHeaders', 'extraHeaders']
 )
+/*
+chrome.webRequest.onAuthRequired.addListener(
+    function(details, callbackFn) {
+        // console.log("onAuthRequired!", details, callbackFn);
+        callbackFn({
+            authCredentials: {username: "1", password: "__TestUser"}
+        });
+    },
+    {urls: ["<all_urls>"]},
+    ['asyncBlocking']
+);
+*//*
+chrome.webRequest.onAuthRequired.addListener(
+    function(details, callbackFn) {
+        console.log("onAuthRequired!", details, callbackFn);
+        callbackFn({
+            authCredentials: {username: "1", password: "__TestUser"}
+        });
+    },
+    {urls: ["<all_urls>"]},
+    ['asyncBlocking']
+)
+*/
+chrome.webRequest.onBeforeRequest.addListener(
+    function(details) {
+        // console.log("extra details", details);
+    },
+    {urls: ["<all_urls>"]},
+    ["blocking", "requestBody"]);
+
 
 function addHeader (newHeader, headers) {
     //console.log("new header", newHeader);
@@ -110,6 +143,9 @@ function modifyHeaderOrigin (url, requestHeaders) {
         addHeader({name: 'referer', value: referer}, requestHeaders);
     }else{
         addHeader({name: 'sec-fetch-site', value: 'none'}, requestHeaders)
+    }
+    if(url.includes('login')){
+        addHeader({name: 'origin', value: urlServerOrigin}, requestHeaders)
     }
     referer = url;
     console.log("modify header origin", requestHeaders);

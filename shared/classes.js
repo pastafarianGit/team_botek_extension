@@ -4,7 +4,7 @@ let Village = class {
     y;
     isCapital;
     name;
-    nextCheckTime;
+    // nextCheckTime;
     resources;
     buildingsInfo = new Map();
     currentlyBuilding;
@@ -21,9 +21,9 @@ let Village = class {
         this.y  = y;
         this.isCapital  = isCapital;
         this.name  = name;
-        this.nextCheckTime = Date.now() + 1000;
+        // this.nextCheckTime = Date.now() + 1000;
         this.buildingsInfo = new Map();
-        this.buildTasks = [];
+        this.buildTasks = [[]];
     }
 
     /*isNextCheckTime() {
@@ -40,11 +40,11 @@ let Village = class {
         console.log("update if done", this.currentlyBuilding);
         for (let currBuilding of this.currentlyBuilding){
             console.log("task ", currBuilding);
-            BuildHelper.currentlyBuildingTaskComplete(this.buildTasks, currBuilding.building);
+            BuildTaskHelper.currentlyBuildingTaskComplete(this.buildTasks, currBuilding.building);
         }
     }
 
-    isEnoughResAndLvl(key, task){
+    /*isEnoughResAndLvl(key, task){
         const building = this.buildingsInfo.get(task.building.locationId);
         if(building.lvl < task.building.lvl){
             console.log("check task cost ", building);
@@ -54,15 +54,36 @@ let Village = class {
                 return true;
             }
         }else{
-            BuildHelper.deleteTask(this.buildTasks, task.uuid); // remove task from array
+            BuildTaskHelper.deleteTask(this.buildTasks, task.uuid); // remove task from array
         }
+        return false;
+    }*/
+
+    removeTaskIfUnderLvl(building, task){
+        if(building.lvl < task.building.lvl){
+            return true;
+        }
+        BuildTaskHelper.deleteTask(this.buildTasks, task.uuid); // remove task from array
         return false;
     }
 
     isEnoughRes(task){
+        console.log("is enough res" , task);
         const building = this.buildingsInfo.get(task.building.locationId);
         let cost = buildingsData[building.type].cost[building.lvl + 1];
         return this.checkCostVsStorage(cost);
+    }
+
+    calcTimeTillTaskCanBeBuilt(task){
+        const building = this.buildingsInfo.get(task.building.locationId);
+        let cost = buildingsData[building.type].cost[building.lvl + 1];
+        const woodNeeded = cost.wood - this.resources.storage.l1;
+        const clayNeeded= cost.clay - this.resources.storage.l2;
+        const ironNeeded = cost.iron - this.resources.storage.l3;
+        const cropNeeded = cost.crop - this.resources.storage.l4;
+
+        const woodHoursNeeded = woodNeeded / this.resources.production.l1;
+        // TODO calc time when we can build this.
     }
 
 
@@ -86,21 +107,6 @@ let Village = class {
         })
         return lvl;
     }
-
-    /*deleteTaskIfBuildingFinalLvl(currBuilding){
-        for (let taskB of this.buildTasks){
-            console.log("this building key", taskB);
-            if(taskB.building.locationId === currBuilding.locationId){
-                if(taskB.building.lvl <= currBuilding.lvl){
-                    // this.buildHelper.deleteTask(taskB.uuid);
-                    BuildHelper.deleteTask(this.buildTasks, taskB.uuid);
-                    return true;
-                }
-                return false;
-            }
-        }
-        return false;
-    }*/
 
     checkCostVsStorage(cost){
         const wood = this.resources.storage.l1 >= cost.wood;
@@ -142,8 +148,16 @@ class Building {
     constructor(locationId, type, lvl) {
         this.locationId = locationId;
         this.type = type;
-        this.lvl = lvl;
+        this.setLvl(lvl);
         this.setName();
+    }
+
+    setLvl(lvl){
+        if (isNaN(lvl)){
+            this.lvl = 0;
+        }else{
+            this.lvl = lvl;
+        }
     }
 
     setName(){
@@ -160,13 +174,24 @@ class Building {
 
     getLocationTypeURL(){
         if(this.locationId <= RES_MAX_LOCATION){
-            return DORF1_URL
+            return DORF1_PATHNAME;
         }
         return DORF2_URL;
     }
 }
 
-class BuildHelper {
+class BuildTaskHelper {
+
+    static addTask(task, tasks){
+        // let lastArray = [];
+        for (let i=tasks.length; i > 0 ;i--){
+            if(Array.isArray(tasks[i])){
+                tasks[i].push(task);
+                return true;
+            }
+        }
+        return false;
+    }
 
     static deleteTask(uuid, tasks){
         for(let i = 0; i < tasks.length; i++) {
@@ -193,7 +218,7 @@ class BuildHelper {
             } else {
                 if (taskB.building.locationId === currentTask.locationId) {
                     if (taskB.building.lvl <= currentTask.lvl) {
-                        BuildHelper.deleteTask(taskB.uuid, buildTasks);
+                        BuildTaskHelper.deleteTask(taskB.uuid, buildTasks);
                         return true;
                     }
                     return false;
@@ -203,26 +228,22 @@ class BuildHelper {
        return false;
     }
 
-    static getNextTaskGroup(tasks){
-        console.log("next group task", tasks);
-        let currToDoTasks = [];
-        if(tasks.length > 0){
-            if(Array.isArray(tasks[0])){
-                return tasks[0];
-            }
+    static getNextTaskGroup(tasks, timerType){
+        if(timerType === BOTH_BUILD_ID){
+            return tasks[0];
+        }
 
-            for (let task of tasks){
-                if(!Array.isArray(task)){
-                    currToDoTasks.push(task);
-                }else{
-                    return currToDoTasks;
-                }
+        let currentGroupTasks = [];
+        for(let task of tasks[0]){
+            if(task.timerType === timerType){
+                currentGroupTasks.push(task);
             }
         }
-        return currToDoTasks;
+        console.log("current tasks for group", currentGroupTasks, timerType);
+        return currentGroupTasks;
     }
 
-    static getNextTaskWithType(village, isRes){
+    /*static getNextTaskWithType(village, timerType){
         console.log("available tasks", this.getNextTaskGroup(village.buildTasks));
         for (const task of this.getNextTaskGroup(village.buildTasks)) {
             if(task.building.isResourceBuilding() === isRes){
@@ -232,13 +253,17 @@ class BuildHelper {
             }
         }
         return null;
-    }
+    }*/
 
-    static getNextTask(village){
-        for (const task of this.getNextTaskGroup(village.buildTasks)) {
+    static getNextTask(village, timerType){
+        const currentGroup = this.getNextTaskGroup(village.buildTasks, timerType);
+        for (const task of currentGroup) {
             if(village.isEnoughRes(task)){
                 return task;
             }
+        }
+        if(currentGroup.length > 0){
+            return currentGroup[0];
         }
         return null;
     }
@@ -254,8 +279,23 @@ class BuildHelper {
         }
         return buildTasks;
     }
+
+    static calcWhenFirstTaskIsAvailable(village, timerType) {
+        const availableTasks  = this.getNextTaskGroup(village.buildTasks, timerType);
+        let minTime;
+        for(let task of availableTasks){
+            village.calcWhenCanBuildTask(task);
+            const building = village.buildingsInfo.get(task.building.locationId);
+            //if(task.building.locationId)
+        }
+    }
 }
 
+/*
+*
+*         const building = this.buildingsInfo.get(task.building.locationId);
+        let cost = buildingsData[building.type].cost[building.lvl + 1];
+* */
 /*
 class BuildHelper1 {
 
@@ -358,7 +398,7 @@ class BuildTask {
                 this.timerType = ROMANS_DORF2_ID;
             }
         }else{
-            this.timerType = BUILD_ID;
+            this.timerType = BOTH_BUILD_ID;
         }
     }
 }
@@ -430,7 +470,7 @@ class Timers {
                 return (this.romansDorf1Timer < Date.now());
             case ROMANS_DORF2_ID:
                 return (this.romansDorf2Timer < Date.now());
-            case BUILD_ID:
+            case BOTH_BUILD_ID:
                 return (this.buildingTimer < Date.now());
             default:
                 return false;
@@ -446,7 +486,7 @@ class Timers {
             case ROMANS_DORF2_ID:
                 this.romansDorf2Timer =  Date.now() + time;
                 break;
-            case BUILD_ID:
+            case BOTH_BUILD_ID:
                 this.buildingTimer =  Date.now() + time;
                 break;
         }
@@ -461,7 +501,7 @@ class Timers {
             case ROMANS_DORF2_ID:
                 this.romansDorf2Timer =  newTime;
                 break;
-            case BUILD_ID:
+            case BOTH_BUILD_ID:
                 this.buildingTimer =  newTime;
                 break;
         }

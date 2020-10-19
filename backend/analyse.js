@@ -37,7 +37,7 @@ function parseTribe (pageString) {
 }
 
 async function getDorf1AndAnalyseBuildings(village) {
-    let pageString = await getTextFromPage(DORF1_URL, NEW_DID_PARAM + village.did);
+    let pageString = await getTextFromPage(DORF1_PATHNAME, NEW_DID_PARAM + village.did);
     analyseDorf1Buildings(pageString, village);
 }
 
@@ -65,4 +65,19 @@ function analyseCurrResBuildings (village, pageString) {
     village.resources = parseResources(pageString);
     village.currentlyBuilding = parseCurrentlyBuilding(pageString, village);
 }
+async function analyseIsUserLoggedIn(url) {
+    console.log("url is ", url)
 
+
+    let document = await getHtmlDocFromPage(url, {});
+    let inputElements = document.getElementsByTagName("input");
+
+    console.log("input elements", inputElements);
+    for(let element of inputElements){
+        if(element.getAttribute('name') === 'login'){
+            return  element.getAttribute('value');
+        }
+    }
+
+    return Promise.reject("already logged in");
+}

@@ -5,8 +5,8 @@ async function build (task) {
 
 
     // after analyse check If task is doable
-    if(!village.isEnoughResAndLvl(task.uuid, task)){
-        return Promise.reject("Not enough res or lvl");
+    if(!isEnoughLvlAndResources(village, task)){
+        return Promise.reject("not enough lvl or res");
     }
 
     if (CurrentlyBuildingHelper.isBuildSlotFree(task.building, village.currentlyBuilding)) {
@@ -20,6 +20,22 @@ async function build (task) {
         return Promise.reject(ERR_ALREADY_BUILDING)
     }
 }
+
+function isEnoughLvlAndResources(village, task) {
+    if(village.removeTaskIfUnderLvl(task)){
+        if(village.isEnoughRes(task)){
+            return true;
+        }else{
+            BuildTaskHelper.calcWhenFirstTaskIsAvailable(village, task.timerType);
+            // calc first to build from task.timertype
+        }
+        //return Promise.reject("Not enough res");
+    }
+    return false;
+    // return Promise.reject(("task already more lvl"));
+}
+
+
 
 function calcTimeToBuild (village, building, serverSpeed) {
     let timeToBuild = buildingsData[building.type].cost[building.lvl + 1].timeToBuild;  // + 1 to get for next lvl
@@ -46,22 +62,18 @@ async function simulateClickBuildingAndPressUpgrade (building) {
 function addBuildingTasks(village) {
     if(village.buildTasks.length > 0){
         if(tribe === TRIBE_ROMANS){
-            addRomanBuildTask(village, ROMANS_DORF1_ID);
-            addRomanBuildTask(village, ROMANS_DORF2_ID);
+            addBuildTask(village, ROMANS_DORF1_ID);
+            addBuildTask(village, ROMANS_DORF2_ID);
         }else{
-            if(village.timers.isNextCheckTime(BUILD_ID)){
-                const resTask = BuildHelper.getNextTask(village);
-                addToQueueAndUpdateTimer(resTask, village, BUILD_ID);
-            }
+            addBuildTask(village, BOTH_BUILD_ID);
         }
     }
 }
 
-function addRomanBuildTask (village, type) {
-    console.log("add building task!!", village.timers.isNextCheckTime(type), type);
-    if(village.timers.isNextCheckTime(type)){
-        console.log("isNextCheckTime", type, village);
-        const resTask = BuildHelper.getNextTaskWithType(village, type === ROMANS_DORF1_ID);
-        addToQueueAndUpdateTimer(resTask, village, type);
+function addBuildTask (village, timerType) {
+    if(village.timers.isNextCheckTime(timerType)){
+        console.log("isNextCheckTime", timerType, village);
+        const buildTask = BuildTaskHelper.getNextTask(village, timerType);
+        addToQueueAndUpdateTimer(buildTask, village, timerType);
     }
 }

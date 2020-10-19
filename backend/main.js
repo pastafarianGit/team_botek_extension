@@ -1,20 +1,21 @@
 let queue = [];
 let referer;
-let travianServer = "";
+let urlServerOrigin = "";
 let botTabId;
 let villages = null;
 let serverSettings = null;
 let tribe = -1;
+let urlForFrontEnd = "";
 
 onStartUp();
 
 function onStartUp() {
     //analyseVillageProfile().then(r => console.log("analysed data", r));
     //openBot();
-    testStartup();
-    analyseVillages().then(r => console.log("anal r", r));
+    //testStartup();
+    //analyseVillages().then(r => console.log("anal r", r));
     setInterval(mainLoop, 15000);
-    setInterval(frontEndUpdateLoop, 5000);
+    setInterval(frontEndUpdateLoop, 10000);
 
 }
 
@@ -36,17 +37,65 @@ function testStartup() {
 function openBot() {
     runOnActiveId((tab) => {
         console.log("open bot1 result", tab);
-        travianServer = tab.url;
-        // chrome.tabs.create({ url: tab.url });
-        chrome.tabs.update(tab.id, {url:"http://localhost:4200/"});
         botTabId = tab.id;
-        analyseVillageProfile().then(result => {
+        let url = new URL(tab.url);
+        urlServerOrigin = url.origin;
+        console.log("my tab url", url);
+        /*const userData = {
+            name: 'pastafarian',
+            password: '65c9e2b60d',
+            s1: 'Prijava',
+            w: '1920:1080'
+        }*/
+
+        setFrontEndUrl(url, tab);
+        chrome.tabs.update(tab.id, {url:"http://localhost:4200/"});
+
+        /*chrome.storage.sync.set({user: userData}, function() {
+            console.log('Value is set to ', userData);
+        });*/
+
+        // if(tab.hostname.includes('travian') &&)
+        // TODO check if link is travian server
+            // is saved
+                //try to go to dorf1
+            // go to login page
+                //save login data
+        // TODO send botTabId link for iframe
+
+
+        /*analyseVillageProfile().then(result => {
             villages = result;
             //= new Villages(result);
             console.log("villages ", villages);
-            chrome.tabs.create({ url: tab.url });
-        });
+            // chrome.tabs.create({ url: tab.url });
+        });*/
     })
+}
+
+function setFrontEndUrl(url, tab) {
+    if(url.hostname.includes('travian')){
+        chrome.storage.sync.get(['user'], (result) => {
+            console.log('Value currently is ', result);
+            if(result.user === undefined){
+                urlForFrontEnd = url.origin + '/'+ LOGIN_PATHNAME;
+            }else{
+                urlForFrontEnd = url.origin + '/' + DORF1_PATHNAME;
+                analyseIsUserLoggedIn(urlForFrontEnd)
+                    .then(userLogin => {
+                        result.user.login = userLogin;
+                        console.log("result user2", result.user);
+
+                        makePostRequest(url.origin + '/'+ LOGIN_PATHNAME, result.user)
+                            .then(result => {
+                                console.log("result post request ", result);
+                            }).catch(err => {
+                                console.log("err post request", err);
+                        });
+                    }).catch(err => console.log("err is already logged in", err));
+            }
+        });
+    }
 }
 
 function mainLoop (){
