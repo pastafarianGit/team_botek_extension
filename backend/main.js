@@ -1,21 +1,23 @@
 let queue = [];
 let referer;
-let urlServerOrigin = "";
+let baseServerUrl = "";
 let botTabId;
 let villages = null;
 let serverSettings = null;
 let tribe = -1;
 let urlForFrontEnd = "";
+let isBotActive = false;
+let guiPortConnection = null;
 
 onStartUp();
+setInterval(mainLoop, 15000);
 
 function onStartUp() {
     //analyseVillageProfile().then(r => console.log("analysed data", r));
     //openBot();
     //testStartup();
     //analyseVillages().then(r => console.log("anal r", r));
-    setInterval(mainLoop, 15000);
-    setInterval(frontEndUpdateLoop, 10000);
+    // setInterval(frontEndUpdateLoop, 10000);
 
 }
 
@@ -36,72 +38,43 @@ function testStartup() {
 
 function openBot() {
     runOnActiveId((tab) => {
-        console.log("open bot1 result", tab);
-        botTabId = tab.id;
         let url = new URL(tab.url);
-        urlServerOrigin = url.origin;
-        console.log("my tab url", url);
-        /*const userData = {
-            name: 'pastafarian',
-            password: '65c9e2b60d',
-            s1: 'Prijava',
-            w: '1920:1080'
-        }*/
-
+        botTabId = tab.id;
+        baseServerUrl = url.origin;
         setFrontEndUrl(url, tab);
-        chrome.tabs.update(tab.id, {url:"http://localhost:4200/"});
-
-        /*chrome.storage.sync.set({user: userData}, function() {
-            console.log('Value is set to ', userData);
-        });*/
-
-        // if(tab.hostname.includes('travian') &&)
-        // TODO check if link is travian server
-            // is saved
-                //try to go to dorf1
-            // go to login page
-                //save login data
-        // TODO send botTabId link for iframe
-
-
-        /*analyseVillageProfile().then(result => {
-            villages = result;
-            //= new Villages(result);
-            console.log("villages ", villages);
-            // chrome.tabs.create({ url: tab.url });
-        });*/
     })
 }
 
 function setFrontEndUrl(url, tab) {
     if(url.hostname.includes('travian')){
         chrome.storage.sync.get(['user'], (result) => {
-            console.log('Value currently is ', result);
             if(result.user === undefined){
-                urlForFrontEnd = url.origin + '/'+ LOGIN_PATHNAME;
+                urlForFrontEnd = url.origin + LOGIN_PATHNAME;
+                openBotTab(tab.id);
             }else{
-                urlForFrontEnd = url.origin + '/' + DORF1_PATHNAME;
-                analyseIsUserLoggedIn(urlForFrontEnd)
-                    .then(userLogin => {
-                        result.user.login = userLogin;
-                        console.log("result user2", result.user);
-
-                        makePostRequest(url.origin + '/'+ LOGIN_PATHNAME, result.user)
-                            .then(result => {
-                                console.log("result post request ", result);
-                            }).catch(err => {
-                                console.log("err post request", err);
-                        });
-                    }).catch(err => console.log("err is already logged in", err));
+                urlForFrontEnd = url.origin + DORF1_PATHNAME;
+                loginFlow(url.origin, result)
+                    .then(result => {
+                        openBotTab(tab.id);
+                    }).catch(err => {
+                        openBotTab(tab.id);
+                });
             }
         });
     }
 }
 
+async function loginFlow(url, storedUser) {
+    storedUser.user.login = await analyseIsUserLoggedIn(DORF1_PATHNAME);
+    return  await makePostRequest(url + LOGIN_PATHNAME, storedUser.user);
+}
+
 function mainLoop (){
-    //ANALYSE WORK TODO
+    if(baseServerUrl === "")//if(!isBotActive)
+        return;
+
     console.log("main loop", villages);
-    addTasksToQueue();
+    addTasksToQueue();     //ANALYSE WORK TODO
 
     //DO WORK TASK FROM QUEUE
     if(queue.length !== 0){

@@ -9,21 +9,22 @@ let Village = class {
     buildingsInfo = new Map();
     currentlyBuilding;
     timers;
+    buildTasks;
 
 
     constructor(did) {
         this.did  = did;
         this.timers = new Timers();
+        this.buildingsInfo = new Map();
+        this.buildTasks = [[]];
+        this.isCapital = false;
     }
 
     addParams(x, y, isCapital, name) {
         this.x  = x;
         this.y  = y;
-        this.isCapital  = isCapital;
+        //this.isCapital  = isCapital;
         this.name  = name;
-        // this.nextCheckTime = Date.now() + 1000;
-        this.buildingsInfo = new Map();
-        this.buildTasks = [[]];
     }
 
     /*isNextCheckTime() {
@@ -176,7 +177,7 @@ class Building {
         if(this.locationId <= RES_MAX_LOCATION){
             return DORF1_PATHNAME;
         }
-        return DORF2_URL;
+        return DORF2_PATHNAME;
     }
 }
 

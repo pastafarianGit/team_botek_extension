@@ -29,7 +29,7 @@ function showOnBuildPhp() {
 
 function onBuildDropdownSelected(lvl, type) {
     const locationId = getParamFromUrl("id");
-    const buildTask = {lvl: parseInt(lvl), type: type, locationId: parseInt(locationId), villageDid: activeVillage.did};
+    const buildTask = {lvl: parseInt(lvl), action: type, locationId: parseInt(locationId), villageDid: activeVillage.did};
     console.log("selected 1:  location", locationId);
     console.log("selected 2:  lvl", lvl);
     console.log("selected 3:  type", type);

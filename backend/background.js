@@ -16,6 +16,7 @@ function addBuildTask(data, sendResponse) {
             village.timers.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask);
         }
     }
+    sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
 }
 
 function getUuidv4() {
@@ -26,14 +27,32 @@ function getUuidv4() {
 
 chrome.runtime.onMessage.addListener(  // from inside content extension
     function(request, sender, sendResponse) {
-        // console.log("from a content script:" + sender.tab.url);
-        // console.log("request:", request);
+        if(baseServerUrl === ""){
+            console.log("bot not opened");
+            sendResponse(false);
+            return false;
+        }
+
+        console.log("request:", request);
         switch (request.action) {
-            case IS_TAB_ACTIVE:
-                isTabActive(sendResponse);
+            case IS_TAB_ACTIVE_ACTION:
+                if(villages === null){
+                    analyseVillageProfile().then(result => {
+                       villages = result;
+                       isTabActive(sendResponse);
+                    })
+                }else{
+                    isTabActive(sendResponse);
+                }
                 break;
-            case GET_IFRAME_URL:
+            case GET_IFRAME_URL_ACTION:
+                console.log("sending response iframe url action", urlForFrontEnd);
                 sendResponse(urlForFrontEnd);
+                break;
+            case CHANGE_VILLAGE_ACTION:
+                const villageDid = regexSearchOne(REGEX_VILLAGE_LINK_TEXT, request.data, "g");
+                sendResponse(true);
+                sendMessageToGUI(CHANGE_VILLAGE_ACTION, villageDid);
                 break;
             case "build":
                 addBuildTask(request.data, sendResponse);
@@ -43,10 +62,10 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
     });
 
 chrome.runtime.onMessageExternal.addListener(   // from botkeGui
-function(request, sender, sendResponse) {
+(request, sender, sendResponse) => {
         //console.log("onMessageExternal", request);
-        switch (request.type) {
-            case "updateBuildTasks":
+        switch (request.action) {
+            case UPDATE_BUILD_TASK_ACTION:
                 let village = VillagesHelper.findVillage(villages, request.data.village.did);
                 village.buildTasks = BuildTaskHelper.convertToBuildTaskObject(request.data.village.buildTasks);
                 // console.log("village builds tasks.", village.buildTasks);
@@ -56,17 +75,22 @@ function(request, sender, sendResponse) {
             case "getUpdateOnVillage":
                 sendResponse(villages);
                 break;
-        }
 
-       /* let testBuild = {
-            "type":BUILD_TYPE,
-            "value":{
-                id:13,
-            },
-            "response":sendResponse
-        };*/
-        // queue.push(testBuild);
+            case TOGGLE_BOT_ACTIVE:
+                console.log("toggle bot", request.data);
+                isBotActive = request.data.isRunning;
+                break;
+        }
         return true;
+});
+
+chrome.runtime.onConnectExternal.addListener((port) => { // connection with GUI
+    console.log("gui onConnectExternal");
+    guiPortConnection = port;
+    port.onMessage.addListener((msg) => {
+        console.log("gui on msg");
+        // See other examples for sample onMessage handlers.
+    });
 });
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
@@ -87,32 +111,18 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     },
     [ 'blocking', 'requestHeaders', 'extraHeaders']
 )
-/*
-chrome.webRequest.onAuthRequired.addListener(
-    function(details, callbackFn) {
-        // console.log("onAuthRequired!", details, callbackFn);
-        callbackFn({
-            authCredentials: {username: "1", password: "__TestUser"}
-        });
-    },
-    {urls: ["<all_urls>"]},
-    ['asyncBlocking']
-);
-*//*
-chrome.webRequest.onAuthRequired.addListener(
-    function(details, callbackFn) {
-        console.log("onAuthRequired!", details, callbackFn);
-        callbackFn({
-            authCredentials: {username: "1", password: "__TestUser"}
-        });
-    },
-    {urls: ["<all_urls>"]},
-    ['asyncBlocking']
-)
-*/
+
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
-        // console.log("extra details", details);
+        if(details.method === "POST" && details.url === baseServerUrl + LOGIN_PATHNAME){
+            const formData = details.requestBody.formData;
+            if(formData !== undefined){
+                let user = {name: formData.name[0], password: formData.password[0], s1: formData.s1[0], w: formData.w[0]};
+                chrome.storage.sync.set({user: user}, () => {
+                    console.log("saved user to exetension");
+                });
+            }
+        }
     },
     {urls: ["<all_urls>"]},
     ["blocking", "requestBody"]);
@@ -145,7 +155,7 @@ function modifyHeaderOrigin (url, requestHeaders) {
         addHeader({name: 'sec-fetch-site', value: 'none'}, requestHeaders)
     }
     if(url.includes('login')){
-        addHeader({name: 'origin', value: urlServerOrigin}, requestHeaders)
+        addHeader({name: 'origin', value: baseServerUrl}, requestHeaders)
     }
     referer = url;
     console.log("modify header origin", requestHeaders);

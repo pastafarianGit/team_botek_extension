@@ -53,24 +53,24 @@ async function  retrieveC (buildingCall){
 }
 
 async function simulateClickBuildingAndPressUpgrade (building) {
-    let buildingCall = await callFetch(BUILD_URL + building.locationId, {});
+    let buildingCall = await callFetch(BUILD_URL + building.locationId, {}, 3000);
     let c = await retrieveC(buildingCall);
-    return await getTextFromPage(building.getLocationTypeURL(), "?a="+building.locationId+"&c="+c)
+    return await getTextFromPage(building.getLocationTypeURL(), "?a="+building.locationId+"&c="+c, 3000)
     // callFetch(DORF1_URL+"?a="+locationId+"&c="+c, {});
 }
 
 function addBuildingTasks(village) {
     if(village.buildTasks.length > 0){
         if(tribe === TRIBE_ROMANS){
-            addBuildTask(village, ROMANS_DORF1_ID);
-            addBuildTask(village, ROMANS_DORF2_ID);
+            addBuildTaskToQueue(village, ROMANS_DORF1_ID);
+            addBuildTaskToQueue(village, ROMANS_DORF2_ID);
         }else{
-            addBuildTask(village, BOTH_BUILD_ID);
+            addBuildTaskToQueue(village, BOTH_BUILD_ID);
         }
     }
 }
 
-function addBuildTask (village, timerType) {
+function addBuildTaskToQueue (village, timerType) {
     if(village.timers.isNextCheckTime(timerType)){
         console.log("isNextCheckTime", timerType, village);
         const buildTask = BuildTaskHelper.getNextTask(village, timerType);

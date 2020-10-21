@@ -1,56 +1,73 @@
 let villages = null;
 let activeVillage = null;
-console.log("hey botek extension", window.location);
-// hey();
 
+onStartUp();
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+function onStartUp(){
+    let hostname = window.location.hostname;
+    console.log("hey botek extension", window.location);
+
+    if(hostname.includes('botek') || hostname.includes('localhost')){
+        handleBotekPageOpened();
+    }else{
+
+        if(window.location.pathname === LOGIN_PATHNAME){
+           return;
+        }
+        handleTravianPageOpened();
+    }
+}
+
+function handleBotekPageOpened(){
+    console.log("handleBotekPageOpened end url is");
+
+    sendMessageToExtension(GET_IFRAME_URL_ACTION, {}, (url) => {
+        console.log("front end url is", url, window.location);
+        window.document.getElementById('iframe-container').setAttribute('src', url);
+    });
+}
+
+function handleTravianPageOpened(){
+    sendMessageToExtension(IS_TAB_ACTIVE_ACTION, {},(data) => {
+        console.log("is active", data);
+        if(data.isActive && data.villages !== null){
+            villages = data.villages;
+            activeVillage = findActiveVillage();
+            showUi();
+            showBuildUI();
+            setOnVillageChangeListener();
+        }
+    });
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log("on msg request qweqwe", request);
     sendResponse("qwe recived on FE 1 qqwe");
     console.log("11111111111111111111");
     return true;
 });
 
-async function hey(){
-    await sleep(2000);
-    if(window.location.pathname === "/login.php"){
-        console.log("on login click");
-         document.getElementsByTagName("form")[0].submit();
-    }
-    await sleep(2000);
-}
+function setOnVillageChangeListener() {
+    const sideBox = document.getElementById('sidebarBoxVillagelist');
+    const ul = sideBox.getElementsByTagName('ul')[0];
+    console.log("sidebox", sideBox);
+    console.log("ul", ul);
 
-function sleep (time) {
-    return new Promise((resolve) => setTimeout(resolve, time));
-}
+    ul.addEventListener('click', (event) => {
+        for(let element of event.path){
+            if(element.nodeName === 'A'){
+                element.getAttribute('href');
+                sendMessageToExtension(CHANGE_VILLAGE_ACTION, element.getAttribute('href'),
+                    (response) => {
+                        console.log("village change response", response)
+                    }
+                );
 
-// document.getElementById('sidebarBeforeContent').style.visibility = 'hidden';
-
-let hostname = window.location.hostname;
-if(hostname.includes('botek') || hostname.includes('localhost')){
-    chrome.runtime.sendMessage({action: GET_IFRAME_URL}, (url) => {
-        console.log("front end url is", url);
-        window.document.getElementById('iframe-container').setAttribute('src', url);
-        /*console.log("is active", data);
-        if(data.isActive && data.villages !== null){
-            villages = data.villages;
-            activeVillage = findActiveVillage(); // TODO active village not working for drof2
-            showUi();
-            showBuildUI();
-        }*/
-    });
-}else{
-    chrome.runtime.sendMessage({action: IS_TAB_ACTIVE}, function(data) {
-        console.log("is active", data);
-        if(data.isActive && data.villages !== null){
-            villages = data.villages;
-            activeVillage = findActiveVillage(); // TODO active village not working for drof2
-            showUi();
-            showBuildUI();
+            }
         }
-    });
-}
 
+    })
+}
 
 function showUi(){
     let villageProduction = document.getElementsByClassName("villageList production")
@@ -58,29 +75,12 @@ function showUi(){
     let custom = document.createElement('div');
     custom.innerHTML = '<button type="button">Click Me!</button>'
 
-
     for (elt of villageProduction){
         elt.style['background-color'] = '#ff00FF'
         elt.appendChild(custom)
     }
 }
 
-function myFunction() {
-    let btn = document.createElement("BUTTON");
-    let t = document.createTextNode("CLICK ME");
-
-    btn.setAttribute("style","color:red;font-size:23px");
-
-    btn.appendChild(t);
-    document.body.appendChild(btn);
-
-    btn.setAttribute("onclick", alert("clicked"));
-
+function sendMessageToExtension(action, data, callback) {
+    chrome.runtime.sendMessage({action: action, data: data}, callback);
 }
-
-/*
-function gotMessage(request, sender, sendResponse) {
-    console.log("msg recived", request)
-
-}
-*/

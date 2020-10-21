@@ -26,14 +26,15 @@ function xPathSearch(xPath, htmlString) {
     return doc.evaluate(xPath, doc.body, null, XPathResult.ANY_TYPE, null);
 }
 
-async function getTextFromPage(url, params) {
-    url =  url + params;
-    let pageCall = await callFetch(url);
+async function getTextFromPage(pathname, params, time) {
+    const url =  baseServerUrl + pathname + params;
+    console.log("get text from page url", url);
+    let pageCall = await callFetch(url, {}, time);
     return  await pageCall.text();
 }
 
-async function getHtmlDocFromPage(url) {
-    let pageString = await getTextFromPage(url, "");
+async function getHtmlDocFromPage(pathname) {
+    let pageString = await getTextFromPage(pathname, "", 200);
     // console.log("pageString html", pageString);
     let parser = new DOMParser();
     let doc = parser.parseFromString(pageString, 'text/html');
@@ -53,18 +54,14 @@ function makeValidJsonResource(text) {
 }
 
 async function makePostRequest(url, params){
-    //let formData = new FormData();
 
     let formData = "name=" + encodeURIComponent(params.name) + "&password=" + encodeURIComponent(params.password) + "&s1=" + encodeURIComponent(params.s1) + "&w=" + encodeURIComponent(params.w) + "&login=" + encodeURIComponent(params.login);
-    /*for (let param in params){
-        if(params.hasOwnProperty(param)){
-            formData.append(param, params[param]);
-        }
-    }*/
-
     const headers = {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers:{
+            'content-type': 'application/x-www-form-urlencoded',
+        }
     }
     return await fetch(url, headers);
 }
@@ -87,12 +84,25 @@ async function postData(url = '', data = {}) {
     return response.json(); // parses JSON response into native JavaScript objects
 }*/
 
-async function callFetch (url, headers) {
+async function callFetch (url, headers, time) {
+    console.log("fetch url" , url);
     let myPromise = await fetch(url, headers);
-    await new Promise((resolve, reject) => setTimeout(resolve, 3000));
+    await new Promise((resolve, reject) => setTimeout(resolve, time));
     return myPromise;
 }
 
 function calcNextCheckTime (secTimeToDo) { // in sec
     return Date.now() + (secTimeToDo * 1000);
+}
+
+function sendMessageToGUI(action, data) {
+    console.log("trying to send msg via guiPort", guiPortConnection);
+    if(guiPortConnection !== null){
+        guiPortConnection.postMessage({action: action, data:data});
+    }
+    //chrome.tabs.sendMessage(botTabId, {type: type, data: data}, response);
+}
+
+function openBotTab(tabId){
+    chrome.tabs.update(tabId, {url: SERVER_URL});
 }

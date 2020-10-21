@@ -1,7 +1,6 @@
 
 async function analyseVillageProfile () { //get all villages -> link, name, coordinates
-    let profileCall = await callFetch(PROFILE_URL);
-    let pageString = await profileCall.text();
+    const pageString = await getTextFromPage(PROFILE_PATHNAME, "", 300);
     serverSettings = parseServerSettings(pageString);
     console.log("server settings", serverSettings);
     let villagesLinks  = regexSearchMultiple(REGEX_VILLAGE_LINK, pageString);
@@ -37,12 +36,12 @@ function parseTribe (pageString) {
 }
 
 async function getDorf1AndAnalyseBuildings(village) {
-    let pageString = await getTextFromPage(DORF1_PATHNAME, NEW_DID_PARAM + village.did);
+    let pageString = await getTextFromPage(DORF1_PATHNAME, NEW_DID_PARAM + village.did, 3000);
     analyseDorf1Buildings(pageString, village);
 }
 
 async function getDorf2AndAnalyseBuildings(village) {
-    let pageString = await getTextFromPage(DORF2_URL, NEW_DID_PARAM + village.did);
+    let pageString = await getTextFromPage(DORF2_PATHNAME, NEW_DID_PARAM + village.did, 3000);
     analyseDorf2Buildings(pageString, village);
 }
 
@@ -65,11 +64,11 @@ function analyseCurrResBuildings (village, pageString) {
     village.resources = parseResources(pageString);
     village.currentlyBuilding = parseCurrentlyBuilding(pageString, village);
 }
-async function analyseIsUserLoggedIn(url) {
-    console.log("url is ", url)
+async function analyseIsUserLoggedIn(pathname) {
+    console.log("pathanem is ", pathname)
 
 
-    let document = await getHtmlDocFromPage(url, {});
+    let document = await getHtmlDocFromPage(pathname, {});
     let inputElements = document.getElementsByTagName("input");
 
     console.log("input elements", inputElements);
