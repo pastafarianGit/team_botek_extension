@@ -6,13 +6,12 @@ chrome.browserAction.onClicked.addListener(tab =>{
     //chrome.tabs.update(tab.id, {url:"http://localhost:4200/"});
 });
 
-function addBuildTask(data, sendResponse) {
-    console.log("add build task", data);
+function addBuildTask(data) {
     for(let village of villages){
         if(village.did === data.villageDid){
             let building = new Building(data.locationId, data.type, data.lvl);
-            let newBuildTask = new BuildTask(building, data.villageDid, getUuidv4(), false);
-            village.buildTasks = BuildTaskHelper.addTask(newBuildTask, village.buildTasks);
+            let newBuildTask = new BuildTask(building, data.villageDid, getUuidv4(), (village.buildTasks[0].length > 0));
+            BuildTaskHelper.addTask(newBuildTask, village.buildTasks);
             village.timers.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask);
         }
     }
@@ -28,34 +27,31 @@ function getUuidv4() {
 chrome.runtime.onMessage.addListener(  // from inside content extension
     function(request, sender, sendResponse) {
         if(baseServerUrl === ""){
-            console.log("bot not opened");
             sendResponse(false);
             return false;
         }
 
-        console.log("request:", request);
         switch (request.action) {
             case IS_TAB_ACTIVE_ACTION:
-                if(villages === null){
-                    analyseVillageProfile().then(result => {
-                       villages = result;
-                       isTabActive(sendResponse);
-                    })
+                if(newBotOpen.updateProfile){
+                    analyseVillagesAfterLogin(sendResponse);
+                    newBotOpen.updateProfile = false;
                 }else{
                     isTabActive(sendResponse);
                 }
                 break;
             case GET_IFRAME_URL_ACTION:
-                console.log("sending response iframe url action", urlForFrontEnd);
                 sendResponse(urlForFrontEnd);
+                sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotActive});
                 break;
             case CHANGE_VILLAGE_ACTION:
-                const villageDid = regexSearchOne(REGEX_VILLAGE_LINK_TEXT, request.data, "g");
+                //const villageDid = regexSearchOne(REGEX_VILLAGE_LINK_TEXT, request.data, "g");
                 sendResponse(true);
-                sendMessageToGUI(CHANGE_VILLAGE_ACTION, villageDid);
+                sendMessageToGUI(CHANGE_VILLAGE_ACTION, request.data);
                 break;
-            case "build":
-                addBuildTask(request.data, sendResponse);
+            case ADD_BUILD_TASK_ACTION:
+                addBuildTask(request.data);
+                sendResponse(true);
                 break;
         }
         return true;
@@ -85,10 +81,10 @@ chrome.runtime.onMessageExternal.addListener(   // from botkeGui
 });
 
 chrome.runtime.onConnectExternal.addListener((port) => { // connection with GUI
-    console.log("gui onConnectExternal");
+    //console.log("gui onConnectExternal");
     guiPortConnection = port;
     port.onMessage.addListener((msg) => {
-        console.log("gui on msg");
+        // console.log("gui on msg");
         // See other examples for sample onMessage handlers.
     });
 });
@@ -98,7 +94,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         // console.log("info: ", info);
         let url = new URL(info.url);
         if(info.initiator !== undefined && info.initiator.includes(EXTENSION_ID)){
-            console.log("jup", url);
+            // console.log("jup", url);
             modifyHeaders(url.pathname, info.requestHeaders);
             modifyHeaderOrigin(info.url, info.requestHeaders);
             //modifyHeaderReferer(info.)
@@ -117,15 +113,42 @@ chrome.webRequest.onBeforeRequest.addListener(
         if(details.method === "POST" && details.url === baseServerUrl + LOGIN_PATHNAME){
             const formData = details.requestBody.formData;
             if(formData !== undefined){
-                let user = {name: formData.name[0], password: formData.password[0], s1: formData.s1[0], w: formData.w[0]};
-                chrome.storage.sync.set({user: user}, () => {
-                    console.log("saved user to exetension");
+                let newUser = {name: formData.name[0], password: formData.password[0], s1: formData.s1[0], w: formData.w[0], serverUrl : baseServerUrl};
+                chrome.storage.sync.get(['users'], (result) => {
+                    console.log("result on before request", result);
+                    let users = addUser(result, newUser);
+                    chrome.storage.sync.set({users: users}, () => {
+                        console.log("saved user to exetension");
+                    });
                 });
+
             }
         }
     },
     {urls: ["<all_urls>"]},
-    ["blocking", "requestBody"]);
+    ["blocking", "requestBody"])
+
+function addUser(result, newUser) {
+    let users = [];
+    let addedNewOne = false;
+    if(result.users === undefined){ // fist time
+        console.log("returning new users");
+        return [newUser];
+    }
+
+    for(let user of result.users){
+        if(user.serverUrl === newUser.serverUrl){
+            users.push(newUser)  // add new one
+            addedNewOne = true;
+        }else{
+            users.push(user);   // re add previous ones
+        }
+    }
+    if(!addedNewOne){
+        users.push(newUser);
+    }
+    return users;
+}
 
 
 function addHeader (newHeader, headers) {
@@ -158,7 +181,7 @@ function modifyHeaderOrigin (url, requestHeaders) {
         addHeader({name: 'origin', value: baseServerUrl}, requestHeaders)
     }
     referer = url;
-    console.log("modify header origin", requestHeaders);
+    // console.log("modify header origin", requestHeaders);
 }
 
 /*

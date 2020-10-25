@@ -6,7 +6,7 @@ let Village = class {
     name;
     // nextCheckTime;
     resources;
-    buildingsInfo = new Map();
+    buildingsInfo;
     currentlyBuilding;
     timers;
     buildTasks;
@@ -17,6 +17,7 @@ let Village = class {
         this.timers = new Timers();
         this.buildingsInfo = new Map();
         this.buildTasks = [[]];
+        this.currentlyBuilding = [];
         this.isCapital = false;
     }
 
@@ -38,38 +39,21 @@ let Village = class {
     }
 
     updateIfTaskDone(){
-        console.log("update if done", this.currentlyBuilding);
         for (let currBuilding of this.currentlyBuilding){
-            console.log("task ", currBuilding);
             BuildTaskHelper.currentlyBuildingTaskComplete(this.buildTasks, currBuilding.building);
         }
     }
 
-    /*isEnoughResAndLvl(key, task){
+    removeTaskIfUnderLvl(task){
         const building = this.buildingsInfo.get(task.building.locationId);
-        if(building.lvl < task.building.lvl){
-            console.log("check task cost ", building);
-
-            let cost = buildingsData[building.type].cost[building.lvl + 1];
-            if(this.checkCostVsStorage(cost)){
-                return true;
-            }
-        }else{
-            BuildTaskHelper.deleteTask(this.buildTasks, task.uuid); // remove task from array
-        }
-        return false;
-    }*/
-
-    removeTaskIfUnderLvl(building, task){
         if(building.lvl < task.building.lvl){
             return true;
         }
-        BuildTaskHelper.deleteTask(this.buildTasks, task.uuid); // remove task from array
+        BuildTaskHelper.deleteTask( task.uuid, this.buildTasks); // remove task from array
         return false;
     }
 
     isEnoughRes(task){
-        console.log("is enough res" , task);
         const building = this.buildingsInfo.get(task.building.locationId);
         let cost = buildingsData[building.type].cost[building.lvl + 1];
         return this.checkCostVsStorage(cost);
@@ -78,15 +62,18 @@ let Village = class {
     calcTimeTillTaskCanBeBuilt(task){
         const building = this.buildingsInfo.get(task.building.locationId);
         let cost = buildingsData[building.type].cost[building.lvl + 1];
-        const woodNeeded = cost.wood - this.resources.storage.l1;
-        const clayNeeded= cost.clay - this.resources.storage.l2;
-        const ironNeeded = cost.iron - this.resources.storage.l3;
-        const cropNeeded = cost.crop - this.resources.storage.l4;
 
-        const woodHoursNeeded = woodNeeded / this.resources.production.l1;
-        // TODO calc time when we can build this.
+        const woodTime = this.calculateResourcesTime(cost.wood, this.resources.storage.l1, this.resources.production.l1);
+        const clayTime = this.calculateResourcesTime(cost.clay, this.resources.storage.l2, this.resources.production.l2);
+        const ironTime = this.calculateResourcesTime(cost.iron, this.resources.storage.l3, this.resources.production.l3);
+        const cropTime = this.calculateResourcesTime(cost.crop, this.resources.storage.l4, this.resources.production.l3);
+        let times = [woodTime, clayTime, ironTime, cropTime];
+        return Math.max(...times) * 60; // change to mins
     }
 
+    calculateResourcesTime(cost, resourcesStorage, production){
+        return (cost - resourcesStorage) / production
+    }
 
     setCoordinates(coordinates){
         const {x,y} = coordinates;
@@ -184,8 +171,7 @@ class Building {
 class BuildTaskHelper {
 
     static addTask(task, tasks){
-        // let lastArray = [];
-        for (let i=tasks.length; i > 0 ;i--){
+        for (let i=tasks.length - 1; i >= 0 ;i--){
             if(Array.isArray(tasks[i])){
                 tasks[i].push(task);
                 return true;
@@ -197,7 +183,10 @@ class BuildTaskHelper {
     static deleteTask(uuid, tasks){
         for(let i = 0; i < tasks.length; i++) {
             if(Array.isArray(tasks[i])){
-                if(this.deleteTask(tasks[i])){
+                if(this.deleteTask(uuid, tasks[i])){
+                    if(tasks[i].length === 0 && tasks.length > 1){ // remove empty array if there is more than one internal array
+                        tasks.splice(i, 1);
+                    }
                     return true;
                 }
             }else{
@@ -211,6 +200,19 @@ class BuildTaskHelper {
     }
 
     static currentlyBuildingTaskComplete(buildTasks, currentTask) {
+        for(let taskGroup of buildTasks){
+            for(let task of taskGroup){
+                if (task.building.locationId === currentTask.locationId) {
+                    if (task.building.lvl <= currentTask.lvl) {
+                        BuildTaskHelper.deleteTask(task.uuid, buildTasks);
+                        return true;
+                    }
+                }
+            }
+        }
+        /*return false;
+
+
         for (let taskB of buildTasks) {
             if (Array.isArray(taskB)) {
                 if (this.currentlyBuildingTaskComplete(taskB, currentTask)) {
@@ -225,7 +227,7 @@ class BuildTaskHelper {
                     return false;
                 }
             }
-        }
+        }*/
        return false;
     }
 
@@ -240,7 +242,6 @@ class BuildTaskHelper {
                 currentGroupTasks.push(task);
             }
         }
-        console.log("current tasks for group", currentGroupTasks, timerType);
         return currentGroupTasks;
     }
 
@@ -283,12 +284,16 @@ class BuildTaskHelper {
 
     static calcWhenFirstTaskIsAvailable(village, timerType) {
         const availableTasks  = this.getNextTaskGroup(village.buildTasks, timerType);
-        let minTime;
+        let times = [];
         for(let task of availableTasks){
-            village.calcWhenCanBuildTask(task);
-            const building = village.buildingsInfo.get(task.building.locationId);
-            //if(task.building.locationId)
+            let taskTime = village.calcTimeTillTaskCanBeBuilt(task);
+            times.push(taskTime);
         }
+        let minTime = Math.min(... times);
+        if(minTime > 15){  // cap at 15min maybe you get res from market or farming
+            minTime = 15;
+        }
+        return minTime;
     }
 }
 
@@ -479,6 +484,25 @@ class Timers {
 
     }
 
+    nextCheckTime(type){
+        let timer = null;
+        switch (type) {
+            case ROMANS_DORF1_ID:
+                timer = this.romansDorf1Timer;
+                break
+            case ROMANS_DORF2_ID:
+                timer = this.romansDorf2Timer;
+                break;
+            case BOTH_BUILD_ID:
+                timer = this.buildingTimer;
+                break;
+            default:
+                return false;
+        }
+        let nextCheck = timer - Date.now();
+        return  nextCheck / 1000 / 60;
+    }
+
     addTimeFromNow(type, time){
         switch (type) {
             case ROMANS_DORF1_ID:
@@ -506,6 +530,10 @@ class Timers {
                 this.buildingTimer =  newTime;
                 break;
         }
+    }
+
+    addTimeFromNowMins(type, mins){
+        this.addTimeFromNow(type, mins * 60 * 1000);
     }
 
     updateTimers(currentlyBuilding) {

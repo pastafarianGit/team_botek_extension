@@ -2,17 +2,20 @@ let queue = [];
 let referer;
 let baseServerUrl = "";
 let botTabId;
-let villages = null;
+let villages = [];
 let serverSettings = null;
 let tribe = -1;
 let urlForFrontEnd = "";
 let isBotActive = false;
 let guiPortConnection = null;
+let newBotOpen = {updateProfile: false, updateTribe: false};
+
 
 onStartUp();
 setInterval(mainLoop, 15000);
 
 function onStartUp() {
+    // loginIn().then(r => console.log("on startup ", r));
     //analyseVillageProfile().then(r => console.log("analysed data", r));
     //openBot();
     //testStartup();
@@ -41,36 +44,56 @@ function openBot() {
         let url = new URL(tab.url);
         botTabId = tab.id;
         baseServerUrl = url.origin;
+        newBotOpen.updateProfile = true;
+        newBotOpen.updateTribe = true;
         setFrontEndUrl(url, tab);
+
     })
+}
+
+async function checkAndLogin() {
+    const pageString = await getTextFromPage(DORF1_PATHNAME, "", 200);
+    const isLogIn = isOnLogInPage(pageString);
+    if(isLogIn){
+        await logIn(isLogIn);
+        return Promise.resolve(true);
+    }
+    return Promise.resolve(false);
 }
 
 function setFrontEndUrl(url, tab) {
     if(url.hostname.includes('travian')){
-        chrome.storage.sync.get(['user'], (result) => {
-            if(result.user === undefined){
+        checkAndLogin()
+            .then(r => {
+                urlForFrontEnd = url.origin + DORF1_PATHNAME;
+                openBotTab(tab.id);
+            }).catch(err =>{
                 urlForFrontEnd = url.origin + LOGIN_PATHNAME;
                 openBotTab(tab.id);
-            }else{
-                urlForFrontEnd = url.origin + DORF1_PATHNAME;
-                loginFlow(url.origin, result)
-                    .then(result => {
-                        openBotTab(tab.id);
-                    }).catch(err => {
-                        openBotTab(tab.id);
-                });
-            }
-        });
+            });
     }
 }
 
-async function loginFlow(url, storedUser) {
-    storedUser.user.login = await analyseIsUserLoggedIn(DORF1_PATHNAME);
-    return  await makePostRequest(url + LOGIN_PATHNAME, storedUser.user);
+function findUser(users){
+    if(users === undefined){
+        return Promise.reject(NO_USER);
+    }
+
+    for (let user of users){
+        if(user.serverUrl === baseServerUrl){
+            return user;
+        }
+    }
+    return Promise.reject(NO_USER);
+}
+
+async function loginFlow(url) {
+    let login = await analyseIsUserLoggedIn(DORF1_PATHNAME);
+    return await makePostRequest(url + LOGIN_PATHNAME, storedUser);
 }
 
 function mainLoop (){
-    if(baseServerUrl === "")//if(!isBotActive)
+    if(villages.length === 0)//if(!isBotActive)
         return;
 
     console.log("main loop", villages);
@@ -78,12 +101,19 @@ function mainLoop (){
 
     //DO WORK TASK FROM QUEUE
     if(queue.length !== 0){
-        console.log("main queue",  queue);
+        //console.log("main queue",  queue);
         const task = queue.shift();
         console.log("Doing task", task);
         if(task instanceof BuildTask){
             // task.name = "test main add to queue";
-            build(task).then(result => console.log("result", result));
+            build(task)
+                .then(result => {
+                    console.log("update_villages_action", villages);
+                    sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
+                    console.log("result", result);
+                }).catch(err => {
+                    console.log("build failed: ", err);
+                });
         }
     }
 }
@@ -101,7 +131,6 @@ function addTasksToQueue() {
 
 function addToQueueAndUpdateTimer (task, village, timerType) {
     if(task !== null){
-        console.log("add to queue");
         queue.push(task);
     }
     console.log("add 15 mins to timerType", timerType);

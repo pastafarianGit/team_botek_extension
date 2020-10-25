@@ -6,18 +6,16 @@ async function build (task) {
 
     // after analyse check If task is doable
     if(!isEnoughLvlAndResources(village, task)){
-        return Promise.reject("not enough lvl or res");
+        return Promise.resolve(NOT_ENOUGH_RES_OR_LVL);
     }
 
     if (CurrentlyBuildingHelper.isBuildSlotFree(task.building, village.currentlyBuilding)) {
-        simulateClickBuildingAndPressUpgrade(task.building)
-            .then(pageString => {
-                analysePageStringDorf12(pageString, village, task.building.isResourceBuilding());
-                village.timers.updateTimers(village.currentlyBuilding);
-                village.updateIfTaskDone(village.currentlyBuilding);
-            });
+        const pageString = await simulateClickBuildingAndPressUpgrade(task.building);
+        analysePageStringDorf12(pageString, village, task.building.isResourceBuilding());
+        village.timers.updateTimers(village.currentlyBuilding);
+        village.updateIfTaskDone(village.currentlyBuilding);
     } else {
-        return Promise.reject(ERR_ALREADY_BUILDING)
+        return Promise.reject(ERR_ALREADY_BUILDING);
     }
 }
 
@@ -26,7 +24,9 @@ function isEnoughLvlAndResources(village, task) {
         if(village.isEnoughRes(task)){
             return true;
         }else{
-            BuildTaskHelper.calcWhenFirstTaskIsAvailable(village, task.timerType);
+            let minTime = BuildTaskHelper.calcWhenFirstTaskIsAvailable(village, task.timerType);
+            console.log("add time from now when next task available", minTime);
+            village.timers.addTimeFromNowMins(task.timerType, minTime);
             // calc first to build from task.timertype
         }
         //return Promise.reject("Not enough res");
@@ -53,9 +53,9 @@ async function  retrieveC (buildingCall){
 }
 
 async function simulateClickBuildingAndPressUpgrade (building) {
-    let buildingCall = await callFetch(BUILD_URL + building.locationId, {}, 3000);
+    let buildingCall = await callFetchWithBaseUrl(BUILD_PATH + building.locationId, {}, 3000);
     let c = await retrieveC(buildingCall);
-    return await getTextFromPage(building.getLocationTypeURL(), "?a="+building.locationId+"&c="+c, 3000)
+    return await getTextAndCheckLogin(building.getLocationTypeURL(), "?a="+building.locationId+"&c="+c, 3000)
     // callFetch(DORF1_URL+"?a="+locationId+"&c="+c, {});
 }
 
@@ -71,8 +71,8 @@ function addBuildingTasks(village) {
 }
 
 function addBuildTaskToQueue (village, timerType) {
+    console.log("next check time is: ", village.timers.nextCheckTime(timerType), "type: ", timerType);
     if(village.timers.isNextCheckTime(timerType)){
-        console.log("isNextCheckTime", timerType, village);
         const buildTask = BuildTaskHelper.getNextTask(village, timerType);
         addToQueueAndUpdateTimer(buildTask, village, timerType);
     }

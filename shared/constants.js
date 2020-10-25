@@ -23,11 +23,14 @@ const IS_TAB_ACTIVE_ACTION = "is_tab_active_action";
 const GET_IFRAME_URL_ACTION = "get_iframe_url_action";
 const UPDATE_BUILD_TASK_ACTION = "update_build_task_action";
 const UPDATE_VILLAGES_ACTION = "update_villages_action";
+const UPDATE_ALL_GUI_BOT_DATA_ACTION = "update_all_gui_bot_data_action";
+const ADD_BUILD_TASK_ACTION = "add_build_task_action";
 
 
 const RES_MAX_LOCATION = 18;
 const ERR_ALREADY_BUILDING = "already building";
-const ERR_NOT_ENOUGH_RES = "not enough resources no doable task";
+const NOT_ENOUGH_RES_OR_LVL = "not enough resources or task lvl too low";
+const NO_USER = "no login user";
 
 const BOTH_BUILD_ID = 0;
 const RES_ID = 1;
@@ -44,11 +47,11 @@ const EXTENSION_ID = "llkkcbnopngmldfgmlhepcbfpoooeaka";
 const BUILD_TYPE = "build_dorf1";
 const ANALYSE_TYPE = "build_dorf1";
 
-const BASE_URL = "https://tx3.balkans.travian.com/";
+// const BASE_URL = "https://tx3.balkans.travian.com/";
 const DORF1_PATHNAME = "/dorf1.php"; // todo changing to dorf1.php
 const DORF2_PATHNAME = "/dorf2.php";
 const LOGIN_PATHNAME = "/login.php";
-const BUILD_URL = BASE_URL + "build.php?id=";
+const BUILD_PATH = "/build.php?id=";
 const PROFILE_PATHNAME ="/profile";
 
 const NEW_DID_PARAM = "?newdid="

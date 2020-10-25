@@ -19,23 +19,24 @@ function onStartUp(){
 }
 
 function handleBotekPageOpened(){
-    console.log("handleBotekPageOpened end url is");
 
     sendMessageToExtension(GET_IFRAME_URL_ACTION, {}, (url) => {
-        console.log("front end url is", url, window.location);
+        console.log('on handle botke page opened', url);
         window.document.getElementById('iframe-container').setAttribute('src', url);
     });
 }
 
 function handleTravianPageOpened(){
     sendMessageToExtension(IS_TAB_ACTIVE_ACTION, {},(data) => {
-        console.log("is active", data);
-        if(data.isActive && data.villages !== null){
+        if(data.isActive && data.villages.length !== 0){
             villages = data.villages;
             activeVillage = findActiveVillage();
-            showUi();
-            showBuildUI();
-            setOnVillageChangeListener();
+            if(activeVillage !== null){
+                sendMessageToExtension(CHANGE_VILLAGE_ACTION, activeVillage.did, (r)=>{console.log("change village response", r);});
+                showUi();
+                showBuildUI();
+            }
+            // setOnVillageChangeListener();
         }
     });
 }
@@ -59,7 +60,6 @@ function setOnVillageChangeListener() {
                 element.getAttribute('href');
                 sendMessageToExtension(CHANGE_VILLAGE_ACTION, element.getAttribute('href'),
                     (response) => {
-                        console.log("village change response", response)
                     }
                 );
 
@@ -71,7 +71,6 @@ function setOnVillageChangeListener() {
 
 function showUi(){
     let villageProduction = document.getElementsByClassName("villageList production")
-    console.log("inner html asd", villageProduction)
     let custom = document.createElement('div');
     custom.innerHTML = '<button type="button">Click Me!</button>'
 
@@ -79,8 +78,4 @@ function showUi(){
         elt.style['background-color'] = '#ff00FF'
         elt.appendChild(custom)
     }
-}
-
-function sendMessageToExtension(action, data, callback) {
-    chrome.runtime.sendMessage({action: action, data: data}, callback);
 }

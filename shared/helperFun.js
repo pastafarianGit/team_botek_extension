@@ -27,10 +27,37 @@ function xPathSearch(xPath, htmlString) {
 }
 
 async function getTextFromPage(pathname, params, time) {
-    const url =  baseServerUrl + pathname + params;
-    console.log("get text from page url", url);
-    let pageCall = await callFetch(url, {}, time);
+    let pageCall = await callFetchWithBaseUrl(pathname + params, {}, time);
     return  await pageCall.text();
+}
+
+async function getTextAndCheckLogin(pathname, params, time){
+    let pageString = getTextFromPage(pathname, params, time);
+
+    const isLogIn = isOnLogInPage(pathname, pageString);
+    if(isLogIn){ // login again
+        await logIn(isLogIn);
+        return getTextFromPage(pathname, params, time);  // request again after login
+    }else{
+        return pageString;
+    }
+}
+
+async function logIn(isLogIn){
+    let users = await getFromStorage('users');
+    let user = findUser(users);
+    user.login = isLogIn;
+    return makePostRequest(baseServerUrl + LOGIN_PATHNAME, user);
+}
+
+async function getFromStorage(data){
+    let promise = new Promise( (resolve, reject) => {
+        chrome.storage.sync.get([data], (result) => {
+            resolve(result.users);
+        });
+    });
+
+    return await promise;
 }
 
 async function getHtmlDocFromPage(pathname) {
@@ -84,8 +111,9 @@ async function postData(url = '', data = {}) {
     return response.json(); // parses JSON response into native JavaScript objects
 }*/
 
-async function callFetch (url, headers, time) {
-    console.log("fetch url" , url);
+async function callFetchWithBaseUrl (pathname, headers, time) {
+    const url = baseServerUrl + pathname;
+
     let myPromise = await fetch(url, headers);
     await new Promise((resolve, reject) => setTimeout(resolve, time));
     return myPromise;
@@ -96,7 +124,6 @@ function calcNextCheckTime (secTimeToDo) { // in sec
 }
 
 function sendMessageToGUI(action, data) {
-    console.log("trying to send msg via guiPort", guiPortConnection);
     if(guiPortConnection !== null){
         guiPortConnection.postMessage({action: action, data:data});
     }
@@ -105,4 +132,8 @@ function sendMessageToGUI(action, data) {
 
 function openBotTab(tabId){
     chrome.tabs.update(tabId, {url: SERVER_URL});
+}
+
+function sendMessageToExtension(action, data, callback) {
+    chrome.runtime.sendMessage({action: action, data: data}, callback);
 }

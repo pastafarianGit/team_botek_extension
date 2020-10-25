@@ -29,20 +29,10 @@ function showOnBuildPhp() {
 
 function onBuildDropdownSelected(lvl, type) {
     const locationId = getParamFromUrl("id");
-    const buildTask = {lvl: parseInt(lvl), action: type, locationId: parseInt(locationId), villageDid: activeVillage.did};
-    console.log("selected 1:  location", locationId);
-    console.log("selected 2:  lvl", lvl);
-    console.log("selected 3:  type", type);
+    const buildTask = {lvl: parseInt(lvl), type: type, locationId: parseInt(locationId), villageDid: activeVillage.did};
 
-
-    chrome.runtime.sendMessage({action: "build", "data": buildTask}, (task) => {
+    sendMessageToExtension(ADD_BUILD_TASK_ACTION, buildTask, (task) => {
         console.log("is task complete", task);
-        /*if(data.isActive && data.villages !== null){
-            villages = new Villages(data.villages);
-            activeVillage = findActiveVillage();
-            showUi();
-            showBuildUI();
-        }*/
     });
 }
 
