@@ -21,8 +21,7 @@ function regexSearchMultiple(regex, text) {
 }
 
 function xPathSearch(xPath, htmlString) {
-    let parser =  new DOMParser();
-    let doc = parser.parseFromString(htmlString, 'text/html');
+    let doc = toHtmlElement(htmlString);
     return doc.evaluate(xPath, doc.body, null, XPathResult.ANY_TYPE, null);
 }
 
@@ -34,9 +33,9 @@ async function getTextFromPage(pathname, params, time) {
 async function getTextAndCheckLogin(pathname, params, time){
     let pageString = getTextFromPage(pathname, params, time);
 
-    const isLogIn = isOnLogInPage(pathname, pageString);
-    if(isLogIn){ // login again
-        await logIn(isLogIn);
+    const isLogInPage = isOnLogInPage(pathname, pageString);
+    if(isLogInPage){ // login again
+        await logIn(isLogInPage);
         return getTextFromPage(pathname, params, time);  // request again after login
     }else{
         return pageString;
@@ -92,28 +91,31 @@ async function makePostRequest(url, params){
     }
     return await fetch(url, headers);
 }
-/*
-async function postData(url = '', data = {}) {
-    // Default options are marked with *
-    const response = await fetch(url, {
-        method: 'POST', // *GET, POST, PUT, DELETE, etc.
-        mode: 'cors', // no-cors, *cors, same-origin
-        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: 'same-origin', // include, *same-origin, omit
-        headers: {
-            'Content-Type': 'application/json'
-            // 'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: JSON.stringify(data) // body data type must match "Content-Type" header
-    });
-    return response.json(); // parses JSON response into native JavaScript objects
-}*/
+
+function getBuildingOnLocationForTask(taskBuilding, village) {
+    let building = village.buildingsInfo.get(taskBuilding.locationId);
+    if(building.type === 0){
+        building = new Building(taskBuilding.locationId, taskBuilding.type, 0);
+    }
+    return building;
+}
+
+function hoursToMiliSec(hours){
+    return minsToMiliSec(hours) * 60;
+}
+
+function minsToMiliSec(mins){
+    return mins * 60 * 1000;
+}
+
+function miliSecondsToMins(miliSec){
+    console.log("mili sec", miliSec);
+    return (miliSec / 1000 / 60);
+}
 
 async function callFetchWithBaseUrl (pathname, headers, time) {
     const url = baseServerUrl + pathname;
-
+    console.log("fetching", url);
     let myPromise = await fetch(url, headers);
     await new Promise((resolve, reject) => setTimeout(resolve, time));
     return myPromise;
@@ -127,7 +129,6 @@ function sendMessageToGUI(action, data) {
     if(guiPortConnection !== null){
         guiPortConnection.postMessage({action: action, data:data});
     }
-    //chrome.tabs.sendMessage(botTabId, {type: type, data: data}, response);
 }
 
 function openBotTab(tabId){
@@ -136,4 +137,16 @@ function openBotTab(tabId){
 
 function sendMessageToExtension(action, data, callback) {
     chrome.runtime.sendMessage({action: action, data: data}, callback);
+}
+
+function toHtmlElement(str){
+    let parser = new DOMParser();
+    let doc =  parser.parseFromString(str, 'text/html');
+    return doc;
+}
+
+function toHtmlGetBodyFirstChild(str){
+    let parser = new DOMParser();
+    let doc =  parser.parseFromString(str, 'text/html');
+    return doc.body.firstChild;
 }

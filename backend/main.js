@@ -6,10 +6,10 @@ let villages = [];
 let serverSettings = null;
 let tribe = -1;
 let urlForFrontEnd = "";
-let isBotActive = false;
+let isBotOn = false;
 let guiPortConnection = null;
 let newBotOpen = {updateProfile: false, updateTribe: false};
-
+let botSleep = {isSleeping: true, timer: Date.now() + hoursToMiliSec(0)};
 
 onStartUp();
 setInterval(mainLoop, 15000);
@@ -17,26 +17,32 @@ setInterval(mainLoop, 15000);
 function onStartUp() {
     // loginIn().then(r => console.log("on startup ", r));
     //analyseVillageProfile().then(r => console.log("analysed data", r));
-    //openBot();
+    // openBot();
     //testStartup();
     //analyseVillages().then(r => console.log("anal r", r));
     // setInterval(frontEndUpdateLoop, 10000);
-
+    // testStartup();
 }
 
 function testStartup() {
-    let village1 = new Village("12744");
-    let village2 = new Village("14562");
-    village1.addParams(23, -63, true, "qwe");
-    village2.addParams(25, -74, false, "qwe2");
+    let village1 = new Village("3810");
+    //let village2 = new Village("14562");
+    village1.addParams(-54, 28, true, "1");
+    //village2.addParams(25, -74, false, "qwe2");
 
-    let villagesTest = [village1, village2];
+    let villagesTest = [village1];
     console.log("test villages", villagesTest);
     villages = villagesTest;
+    isBotOn = true;
+    baseServerUrl = 'https://tx3.travian.com';
+    urlForFrontEnd = baseServerUrl + DORF1_PATHNAME;
 
-    analyseVillageProfile().then(r => {
-        console.log("analyse profile done", r);
-    })
+    callFetchWithBaseUrl(DORF1_PATHNAME, {"Sec-Fetch-Site" : "same-origin"}, 3000).then(r=>{console.log("fetcjed profile test r", r)});
+
+    //analyseVillagesAfterLogin(()=>{});
+    //analyseVillagesAfterLogin(()=>{});
+
+    //analyseBuildingsInAllVillages().then("done");
 }
 
 function openBot() {
@@ -53,9 +59,9 @@ function openBot() {
 
 async function checkAndLogin() {
     const pageString = await getTextFromPage(DORF1_PATHNAME, "", 200);
-    const isLogIn = isOnLogInPage(pageString);
-    if(isLogIn){
-        await logIn(isLogIn);
+    const isLogInPage = isOnLogInPage(pageString);
+    if(isLogInPage){
+        await logIn(isLogInPage);
         return Promise.resolve(true);
     }
     return Promise.resolve(false);
@@ -93,9 +99,13 @@ async function loginFlow(url) {
 }
 
 function mainLoop (){
-    if(villages.length === 0)//if(!isBotActive)
-        return;
 
+    if(villages.length === 0 || !isBotOn)//if(!isBotOn)
+        return;
+    toggleSleep();
+    if(botSleep.isSleeping){
+        return;
+    }
     console.log("main loop", villages);
     addTasksToQueue();     //ANALYSE WORK TODO
 
@@ -118,6 +128,18 @@ function mainLoop (){
     }
 }
 
+function toggleSleep() {
+    if(Date.now() > botSleep.timer){
+        if(botSleep.isSleeping){
+            botSleep.timer = Date.now() + hoursToMiliSec(0.4)
+        }else{
+            botSleep.timer = Date.now() + hoursToMiliSec(0.1)
+        }
+        botSleep.isSleeping = ! botSleep.isSleeping;
+
+        console.log("bot is sleeping", botSleep.isSleeping, " until: ", miliSecondsToMins(Date.now() - botSleep.timer));
+    }
+}
 
 function frontEndUpdateLoop() {
         // should this be frontend?

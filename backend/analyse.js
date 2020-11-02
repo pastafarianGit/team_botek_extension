@@ -9,7 +9,7 @@ function analyseVillagesAfterLogin(sendResponse){
     analyseVillageProfile()
         .then(result => {
             villages = result;
-            sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotActive});
+            sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn});
             isTabActive(sendResponse);
             return analyseBuildingsInAllVillages();
         }).then(result => {
@@ -27,9 +27,9 @@ async function analyseBuildingsInAllVillages(){
 
 async function analyseAndSwitchTo(building, village) {
     if(building.isResourceBuilding()){
-        await getDorf1AndAnalyse(village);
+        return await getDorf1AndAnalyse(village);
     }
-    await getDorf2AndAnalyse(village)
+    return await getDorf2AndAnalyse(village)
 }
 
 async function analyseVillagesTest() {

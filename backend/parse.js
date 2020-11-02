@@ -31,6 +31,13 @@ function parseResourceLvls (pageString) {
     return  map;
 }
 
+function parseGetNewBuildingButton(pageString, type) {
+    let htmlElement = toHtmlElement(pageString);
+    const contractBuilding = htmlElement.getElementById(CONTRACT_BUILDING + type.toString());
+    const contractLink = contractBuilding.getElementsByClassName('contractLink')[0];
+    return contractLink.getElementsByTagName('button')[0];
+}
+
 function parseBuildingLvls (pageString) {
     let parser =  new DOMParser();
     let doc = parser.parseFromString(pageString, 'text/html');

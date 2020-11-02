@@ -1,5 +1,40 @@
 .scrollable-menu {
-    height: auto;
     max-height: 200px;
     overflow-x: hidden;
 }
+
+/*#build-btn{
+  margin: 10px;
+}*/
+
+#build-btn {
+    border: 1px solid #ff4081;
+    background-color: white;
+    padding: 14px 28px;
+    font-size: 15px;
+    cursor: pointer;
+    color: #ff4081
+}
+
+#build-btn:hover {
+    background: #ff4081;
+    color: white;
+}
+
+
+#build-container-old{
+    margin: 0 10px 10px;
+}
+
+#build-container-new{
+    margin: 10px 10px 10px -10px;
+}
+
+#add-task-ul-old{
+    margin-left: 50px;
+}
+
+#add-task-ul-new{
+    margin-left: 0;
+}
+

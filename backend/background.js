@@ -42,7 +42,7 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 break;
             case GET_IFRAME_URL_ACTION:
                 sendResponse(urlForFrontEnd);
-                sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotActive});
+                sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn});
                 break;
             case CHANGE_VILLAGE_ACTION:
                 //const villageDid = regexSearchOne(REGEX_VILLAGE_LINK_TEXT, request.data, "g");
@@ -64,17 +64,14 @@ chrome.runtime.onMessageExternal.addListener(   // from botkeGui
             case UPDATE_BUILD_TASK_ACTION:
                 let village = VillagesHelper.findVillage(villages, request.data.village.did);
                 village.buildTasks = BuildTaskHelper.convertToBuildTaskObject(request.data.village.buildTasks);
-                // console.log("village builds tasks.", village.buildTasks);
-                // console.log("build tasks: ", request.data);
-                // console.log("build tasks village: ", village);
                 break;
             case "getUpdateOnVillage":
                 sendResponse(villages);
                 break;
 
-            case TOGGLE_BOT_ACTIVE:
+            case IS_ACTIVE_BOT_ACTION:
                 console.log("toggle bot", request.data);
-                isBotActive = request.data.isRunning;
+                isBotOn = request.data.isRunning;
                 break;
         }
         return true;
@@ -93,8 +90,12 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     (info) =>{
         // console.log("info: ", info);
         let url = new URL(info.url);
-        if(info.initiator !== undefined && info.initiator.includes(EXTENSION_ID)){
-            // console.log("jup", url);
+        //console.log("inside send requests", url);
+        // console.log("url origin", url);
+
+        if(info.initiator !== undefined && info.initiator.includes(EXTENSION_ID) && !SERVER_URL.includes(url.origin)){
+            console.log("info: ", info);
+            console.log("will modify", url.pathname);
             modifyHeaders(url.pathname, info.requestHeaders);
             modifyHeaderOrigin(info.url, info.requestHeaders);
             //modifyHeaderReferer(info.)
@@ -164,6 +165,9 @@ function addHeader (newHeader, headers) {
 
 function modifyHeaders (pathname, reqHeaders) {
     let constHeaders = REQUESTS_INFO[pathname];
+    if(constHeaders === undefined){
+        constHeaders = REQUESTS_INFO['others'];
+    }
     if(constHeaders){
         constHeaders.headers.forEach(header => {
             addHeader(header, reqHeaders);

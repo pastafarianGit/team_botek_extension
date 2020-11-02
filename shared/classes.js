@@ -4,13 +4,11 @@ let Village = class {
     y;
     isCapital;
     name;
-    // nextCheckTime;
     resources;
     buildingsInfo;
     currentlyBuilding;
     timers;
     buildTasks;
-
 
     constructor(did) {
         this.did  = did;
@@ -24,44 +22,26 @@ let Village = class {
     addParams(x, y, isCapital, name) {
         this.x  = x;
         this.y  = y;
-        //this.isCapital  = isCapital;
+        this.isCapital  = isCapital;
         this.name  = name;
     }
-
-    /*isNextCheckTime() {
-        console.log("time diff: " ,  this.nextCheckTime - Date.now());
-        return (this.nextCheckTime < Date.now());
-    }*/
-
 
     updateBuildingInfo(updatedBuildings){
         this.buildingsInfo = new Map([...this.buildingsInfo, ...updatedBuildings]);
     }
 
-    updateIfTaskDone(){
-        for (let currBuilding of this.currentlyBuilding){
-            BuildTaskHelper.currentlyBuildingTaskComplete(this.buildTasks, currBuilding.building);
-        }
-    }
-
-    removeTaskIfUnderLvl(task){
-        const building = this.buildingsInfo.get(task.building.locationId);
-        if(building.lvl < task.building.lvl){
-            return true;
-        }
-        BuildTaskHelper.deleteTask( task.uuid, this.buildTasks); // remove task from array
-        return false;
-    }
-
     isEnoughRes(task){
-        const building = this.buildingsInfo.get(task.building.locationId);
-        let cost = buildingsData[building.type].cost[building.lvl + 1];
+        let building = this.buildingsInfo.get(task.building.locationId);
+        /*if(building.type === 0){
+            building = new Building(task.building.locationId, task.building.type, 0);
+        }*/
+        let cost = buildingsData[task.building.type].cost[building.lvl + 1];
         return this.checkCostVsStorage(cost);
     }
 
     calcTimeTillTaskCanBeBuilt(task){
         const building = this.buildingsInfo.get(task.building.locationId);
-        let cost = buildingsData[building.type].cost[building.lvl + 1];
+        let cost = buildingsData[task.building.type].cost[building.lvl + 1];
 
         const woodTime = this.calculateResourcesTime(cost.wood, this.resources.storage.l1, this.resources.production.l1);
         const clayTime = this.calculateResourcesTime(cost.clay, this.resources.storage.l2, this.resources.production.l2);
@@ -135,7 +115,7 @@ class Building {
     name;
     constructor(locationId, type, lvl) {
         this.locationId = locationId;
-        this.type = type;
+        this.type = parseInt(type);
         this.setLvl(lvl);
         this.setName();
     }
@@ -199,36 +179,27 @@ class BuildTaskHelper {
         return false;
     }
 
-    static currentlyBuildingTaskComplete(buildTasks, currentTask) {
-        for(let taskGroup of buildTasks){
-            for(let task of taskGroup){
-                if (task.building.locationId === currentTask.locationId) {
-                    if (task.building.lvl <= currentTask.lvl) {
-                        BuildTaskHelper.deleteTask(task.uuid, buildTasks);
-                        return true;
-                    }
-                }
-            }
+    static isTaskUnderLvl(task, village){
+        const building = village.buildingsInfo.get(task.building.locationId);
+
+        if(task.building.lvl > building.lvl){
+            return false;
         }
-        /*return false;
+        return true;
+    }
 
+    static isTaskDifferentType(task, village){
+        const building = village.buildingsInfo.get(task.building.locationId);
+        if(building.type === 0){ //building on empty space
+            return false;
+        }
 
-        for (let taskB of buildTasks) {
-            if (Array.isArray(taskB)) {
-                if (this.currentlyBuildingTaskComplete(taskB, currentTask)) {
-                    return true;
-                }
-            } else {
-                if (taskB.building.locationId === currentTask.locationId) {
-                    if (taskB.building.lvl <= currentTask.lvl) {
-                        BuildTaskHelper.deleteTask(taskB.uuid, buildTasks);
-                        return true;
-                    }
-                    return false;
-                }
-            }
-        }*/
-       return false;
+        if(building.type !== task.building.type){ // wrong task type for building spot
+            BuildTaskHelper.deleteTask(task.uuid, village.buildTasks);
+            return true;
+        }
+
+        return false;
     }
 
     static getNextTaskGroup(tasks, timerType){
@@ -244,18 +215,6 @@ class BuildTaskHelper {
         }
         return currentGroupTasks;
     }
-
-    /*static getNextTaskWithType(village, timerType){
-        console.log("available tasks", this.getNextTaskGroup(village.buildTasks));
-        for (const task of this.getNextTaskGroup(village.buildTasks)) {
-            if(task.building.isResourceBuilding() === isRes){
-                if(village.isEnoughRes(task)){
-                    return task;
-                }
-            }
-        }
-        return null;
-    }*/
 
     static getNextTask(village, timerType){
         const currentGroup = this.getNextTaskGroup(village.buildTasks, timerType);
@@ -297,87 +256,6 @@ class BuildTaskHelper {
     }
 }
 
-/*
-*
-*         const building = this.buildingsInfo.get(task.building.locationId);
-        let cost = buildingsData[building.type].cost[building.lvl + 1];
-* */
-/*
-class BuildHelper1 {
-
-    constructor(tasks) {
-        this.tasks = tasks;
-    }
-
-    deleteTask(uuid) {
-        return this.deleteTaskIn(uuid, this.tasks);
-    }
-
-    deleteTaskIn(uuid, tasks){
-        for(let i = 0; i < this.tasks.length; i++) {
-            if(Array.isArray(tasks[i])){
-                if(this.deleteTaskIn(tasks[i])){
-                    return true;
-                }
-            }else{
-                if(this.tasks[i].uuid === uuid){
-                    this.tasks.splice(i, 1);
-                    return true;
-                }
-            }
-        }
-        return false;
-
-    }
-
-    addTask(task){
-        this.tasks.push(task);
-    }
-
-    isNextBuildTask() {
-        return (this.tasks.length > 0);
-    }
-
-    getNextTaskGroup(){
-        let currToDoTasks = [];
-        if(this.tasks.length > 0){
-            if(Array.isArray(this.tasks[0])){
-                return this.tasks[0];
-            }
-
-            for (let task of this.tasks){
-                if(Array.isArray(task)){
-                    currToDoTasks.push(task);
-                }else{
-                    return currToDoTasks;
-                }
-            }
-        }
-
-    }
-
-    getNextTaskWithType(village, isRes){
-        console.log("available tasks", this.getNextTaskGroup());
-        for (const task of this.getNextTaskGroup()) {
-            if(task.building.isResourceBuilding() === isRes){
-                if(village.isEnoughRes(task)){
-                    return task;
-                }
-            }
-        }
-        return null;
-    }
-
-    getNextTask(village){
-        for (const task of this.getNextTaskGroup()) {
-            if(village.isEnoughRes(task)){
-                return task;
-            }
-        }
-        return null;
-    }
-}*/
-
 class BuildTask {
     timeToBuild;
     timerType;
@@ -412,6 +290,25 @@ class BuildTask {
 
 class CurrentlyBuildingHelper {
 
+    static updateIfTaskDone(village){
+        for (let currBuilding of village.currentlyBuilding){
+            CurrentlyBuildingHelper.currentlyBuildingTaskComplete(village.buildTasks, currBuilding.building);
+        }
+    }
+
+    static currentlyBuildingTaskComplete(buildTasks, currentTask) {
+        for(let taskGroup of buildTasks){
+            for(let task of taskGroup){
+                if (task.building.locationId === currentTask.locationId) {
+                    if (task.building.lvl <= currentTask.lvl) {
+                        BuildTaskHelper.deleteTask(task.uuid, buildTasks);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     static isBuildSlotFree(building, tasks){
         if(tasks.length === 0) {
@@ -448,7 +345,7 @@ class CurrentlyBuildingHelper {
         return false;
     }
 
-    static getFinishBuildingTime(isRes, tasks){
+    /*static getFinishBuildingTime(isRes, tasks){
         if(isRes){
             for (let task of tasks){
                 if(task.building.isResourceBuilding() === isRes){
@@ -457,7 +354,7 @@ class CurrentlyBuildingHelper {
             }
         }
         return -1;
-    }
+    }*/
 }
 
 class Timers {
@@ -575,5 +472,4 @@ class Timers {
     add5Min(type){
         this.addTimeFromNow(type, 60000*5);
     }
-
 }

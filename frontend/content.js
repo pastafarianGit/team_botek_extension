@@ -1,16 +1,22 @@
 let villages = null;
 let activeVillage = null;
+console.log("hey botek extension", window.location);
+init();
 
-onStartUp();
+function init() {
+    document.getElementsByTagName("html")[0].style.display = "none";
+    window.onload = function () {
+        toggleElements("hidden");
+        onPageLoad();
+        document.getElementsByTagName("html")[0].style.display = "block"; //to show it all back again
+    }
+}
 
-function onStartUp(){
+function onPageLoad(){
     let hostname = window.location.hostname;
-    console.log("hey botek extension", window.location);
-
-    if(hostname.includes('botek') || hostname.includes('localhost')){
+    if(hostname.includes('teambot') || hostname.includes('localhost') || hostname.includes('168.119.157.162')){
         handleBotekPageOpened();
     }else{
-
         if(window.location.pathname === LOGIN_PATHNAME){
            return;
         }
@@ -32,13 +38,20 @@ function handleTravianPageOpened(){
             villages = data.villages;
             activeVillage = findActiveVillage();
             if(activeVillage !== null){
-                sendMessageToExtension(CHANGE_VILLAGE_ACTION, activeVillage.did, (r)=>{console.log("change village response", r);});
-                showUi();
+                sendMessageToExtension(CHANGE_VILLAGE_ACTION, activeVillage.did,
+                    (r)=>{console.log("change village response", r);});
                 showBuildUI();
             }
-            // setOnVillageChangeListener();
+        }else{
+            toggleElements("visible");
         }
     });
+}
+
+function setElementVisibility(element, visibility){
+    if(element !== null){
+        element.style.visibility = visibility;
+    }
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -68,7 +81,7 @@ function setOnVillageChangeListener() {
 
     })
 }
-
+/*
 function showUi(){
     let villageProduction = document.getElementsByClassName("villageList production")
     let custom = document.createElement('div');
@@ -78,4 +91,18 @@ function showUi(){
         elt.style['background-color'] = '#ff00FF'
         elt.appendChild(custom)
     }
+}*/
+
+function toggleElements(visibility){
+    let sideBarContent = document.getElementById('sidebarBeforeContent');
+    let sidebarBoxActiveVillage = document.getElementById('sidebarBoxActiveVillage');
+    setElementVisibility(sideBarContent, visibility);
+    setElementVisibility(sidebarBoxActiveVillage, visibility);
 }
+/*
+function unHideElements(){
+    let sideBarContent = document.getElementById('sidebarBeforeContent');
+    let sidebarBoxActiveVillage = document.getElementById('sidebarBoxActiveVillage');
+    setElementVisibility(sideBarContent, "visible");
+    setElementVisibility(sidebarBoxActiveVillage, "visible");
+}*/
