@@ -1,17 +1,54 @@
-
-async function build (task) {
+function buildAndHandleErrors(task){
     let village = VillagesHelper.findVillage(villages, task.villageDid);
+
+    build(task, village)
+        .then(result => {
+            console.log("update_villages_action", villages);
+            sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
+        }).catch(err => {
+        handleBuildErrors(err, task, village);
+        sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
+    });
+}
+
+function handleBuildErrors(err, task, village){
+    console.log("error", err);
+    switch (err) {
+        case ERROR_NOT_ENOUGH_RES:
+            let minTime = BuildTaskHelper.calcWhenFirstTaskIsAvailable(village, task.timerType);
+            village.timers.addTimeFromNowMins(task.timerType, minTime);
+            console.log("add time from now when next task available", minTime);
+            break;
+        case ERROR_TASK_LOWER_LVL_THAN_BUILDING:
+            BuildTaskHelper.deleteTask(task.uuid, village.buildTasks);
+            break;
+        case ERROR_TASK_DIFF_TYPE_THAN_BUILDING:
+            BuildTaskHelper.deleteTask(task.uuid, village.buildTasks);
+            break;
+        case ERROR_NO_PREREQUISITE:
+            BuildTaskHelper.deleteTask(task.uuid, village.buildTasks);
+            break;
+        default:
+            console.error("unhandled error: ", err);
+            break;
+    }
+}
+
+async function build (task, village) {
+    // let village = VillagesHelper.findVillage(villages, task.villageDid);
     await analyseAndSwitchTo(task.building, village);
 
-    let isUnavailable = isTaskUnavailable(task, village);
-    if(isUnavailable){
-        return isUnavailable;
+    let taskStatus = isTaskAvailable(task, village);
+    if(taskStatus !== TASK_OK){
+        return taskStatus;
     }
+    console.log("task status", taskStatus);
+
 
     if (CurrentlyBuildingHelper.isBuildSlotFree(task.building, village.currentlyBuilding)) {
         return tryBuildingAndAnalyse(task, village);
     }
-    return Promise.reject(ERR_ALREADY_BUILDING);
+    return Promise.reject(ERROR_ALREADY_BUILDING);
 }
 
 async function tryBuildingAndAnalyse(task, village) {
@@ -21,21 +58,29 @@ async function tryBuildingAndAnalyse(task, village) {
     CurrentlyBuildingHelper.updateIfTaskDone(village);
 }
 
-function isTaskUnavailable(task, village) {
-    if(BuildTaskHelper.isTaskUnderLvl(task, village)
+function isTaskAvailable(task, village) {
+    if(BuildTaskHelper.isTaskUnderLvl(task, village)){
+        return Promise.reject(ERROR_TASK_LOWER_LVL_THAN_BUILDING);
+    }else if(BuildTaskHelper.isTaskDifferentType(task, village)){
+        return Promise.reject(ERROR_TASK_DIFF_TYPE_THAN_BUILDING);
+    }else if(!village.isEnoughRes(task)){
+        return Promise.reject(ERROR_NOT_ENOUGH_RES);
+    }
+    return TASK_OK;
+   /* if(BuildTaskHelper.isTaskUnderLvl(task, village)
        || BuildTaskHelper.isTaskDifferentType(task, village)){
         BuildTaskHelper.deleteTask(task.uuid, village.buildTasks); // remove task from array
         return BUILDING_DIFF_TASK_LVL_OR_LVL_TOO_LOW;
     }
-
-    if(village.isEnoughRes(task)){
+*/
+    /*if(village.isEnoughRes(task)){
         return false;
     }
 
     let minTime = BuildTaskHelper.calcWhenFirstTaskIsAvailable(village, task.timerType);
     console.log("add time from now when next task available", minTime);
     village.timers.addTimeFromNowMins(task.timerType, minTime);
-    return  NOT_ENOUGH_RES;
+    return  Promise.reject(NOT_ENOUGH_RES);*/
 
 }
 /*
@@ -98,9 +143,6 @@ async function createNewBuilding(taskBuilding, pageString) {
     let button = parseGetNewBuildingButton(changeTab, taskBuilding.type);
     console.log("button is", button);
     if(button === undefined){
-        // can't build this yet lacks prereq
-        console.log("can't do it lacks preq")
-
         return Promise.reject(ERROR_NO_PREREQUISITE);
     }
     let cssClass = button.getAttribute('class');
@@ -110,7 +152,6 @@ async function createNewBuilding(taskBuilding, pageString) {
         console.log("buildPath", buildPath);
         return await getTextAndCheckLogin(buildPath, "", 3000);
     }else if(cssClass.includes('builder')){
-        // can only build with
         console.log("can only build with GOLD builder");
     }
     return Promise.reject("can't build new building type: " + taskBuilding.type);

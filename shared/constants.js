@@ -3,9 +3,10 @@
 const TRIBE_ROMANS = 1;
 const TRIBE_GAULS = 3;
 const TRIBE_TEUTONS = 2;
-// const SERVER_URL = "http://www.travianteambot.com/";
+const SERVER_URL = "http://www.travianteambot.com/";
 //const SERVER_URL = "http://168.119.157.162/";
-const SERVER_URL = "http://localhost:4200/";
+//const SERVER_URL = "http://localhost:4200/";
+const EXTENSION_ID = "llkkcbnopngmldfgmlhepcbfpoooeaka";
 // FRONTEND
 const BUILD_PATH_F = "/build.php";
 const XPATH_ACTIVE_VILLAGE_F = '//*[@id="sidebarBoxVillagelist"]/div[2]/ul/li[@class=" active"]/a';
@@ -31,11 +32,17 @@ const IS_ACTIVE_BOT_ACTION = "is_active_bot_action";
 
 
 const RES_MAX_LOCATION = 18;
-const ERR_ALREADY_BUILDING = "already building";
+const ERROR_ALREADY_BUILDING = "already building";
 const NOT_ENOUGH_RES_OR_LVL = "not enough resources or task lvl too low";
-const NOT_ENOUGH_RES = "not enough resources";
+const ERROR_NOT_ENOUGH_RES = "not enough resources";
 const NO_USER = "no login user";
 const BUILDING_DIFF_TASK_LVL_OR_LVL_TOO_LOW = "building is diff than task or lvl too low";
+const ERROR_TASK_LOWER_LVL_THAN_BUILDING = "task lower lvl than building";
+const ERROR_TASK_DIFF_TYPE_THAN_BUILDING = "task diff type than building";
+const ERROR_BUILDING_C = "no value c";
+const ERROR_NO_PREREQUISITE = "Not meeting prerequisite";
+
+const TASK_OK = "TASK_ok";
 
 const BOTH_BUILD_ID = 0;
 const RES_ID = 1;
@@ -48,7 +55,6 @@ const ROMANS_DORF2_ID = 5;
 
 
 // BACKEND
-const EXTENSION_ID = "llkkcbnopngmldfgmlhepcbfpoooeaka";
 const BUILD_TYPE = "build_dorf1";
 const ANALYSE_TYPE = "build_dorf1";
 
@@ -62,8 +68,6 @@ const PROFILE_PATHNAME ="/profile";
 const CATEGORY_PARAM = "&category=";
 const NEW_DID_PARAM = "?newdid="
 
-const ERROR_BUILDING_C = "no value c";
-const ERROR_NO_PREREQUISITE = "Not meeting prerequisite";
 
 const REGEX_VILLAGE_NAME = "<span class=\"name\">(.*)<\\/span>";
 /*const REGEX_COORDINATE_X = "<span class=\"coordinateX\">\\((.*)</span><span class=\"coordinatePipe\">";
@@ -78,7 +82,7 @@ const REGEX_CURRENTLY_BUILDING = 'var bld=(.*?)<\\/script>';
 const REGEX_DORF2_BUILDING_LOCATION = 'a(\\d\\d)';
 const REGEX_DORF2_BUILDING_TYPE = 'g(\\d+)';
 const REGEX_SERVER_SETTINGS = 'Travian.Translation.add\\((.*?)<\\/script>';
-const REGEX_BUILD_PATH_ON_NEW_BUILDING = 'href = \'\/(.*)\';';
+const REGEX_BUILD_PATH_ON_NEW_BUILDING = 'href = \'(.*)\';';
 
 const REGEX_SERVER_SPEED = 'Travian.Game.speed = (\\d);';
 const REGEX_SERVER_VERSION = 'Travian.Game.version = (.*);';

@@ -115,7 +115,6 @@ function miliSecondsToMins(miliSec){
 
 async function callFetchWithBaseUrl (pathname, headers, time) {
     const url = baseServerUrl + pathname;
-    console.log("fetching", url);
     let myPromise = await fetch(url, headers);
     await new Promise((resolve, reject) => setTimeout(resolve, time));
     return myPromise;

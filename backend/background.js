@@ -94,8 +94,8 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         // console.log("url origin", url);
 
         if(info.initiator !== undefined && info.initiator.includes(EXTENSION_ID) && !SERVER_URL.includes(url.origin)){
-            console.log("info: ", info);
-            console.log("will modify", url.pathname);
+            //console.log("info: ", info);
+            //console.log("will modify", url.pathname);
             modifyHeaders(url.pathname, info.requestHeaders);
             modifyHeaderOrigin(info.url, info.requestHeaders);
             //modifyHeaderReferer(info.)

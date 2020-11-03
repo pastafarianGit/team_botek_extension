@@ -21,7 +21,7 @@ function onStartUp() {
     //testStartup();
     //analyseVillages().then(r => console.log("anal r", r));
     // setInterval(frontEndUpdateLoop, 10000);
-    // testStartup();
+    //testStartup();
 }
 
 function testStartup() {
@@ -39,7 +39,7 @@ function testStartup() {
 
     callFetchWithBaseUrl(DORF1_PATHNAME, {"Sec-Fetch-Site" : "same-origin"}, 3000).then(r=>{console.log("fetcjed profile test r", r)});
 
-    //analyseVillagesAfterLogin(()=>{});
+    analyseVillagesAfterLogin(()=>{});
     //analyseVillagesAfterLogin(()=>{});
 
     //analyseBuildingsInAllVillages().then("done");
@@ -116,14 +116,7 @@ function mainLoop (){
         console.log("Doing task", task);
         if(task instanceof BuildTask){
             // task.name = "test main add to queue";
-            build(task)
-                .then(result => {
-                    console.log("update_villages_action", villages);
-                    sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
-                    console.log("result", result);
-                }).catch(err => {
-                    console.log("build failed: ", err);
-                });
+            buildAndHandleErrors(task);
         }
     }
 }
