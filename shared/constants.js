@@ -3,10 +3,10 @@
 const TRIBE_ROMANS = 1;
 const TRIBE_GAULS = 3;
 const TRIBE_TEUTONS = 2;
-const SERVER_URL = "http://www.travianteambot.com/";
+//const SERVER_URL = "http://www.travianteambot.com/";
 //const SERVER_URL = "http://168.119.157.162/";
-//const SERVER_URL = "http://localhost:4200/";
-const EXTENSION_ID = "llkkcbnopngmldfgmlhepcbfpoooeaka";
+const SERVER_URL = "http://localhost:4200/";
+const EXTENSION_ID = "cbnloeijbkamkdkpnieednoedeakkdga";
 // FRONTEND
 const BUILD_PATH_F = "/build.php";
 const XPATH_ACTIVE_VILLAGE_F = '//*[@id="sidebarBoxVillagelist"]/div[2]/ul/li[@class=" active"]/a';
@@ -29,7 +29,14 @@ const UPDATE_VILLAGES_ACTION = "update_villages_action";
 const UPDATE_ALL_GUI_BOT_DATA_ACTION = "update_all_gui_bot_data_action";
 const ADD_BUILD_TASK_ACTION = "add_build_task_action";
 const IS_ACTIVE_BOT_ACTION = "is_active_bot_action";
+const UPDATE_BOT_STATUS_ACTION = 'update_bot_status_action';
 
+
+const BOT_IS_SLEEPING_STATUS = "sleeping";
+const BOT_IS_WORKING_STATUS = "working";
+const BOT_IS_BUILDING_STATUS = "building";
+const BOT_IS_ON_PAUSE_STATUS = "on pause";
+const BOT_IS_ANALYSING_VILLAGES = "analysing all villages";
 
 const RES_MAX_LOCATION = 18;
 const ERROR_ALREADY_BUILDING = "already building";

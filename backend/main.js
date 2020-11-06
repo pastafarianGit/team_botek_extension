@@ -46,6 +46,7 @@ function testStartup() {
 }
 
 function openBot() {
+
     runOnActiveId((tab) => {
         let url = new URL(tab.url);
         botTabId = tab.id;
@@ -68,6 +69,7 @@ async function checkAndLogin() {
 }
 
 function setFrontEndUrl(url, tab) {
+    console.log("set front end url", url);
     if(url.hostname.includes('travian')){
         checkAndLogin()
             .then(r => {
@@ -102,10 +104,12 @@ function mainLoop (){
 
     if(villages.length === 0 || !isBotOn)//if(!isBotOn)
         return;
-    toggleSleep();
+
+    updateWorkingBotStatus();
     if(botSleep.isSleeping){
         return;
     }
+
     console.log("main loop", villages);
     addTasksToQueue();     //ANALYSE WORK TODO
 
@@ -129,7 +133,6 @@ function toggleSleep() {
             botSleep.timer = Date.now() + hoursToMiliSec(0.1)
         }
         botSleep.isSleeping = ! botSleep.isSleeping;
-
         console.log("bot is sleeping", botSleep.isSleeping, " until: ", miliSecondsToMins(Date.now() - botSleep.timer));
     }
 }
@@ -150,4 +153,21 @@ function addToQueueAndUpdateTimer (task, village, timerType) {
     }
     console.log("add 15 mins to timerType", timerType);
     village.timers.add15Mins(timerType);
+}
+
+function updateBotStatus(data) {
+    sendMessageToGUI(UPDATE_BOT_STATUS_ACTION, data);
+}
+
+function updateWorkingBotStatus() {
+    if(isBotOn){
+        toggleSleep();
+        if(botSleep.isSleeping){
+            updateBotStatus(BOT_IS_SLEEPING_STATUS);
+        }else{
+            updateBotStatus(BOT_IS_WORKING_STATUS);
+        }
+    }else{
+        updateBotStatus(BOT_IS_ON_PAUSE_STATUS);
+    }
 }

@@ -1,13 +1,16 @@
 function buildAndHandleErrors(task){
     let village = VillagesHelper.findVillage(villages, task.villageDid);
-
+    updateBotStatus(BOT_IS_BUILDING_STATUS);
     build(task, village)
         .then(result => {
             console.log("update_villages_action", villages);
             sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
+            updateWorkingBotStatus();
+
         }).catch(err => {
-        handleBuildErrors(err, task, village);
-        sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
+            handleBuildErrors(err, task, village);
+            sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
+            updateBotStatus(err);
     });
 }
 

@@ -34,6 +34,7 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
         switch (request.action) {
             case IS_TAB_ACTIVE_ACTION:
                 if(newBotOpen.updateProfile){
+                    updateBotStatus(BOT_IS_ANALYSING_VILLAGES);
                     analyseVillagesAfterLogin(sendResponse);
                     newBotOpen.updateProfile = false;
                 }else{
@@ -72,6 +73,7 @@ chrome.runtime.onMessageExternal.addListener(   // from botkeGui
             case IS_ACTIVE_BOT_ACTION:
                 console.log("toggle bot", request.data);
                 isBotOn = request.data.isRunning;
+                updateWorkingBotStatus();
                 break;
         }
         return true;
@@ -94,11 +96,9 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         // console.log("url origin", url);
 
         if(info.initiator !== undefined && info.initiator.includes(EXTENSION_ID) && !SERVER_URL.includes(url.origin)){
-            //console.log("info: ", info);
-            //console.log("will modify", url.pathname);
+            console.log("modify header");
             modifyHeaders(url.pathname, info.requestHeaders);
             modifyHeaderOrigin(info.url, info.requestHeaders);
-            //modifyHeaderReferer(info.)
         }
         return {requestHeaders: info.requestHeaders};
 
@@ -111,6 +111,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
 
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
+        //console.log("details", details);
         if(details.method === "POST" && details.url === baseServerUrl + LOGIN_PATHNAME){
             const formData = details.requestBody.formData;
             if(formData !== undefined){
@@ -127,7 +128,7 @@ chrome.webRequest.onBeforeRequest.addListener(
         }
     },
     {urls: ["<all_urls>"]},
-    ["blocking", "requestBody"])
+    ["blocking", "requestBody"]);
 
 function addUser(result, newUser) {
     let users = [];

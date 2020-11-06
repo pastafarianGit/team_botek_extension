@@ -11,8 +11,10 @@ function analyseVillagesAfterLogin(sendResponse){
             villages = result;
             sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn});
             isTabActive(sendResponse);
+
             return analyseBuildingsInAllVillages();
         }).then(result => {
+        updateWorkingBotStatus();
     }).catch(err=> {
         console.log("err updating villages", err);
     });
@@ -102,13 +104,6 @@ async function analyseIsUserLoggedIn(pathname) {
     return Promise.reject("already logged in");
 }
 
-
-function convertFromPageStringToHtml(pageString){
-    let parser = new DOMParser();
-    return  parser.parseFromString(pageString, 'text/html');
-
-}
-
 function isOnLogInPage(pageString){
 
     const doc = convertFromPageStringToHtml(pageString);
@@ -119,6 +114,12 @@ function isOnLogInPage(pageString){
         }
     }
     return false;
+}
+
+function convertFromPageStringToHtml(pageString){
+    let parser = new DOMParser();
+    const doc = parser.parseFromString(pageString, 'text/html');
+    return doc.body;
 }
 
 async function analyseIsUserLoggedIn1(pathname) {

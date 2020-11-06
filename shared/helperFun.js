@@ -31,7 +31,7 @@ async function getTextFromPage(pathname, params, time) {
 }
 
 async function getTextAndCheckLogin(pathname, params, time){
-    let pageString = getTextFromPage(pathname, params, time);
+    let pageString = await getTextFromPage(pathname, params, time);
 
     const isLogInPage = isOnLogInPage(pathname, pageString);
     if(isLogInPage){ // login again
