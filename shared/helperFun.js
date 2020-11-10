@@ -192,3 +192,8 @@ function parseBuildingInfoOnResource(divResource) {
     lvl = parseInt(divResource.getElementsByTagName('div')[0].innerText);
     return new Building(locationId, gid, lvl);
 }
+
+function getBuildingCost(task, village) {
+    const building = village.buildingsInfo.get(task.building.locationId);
+    return  buildingsData[task.building.type].cost[building.lvl + 1];
+}

@@ -50,6 +50,7 @@ const ERROR_BUILDING_C = "no value c";
 const ERROR_NO_PREREQUISITE = "Not meeting prerequisite";
 const HIGHLIGHT_TASK_CSS = 'highlight-task';
 const TASK_OK = "TASK_ok";
+const ERROR_WAREHOUSE_TOO_LOW = "warehouse too low";
 
 const BOTH_BUILD_ID = 0;
 const RES_ID = 1;

@@ -31,6 +31,9 @@ function handleBuildErrors(err, task, village){
         case ERROR_NO_PREREQUISITE:
             BuildTaskHelper.deleteTask(task.uuid, village.buildTasks);
             break;
+        case ERROR_WAREHOUSE_TOO_LOW:
+            BuildTaskHelper.deleteTask(task.uuid, village.buildTasks);
+            break;
         default:
             console.error("unhandled error: ", err);
             break;
@@ -64,12 +67,31 @@ async function tryBuildingAndAnalyse(task, village) {
 function isTaskAvailable(task, village) {
     if(BuildTaskHelper.isTaskUnderLvl(task, village)){
         return Promise.reject(ERROR_TASK_LOWER_LVL_THAN_BUILDING);
-    }else if(BuildTaskHelper.isTaskDifferentType(task, village)){
+    }
+    else if (BuildTaskHelper.isTaskDifferentType(task, village)){
         return Promise.reject(ERROR_TASK_DIFF_TYPE_THAN_BUILDING);
-    }else if(!village.isEnoughRes(task)){
+    }
+    else if(isNotEnoughWarehouseLvl(task, village)){
+        return Promise.reject(ERROR_WAREHOUSE_TOO_LOW);
+    }
+    else if(!village.isEnoughRes(task)){
         return Promise.reject(ERROR_NOT_ENOUGH_RES);
     }
     return TASK_OK;
+}
+
+function isNotEnoughWarehouseLvl (task, village) {
+    const cost = getBuildingCost(task, village);
+    return !isTaskCostSmallerThanWarehouse(cost, village.resources.maxStorage);
+}
+
+function isTaskCostSmallerThanWarehouse(cost, warehouse) {
+    const c1 = cost.wood < warehouse.l1;
+    const c2 = cost.clay < warehouse.l2;
+    const c3 = cost.iron < warehouse.l3;
+    const c4 = cost.crop < warehouse.l4;
+
+    return (c1 && c2 && c3 && c4);
 }
 
 function addNewBuildTask(data) {

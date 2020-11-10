@@ -31,11 +31,12 @@ let Village = class {
     }
 
     isEnoughRes(task){
-        let building = this.buildingsInfo.get(task.building.locationId);
+        // let building = this.buildingsInfo.get(task.building.locationId);
         /*if(building.type === 0){
             building = new Building(task.building.locationId, task.building.type, 0);
         }*/
-        let cost = buildingsData[task.building.type].cost[building.lvl + 1];
+        // let cost = buildingsData[task.building.type].cost[building.lvl + 1];
+        const cost = getBuildingCost(task, this);
         return this.checkCostVsStorage(cost);
     }
 
