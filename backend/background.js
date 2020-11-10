@@ -6,24 +6,6 @@ chrome.browserAction.onClicked.addListener(tab =>{
     //chrome.tabs.update(tab.id, {url:"http://localhost:4200/"});
 });
 
-function addBuildTask(data) {
-    for(let village of villages){
-        if(village.did === data.villageDid){
-            let building = new Building(data.locationId, data.type, data.lvl);
-            let newBuildTask = new BuildTask(building, data.villageDid, getUuidv4(), (village.buildTasks[0].length > 0));
-            BuildTaskHelper.addTask(newBuildTask, village.buildTasks);
-            village.timers.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask);
-        }
-    }
-    sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
-}
-
-function getUuidv4() {
-    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-    );
-}
-
 chrome.runtime.onMessage.addListener(  // from inside content extension
     function(request, sender, sendResponse) {
         if(baseServerUrl === ""){
@@ -51,7 +33,8 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 sendMessageToGUI(CHANGE_VILLAGE_ACTION, request.data);
                 break;
             case ADD_BUILD_TASK_ACTION:
-                addBuildTask(request.data);
+                addNewBuildTask(request.data);
+                sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
                 sendResponse(true);
                 break;
         }
@@ -65,6 +48,8 @@ chrome.runtime.onMessageExternal.addListener(   // from botkeGui
             case UPDATE_BUILD_TASK_ACTION:
                 let village = VillagesHelper.findVillage(villages, request.data.village.did);
                 village.buildTasks = BuildTaskHelper.convertToBuildTaskObject(request.data.village.buildTasks);
+                sendMessageToBotTab(UPDATE_VILLAGES_ACTION, villages);
+                sendResponse(true);
                 break;
             case "getUpdateOnVillage":
                 sendResponse(villages);
@@ -74,6 +59,7 @@ chrome.runtime.onMessageExternal.addListener(   // from botkeGui
                 console.log("toggle bot", request.data);
                 isBotOn = request.data.isRunning;
                 updateWorkingBotStatus();
+                sendResponse(true);
                 break;
         }
         return true;
@@ -186,10 +172,4 @@ function modifyHeaderOrigin (url, requestHeaders) {
         addHeader({name: 'origin', value: baseServerUrl}, requestHeaders)
     }
     referer = url;
-    // console.log("modify header origin", requestHeaders);
 }
-
-/*
-chrome.tabs.getCurrent((result1)=>{
-    console.log("current time", result1);
-})*/

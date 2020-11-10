@@ -40,9 +40,6 @@ function testStartup() {
     callFetchWithBaseUrl(DORF1_PATHNAME, {"Sec-Fetch-Site" : "same-origin"}, 3000).then(r=>{console.log("fetcjed profile test r", r)});
 
     analyseVillagesAfterLogin(()=>{});
-    //analyseVillagesAfterLogin(()=>{});
-
-    //analyseBuildingsInAllVillages().then("done");
 }
 
 function openBot() {
@@ -82,23 +79,10 @@ function setFrontEndUrl(url, tab) {
     }
 }
 
-function findUser(users){
-    if(users === undefined){
-        return Promise.reject(NO_USER);
-    }
-
-    for (let user of users){
-        if(user.serverUrl === baseServerUrl){
-            return user;
-        }
-    }
-    return Promise.reject(NO_USER);
-}
-
-async function loginFlow(url) {
+/*async function loginFlow(url) {
     let login = await analyseIsUserLoggedIn(DORF1_PATHNAME);
     return await makePostRequest(url + LOGIN_PATHNAME, storedUser);
-}
+}*/
 
 function mainLoop (){
 

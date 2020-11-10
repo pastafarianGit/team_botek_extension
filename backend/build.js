@@ -70,39 +70,18 @@ function isTaskAvailable(task, village) {
         return Promise.reject(ERROR_NOT_ENOUGH_RES);
     }
     return TASK_OK;
-   /* if(BuildTaskHelper.isTaskUnderLvl(task, village)
-       || BuildTaskHelper.isTaskDifferentType(task, village)){
-        BuildTaskHelper.deleteTask(task.uuid, village.buildTasks); // remove task from array
-        return BUILDING_DIFF_TASK_LVL_OR_LVL_TOO_LOW;
-    }
-*/
-    /*if(village.isEnoughRes(task)){
-        return false;
-    }
-
-    let minTime = BuildTaskHelper.calcWhenFirstTaskIsAvailable(village, task.timerType);
-    console.log("add time from now when next task available", minTime);
-    village.timers.addTimeFromNowMins(task.timerType, minTime);
-    return  Promise.reject(NOT_ENOUGH_RES);*/
-
 }
-/*
-function isEnoughLvlAndResources(village, task) {
-    if(BuildTaskHelper.isTaskUnderLvlThenRemove(task, village)) {
-        return false;
+
+function addNewBuildTask(data) {
+    for(let village of villages){
+        if(village.did === data.villageDid){
+            let building = new Building(data.locationId, data.type, data.lvl);
+            let newBuildTask = new BuildTask(building, data.villageDid, getUuidv4(), (village.buildTasks[0].length > 0));
+            BuildTaskHelper.addTask(newBuildTask, village.buildTasks);
+            village.timers.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask);
+        }
     }
-
-    if(village.isEnoughRes(task)){
-        return true;
-    }else{
-        let minTime = BuildTaskHelper.calcWhenFirstTaskIsAvailable(village, task.timerType);
-        console.log("add time from now when next task available", minTime);
-        village.timers.addTimeFromNowMins(task.timerType, minTime);
-    }
-    return false;
-}*/
-
-
+}
 
 function calcTimeToBuild (village, building, serverSpeed) {
     let timeToBuild = buildingsData[building.type].cost[building.lvl + 1].timeToBuild;  // + 1 to get for next lvl

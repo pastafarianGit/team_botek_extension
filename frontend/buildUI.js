@@ -10,12 +10,45 @@ let dropDown = '    <div id="" class="bootstrap">\n' +
     '</div>\n';
 
 function showBuildUI() {
-    const pathname = window.location.pathname;
+    // const pathname = window.location.pathname;
     if(pathname === BUILD_PATH_F){
         showDropDownOnOldBuilding();
         showDropDownForNewBuilding();
     }
 }
+
+function highlightTasks() {
+    if (pathname === DORF1_PATHNAME) {
+        highLightBuildingTasks();
+    }
+    else if (pathname === DORF2_PATHNAME) {
+        console.log("hey");
+        let asd = 1 + 1;
+    }
+}
+
+function highLightBuildingTasks() {
+    let resourceElements = getResourceElements(document);
+    console.log("highlight active village", activeVillage.buildTasks);
+    for (let child of resourceElements) {
+        if (child.tagName === 'DIV') {
+            let building = parseBuildingInfoOnResource(child);
+            let isOnLocation = BuildTaskHelper.isTaskOnLocation(building.locationId, activeVillage.buildTasks)
+            if(isOnLocation){
+                child.firstChild.classList.add(HIGHLIGHT_TASK_CSS);
+                console.log("is on location", building);
+            }else{
+                child.firstChild.classList.remove(HIGHLIGHT_TASK_CSS);
+            }
+        }
+    }
+}
+
+function highLightTasks() {
+ /*    color: #ff4081;
+    background: #f5bdf6; */
+}
+
 function showDropDownForNewBuilding() {
     const buildWrappers = document.getElementsByClassName('contractWrapper');
     for(let wrapper of buildWrappers){
@@ -79,8 +112,8 @@ function onBuildDropdownSelected(lvl, type) {
     const locationId = getParamFromUrl("id");
     const buildTask = {lvl: parseInt(lvl), type: type, locationId: parseInt(locationId), villageDid: activeVillage.did};
 
-    sendMessageToExtension(ADD_BUILD_TASK_ACTION, buildTask, (task) => {
-        console.log("is task complete", task);
+    sendMessageToExtension(ADD_BUILD_TASK_ACTION, buildTask, (villages) => {
+        console.log("is task complete", villages);
     });
 }
 

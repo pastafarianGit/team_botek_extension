@@ -254,6 +254,17 @@ class BuildTaskHelper {
         }
         return minTime;
     }
+
+    static isTaskOnLocation(locationId, tasks){
+        for (let groupOfTask of tasks){
+            for(let task of groupOfTask){
+                if(task.building.locationId === locationId){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
 
 class BuildTask {

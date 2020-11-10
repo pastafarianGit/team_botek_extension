@@ -7,24 +7,13 @@ function parseResources (pageString) {
 function parseResourceLvls (pageString) {
     let parser =  new DOMParser();
     let doc = parser.parseFromString(pageString, 'text/html');
-    const resContainer = doc.getElementById("resourceFieldContainer");
+    let resourceElements = getResourceElements(doc);
     let map = new Map();
 
-    for (let child of resContainer.childNodes){
+    for (let child of resourceElements){
         if(child.tagName === 'DIV'){
-            let locationId, gid;
-            let lvl;
-            for(let divClass of child.classList){
-                if(divClass.startsWith(BUILDING_LOCATION_ID)){
-                    locationId = parseInt(divClass.substring(BUILDING_LOCATION_ID.length));
-                }
-                if(divClass.startsWith(BUILDING_GID)){
-                    gid = parseInt(divClass.substring(BUILDING_GID.length));
-                }
-            }
-            lvl = parseInt(child.getElementsByTagName('div')[0].innerText);
-
-            map.set(locationId,  new Building(locationId, gid, lvl));
+            let building = parseBuildingInfoOnResource(child);
+            map.set(building.locationId,  building);
             //fields.push({lvl:lvl, locationID: locationID, gid: gid});
         }
     }

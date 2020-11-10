@@ -48,7 +48,7 @@ const ERROR_TASK_LOWER_LVL_THAN_BUILDING = "task lower lvl than building";
 const ERROR_TASK_DIFF_TYPE_THAN_BUILDING = "task diff type than building";
 const ERROR_BUILDING_C = "no value c";
 const ERROR_NO_PREREQUISITE = "Not meeting prerequisite";
-
+const HIGHLIGHT_TASK_CSS = 'highlight-task';
 const TASK_OK = "TASK_ok";
 
 const BOTH_BUILD_ID = 0;
@@ -58,6 +58,7 @@ const RES_AND_TOWN_ID = 3;
 
 const ROMANS_DORF1_ID = 4;
 const ROMANS_DORF2_ID = 5;
+
 
 
 

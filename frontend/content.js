@@ -1,5 +1,6 @@
 let villages = null;
 let activeVillage = null;
+let pathname = null;
 console.log("hey botek extension", window.location);
 init();
 
@@ -13,15 +14,23 @@ function init() {
 }
 
 function onPageLoad(){
-    let hostname = window.location.hostname;
-    if(hostname.includes('teambot') || hostname.includes('localhost') || hostname.includes('168.119.157.162')){
+    if(isBotPage()){
         handleBotekPageOpened();
     }else{
-        if(window.location.pathname === LOGIN_PATHNAME){
+        if(isLoginPage()){
            return;
         }
         handleTravianPageOpened();
     }
+}
+
+function isLoginPage() {
+    return (window.location.pathname === LOGIN_PATHNAME);
+}
+
+function isBotPage() {
+    const hostname = window.location.hostname;
+    return (hostname.includes('teambot') || hostname.includes('localhost') || hostname.includes('168.119.157.162'));
 }
 
 function handleBotekPageOpened(){
@@ -33,14 +42,18 @@ function handleBotekPageOpened(){
 }
 
 function handleTravianPageOpened(){
+
     sendMessageToExtension(IS_TAB_ACTIVE_ACTION, {},(data) => {
         if(data.isActive && data.villages.length !== 0){
-            villages = data.villages;
+            updateGlobalVariables(data.villages);
+            /*villages = data.villages;
             activeVillage = findActiveVillage();
+            pathname = window.location.pathname;*/
             if(activeVillage !== null){
                 sendMessageToExtension(CHANGE_VILLAGE_ACTION, activeVillage.did,
                     (r)=>{console.log("change village response", r);});
                 showBuildUI();
+                highlightTasks();
             }
         }else{
             toggleElements("visible");
@@ -48,19 +61,13 @@ function handleTravianPageOpened(){
     });
 }
 
-function setElementVisibility(element, visibility){
-    if(element !== null){
-        element.style.visibility = visibility;
-    }
+function updateGlobalVariables(newVillages) {
+    villages = newVillages;
+    activeVillage = findActiveVillage();
+    pathname = window.location.pathname;
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log("on msg request qweqwe", request);
-    sendResponse("qwe recived on FE 1 qqwe");
-    console.log("11111111111111111111");
-    return true;
-});
-
+/*
 function setOnVillageChangeListener() {
     const sideBox = document.getElementById('sidebarBoxVillagelist');
     const ul = sideBox.getElementsByTagName('ul')[0];
@@ -80,17 +87,6 @@ function setOnVillageChangeListener() {
         }
 
     })
-}
-/*
-function showUi(){
-    let villageProduction = document.getElementsByClassName("villageList production")
-    let custom = document.createElement('div');
-    custom.innerHTML = '<button type="button">Click Me!</button>'
-
-    for (elt of villageProduction){
-        elt.style['background-color'] = '#ff00FF'
-        elt.appendChild(custom)
-    }
 }*/
 
 function toggleElements(visibility){
@@ -99,6 +95,28 @@ function toggleElements(visibility){
     setElementVisibility(sideBarContent, visibility);
     setElementVisibility(sidebarBoxActiveVillage, visibility);
 }
+
+function setElementVisibility(element, visibility){
+    if(element !== null){
+        element.style.visibility = visibility;
+    }
+}
+
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log("on msg request qweqwe", request);
+    if(isBotPage()){
+        return false;
+    }
+
+    switch (request.action) {
+        case UPDATE_VILLAGES_ACTION:
+            updateGlobalVariables(request.data);
+            highlightTasks();
+            break;
+    }
+    return true;
+});
 /*
 function unHideElements(){
     let sideBarContent = document.getElementById('sidebarBeforeContent');
