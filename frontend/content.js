@@ -53,6 +53,7 @@ function handleTravianPageOpened(){
                 sendMessageToExtension(CHANGE_VILLAGE_ACTION, activeVillage.did,
                     (r)=>{console.log("change village response", r);});
                 showBuildUI();
+                showTrainUI();
                 highlightTasks();
             }
         }else{
@@ -115,7 +116,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             highlightTasks();
             break;
     }
-    return true;
+    return false;
 });
 /*
 function unHideElements(){

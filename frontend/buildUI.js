@@ -1,45 +1,48 @@
-let dropDown = '    <div id="" class="bootstrap">\n' +
-    '        <div class="col-lg-12">\n' +
-    '<div id="btn-container">\n'+
-    '            <button id="build-btn" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
-    '            <ul id="" class="dropdown-menu scrollable-menu" role="menu">\n' +
-    '            </ul>\n' +
-        '      </div>\n' +
-    '      </div>\n' +
-    '</div>\n' +
-    '</div>\n';
 
 function showBuildUI() {
     // const pathname = window.location.pathname;
     if(pathname === BUILD_PATH_F){
-        showDropDownOnOldBuilding();
+        showDropDownOnExistingBuilding();
         showDropDownForNewBuilding();
     }
 }
 
 function highlightTasks() {
     if (pathname === DORF1_PATHNAME) {
-        highLightBuildingTasks();
+        highlightResourcesTasks();
     }
     else if (pathname === DORF2_PATHNAME) {
+        highlightBuildingsTasks();
         console.log("hey");
         let asd = 1 + 1;
     }
 }
 
-function highLightBuildingTasks() {
+function highlightBuildingsTasks() {
+    let buildingElements = getBuildingsElements(document);
+    for (let element of buildingElements){
+        const container = element.divContainer;
+        const isOnLocation = BuildTaskHelper.isTaskOnLocation(element.building.locationId, activeVillage.buildTasks)
+        const labelLayer = element.divContainer.getElementsByClassName('labelLayer')[0];
+        highlightElement(labelLayer, isOnLocation);
+    }
+}
+
+function highlightResourcesTasks() {
     let resourceElements = getResourceElements(document);
     console.log("highlight active village", activeVillage.buildTasks);
-    for (let child of resourceElements) {
-        if (child.tagName === 'DIV') {
-            let building = parseBuildingInfoOnResource(child);
-            let isOnLocation = BuildTaskHelper.isTaskOnLocation(building.locationId, activeVillage.buildTasks)
-            if(isOnLocation){
-                child.firstChild.classList.add(HIGHLIGHT_TASK_CSS);
-                console.log("is on location", building);
-            }else{
-                child.firstChild.classList.remove(HIGHLIGHT_TASK_CSS);
-            }
+    for (let element of resourceElements) {
+        let isOnLocation = BuildTaskHelper.isTaskOnLocation(element.building.locationId, activeVillage.buildTasks)
+        highlightElement(element.divContainer.firstChild, isOnLocation);
+    }
+}
+
+function highlightElement(element, isOnLocation) {
+    if(element !== undefined){
+        if(isOnLocation){
+            element.classList.add(HIGHLIGHT_TASK_CSS);
+        }else{
+            element.classList.remove(HIGHLIGHT_TASK_CSS);
         }
     }
 }
@@ -49,7 +52,16 @@ function highLightTasks() {
     background: #f5bdf6; */
 }
 
+function isOnNewBuildingsPage() {
+    const tabWrapper = document.getElementsByClassName('tabWrapper')[0];
+    return (tabWrapper !== undefined);
+}
+
 function showDropDownForNewBuilding() {
+    if(!isOnNewBuildingsPage()){
+        return;
+    }
+
     const buildWrappers = document.getElementsByClassName('contractWrapper');
     for(let wrapper of buildWrappers){
         console.log("wrapper",  wrapper);
@@ -57,7 +69,8 @@ function showDropDownForNewBuilding() {
         const buildingType = parseInt(id.substring(CONTRACT_BUILDING.length));
         console.log("my type ", buildingType);
         const maxLvl = getMaxLvl(buildingType);
-        const dropDownNode = createDropDown(1, maxLvl, onBuildDropdownSelected, buildingType, '-new');
+        const selectOptions = createArrayWithItemsInRange(1, maxLvl);
+        const dropDownNode = createDropDown(selectOptions, onBuildDropdownSelected, buildingType, '-new', ADD_BUILDING_NAME);
 
         const contractLink = wrapper.getElementsByClassName('contractLink')[0];
         contractLink.append(dropDownNode);
@@ -65,6 +78,7 @@ function showDropDownForNewBuilding() {
         console.log("my type ", type);*/
     }
 }
+
 
 function getTypeFromBuildingWrapper(wrapper) {
     for(let child of wrapper.children){
@@ -76,10 +90,11 @@ function getTypeFromBuildingWrapper(wrapper) {
     return null;
 }
 
-function showDropDownOnOldBuilding() {
+function showDropDownOnExistingBuilding() {
     const {buildingType, buildingLvl} = getBuildingTypeLevel();
     const maxLvl = getMaxLvl(buildingType);
-    const dropDownNode = createDropDown(buildingLvl+1, maxLvl, onBuildDropdownSelected, buildingType, '-old');
+    const selectOptions = createArrayWithItemsInRange(buildingLvl+1, maxLvl);
+    const dropDownNode = createDropDown(selectOptions, onBuildDropdownSelected, buildingType, '-existing', ADD_BUILDING_NAME);
 
     appendToSection(dropDownNode);
 }
@@ -102,13 +117,13 @@ function getMaxLvl(buildingType) {
 
 function setHiddenChildToTakeSpace() {
     const section2 = document.getElementsByClassName("section2")[0];
-    const dropDownNode1 = createDropDown(0, 0, onBuildDropdownSelected, 0, '-old');
+    const dropDownNode1 = createDropDown([], ()=>{}, 0, '-old', ADD_BUILDING_NAME);
     section2.insertBefore(dropDownNode1, section2.firstChild);
     section2.firstChild.style.visibility = 'hidden';
 }
 
 
-function onBuildDropdownSelected(lvl, type) {
+function onBuildDropdownSelected(type, lvl) {
     const locationId = getParamFromUrl("id");
     const buildTask = {lvl: parseInt(lvl), type: type, locationId: parseInt(locationId), villageDid: activeVillage.did};
 
@@ -121,25 +136,6 @@ function getParamFromUrl (name) {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     return urlParams.get(name);
-}
-
-function createDropDown(minLvl, maxLvl, onSelectedFun, buildingType, newOld) {
-    let dropDownNode = toHtmlGetBodyFirstChild(dropDown);
-    dropDownNode.id = 'build-container'+ newOld;
-    let btnNode = dropDownNode.getElementsByTagName("button")[0];
-    let ulNode = dropDownNode.getElementsByTagName("ul")[0];
-    btnNode.insertBefore(document.createTextNode('add task '), btnNode.firstChild);
-    // ulNode.id = "add_task_ul";
-    for(let i = minLvl; i <= maxLvl; i++){
-        ulNode.appendChild(getItemLI(i));
-    }
-
-    ulNode.onclick = (event) => {
-        let lvl = event.target.innerText;
-        onSelectedFun(lvl, buildingType);
-    }
-    //addOnClickListener(ulNode, onSelectedFun);
-    return dropDownNode;
 }
 
 function getMaxResourceLvl() {

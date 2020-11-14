@@ -154,10 +154,7 @@ function toHtmlGetBodyFirstChild(str){
     return doc.body.firstChild;
 }
 
-function getResourceElements(doc) {
-    const resContainer = doc.getElementById("resourceFieldContainer");
-    return resContainer.childNodes;
-}
+
 
 function getUuidv4() {
     return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
@@ -196,4 +193,31 @@ function parseBuildingInfoOnResource(divResource) {
 function getBuildingCost(task, village) {
     const building = village.buildingsInfo.get(task.building.locationId);
     return  buildingsData[task.building.type].cost[building.lvl + 1];
+}
+
+function createArrayWithItemsInRange(min, max) {
+    let rangeArray = [];
+    for(let i = min; i <= max; i++){
+        rangeArray.push(i);
+    }
+    return rangeArray;
+}
+
+function createDropDown(options, onSelectedFun, buildingType, cssSelector, name) {
+    let dropDownNode = toHtmlGetBodyFirstChild(DROP_DOWN);
+    let btnNode = dropDownNode.getElementsByTagName("button")[0];
+    let ulNode = dropDownNode.getElementsByTagName("ul")[0];
+
+    dropDownNode.id = 'build-container'+ cssSelector;
+    btnNode.insertBefore(document.createTextNode(name), btnNode.firstChild);
+    ulNode.id = "add-task-ul" + cssSelector;
+    for(let i = 0; i < options.length; i++){
+        ulNode.appendChild(getItemLI(options[i]));
+    }
+
+    ulNode.onclick = (event) => {
+        let lvl = event.target.innerText;
+        onSelectedFun(buildingType, lvl);
+    }
+    return dropDownNode;
 }

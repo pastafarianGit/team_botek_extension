@@ -10,12 +10,8 @@ function parseResourceLvls (pageString) {
     let resourceElements = getResourceElements(doc);
     let map = new Map();
 
-    for (let child of resourceElements){
-        if(child.tagName === 'DIV'){
-            let building = parseBuildingInfoOnResource(child);
-            map.set(building.locationId,  building);
-            //fields.push({lvl:lvl, locationID: locationID, gid: gid});
-        }
+    for (let element of resourceElements){
+            map.set(element.building.locationId,  element.building);
     }
     return  map;
 }
@@ -27,12 +23,22 @@ function parseGetNewBuildingButton(pageString, type) {
     return contractLink.getElementsByTagName('button')[0];
 }
 
-function parseBuildingLvls (pageString) {
-    let parser =  new DOMParser();
-    let doc = parser.parseFromString(pageString, 'text/html');
-    const resContainer = doc.getElementById("village_map");
-    let map = new Map();
 
+function getResourceElements(doc) {
+    let elements = [];
+    const resContainer = doc.getElementById("resourceFieldContainer");
+    for (let child of resContainer.childNodes){
+        if(child.tagName === 'DIV'){
+            let building = parseBuildingInfoOnResource(child);
+            elements.push({divContainer: child, building: building});
+        }
+    }
+    return elements;
+}
+
+function getBuildingsElements(doc) {
+    let elements = [];
+    const resContainer = doc.getElementById("village_map");
     for (let child of resContainer.childNodes) {
         if(child.classList !== undefined){
             if (child.tagName === 'DIV') {
@@ -47,10 +53,21 @@ function parseBuildingLvls (pageString) {
                     if(labelLayer){
                         lvl = parseInt(labelLayer.innerText);
                     }
-                    map.set(locationId, new Building(locationId, gid, lvl));
+                    elements.push({divContainer: child, building: new Building(locationId, gid, lvl)});
                 }
             }
         }
+    }
+    return elements;
+}
+
+function parseBuildingLvls (pageString) {
+    let parser =  new DOMParser();
+    let doc = parser.parseFromString(pageString, 'text/html');
+    let map = new Map();
+    let elements  = getBuildingsElements(doc);
+    for(let element of elements){
+        map.set(element.building.locationId, element.building);
     }
     return map;
 }

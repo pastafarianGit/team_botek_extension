@@ -9,6 +9,7 @@ let Village = class {
     currentlyBuilding;
     timers;
     buildTasks;
+    trainTasks;
 
     constructor(did) {
         this.did  = did;

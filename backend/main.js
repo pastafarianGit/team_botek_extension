@@ -12,9 +12,11 @@ let newBotOpen = {updateProfile: false, updateTribe: false};
 let botSleep = {isSleeping: true, timer: Date.now() + hoursToMiliSec(0)};
 
 onStartUp();
-setInterval(mainLoop, 15000);
+
 
 function onStartUp() {
+    setInterval(mainLoop, 15000);
+    testStartup();
     // loginIn().then(r => console.log("on startup ", r));
     //analyseVillageProfile().then(r => console.log("analysed data", r));
     // openBot();
@@ -25,27 +27,42 @@ function onStartUp() {
 }
 
 function testStartup() {
-    let village1 = new Village("3810");
+        let newURL = "https://tx3.travian.hu/";
+        chrome.tabs.create({ windowId: 1312, url: newURL, active: true }, (tab)=> {
+            setTimeout(()=> {
+                openBot();
+            }, 500)
+           // openBot();
+        });
+
+
+    //let village1 = new Village("3810");
     //let village2 = new Village("14562");
-    village1.addParams(-54, 28, true, "1");
+    //village1.addParams(-54, 28, true, "1");
     //village2.addParams(25, -74, false, "qwe2");
 
-    let villagesTest = [village1];
-    console.log("test villages", villagesTest);
-    villages = villagesTest;
-    isBotOn = true;
-    baseServerUrl = 'https://tx3.travian.com';
-    urlForFrontEnd = baseServerUrl + DORF1_PATHNAME;
+    //let villagesTest = [village1];
+    //console.log("test villages", villagesTest);
+    //villages = villagesTest;
+    //isBotOn = true;
+    //baseServerUrl = 'https://tx3.travian.hu';
+    //urlForFrontEnd = baseServerUrl + DORF1_PATHNAME;
+    /*runOnActiveId((tab) => {
+        let url = new URL(tab.url);
+        if(url.origin === 'https://tx3.travian.hu/'){
 
-    callFetchWithBaseUrl(DORF1_PATHNAME, {"Sec-Fetch-Site" : "same-origin"}, 3000).then(r=>{console.log("fetcjed profile test r", r)});
+        }
+    }*/
+    //callFetchWithBaseUrl(DORF1_PATHNAME, {"Sec-Fetch-Site" : "same-origin"}, 3000).then(r=>{console.log("fetcjed profile test r", r)});
 
-    analyseVillagesAfterLogin(()=>{});
+    //analyseVillagesAfterLogin(()=>{});
 }
 
 function openBot() {
 
     runOnActiveId((tab) => {
         let url = new URL(tab.url);
+        console.log("open bot", tab);
         botTabId = tab.id;
         baseServerUrl = url.origin;
         newBotOpen.updateProfile = true;

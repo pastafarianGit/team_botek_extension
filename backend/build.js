@@ -125,7 +125,7 @@ async function simulateClickBuildingAndPressUpgrade (taskBuilding, village) {
 
     let buildingPhpPageString = await getTextAndCheckLogin(BUILD_PATH + taskBuilding.locationId, "", 3000);
 
-    if(liveBuilding.lvl === 0){ // create new building
+    if(liveBuilding.lvl === 0 && !taskBuilding.isResourceBuilding()){ // create new building
         return await createNewBuilding(taskBuilding, buildingPhpPageString);
     }else{
         return await upgradeBuilding(taskBuilding, buildingPhpPageString);

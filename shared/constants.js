@@ -11,14 +11,15 @@ const EXTENSION_ID = "cbnloeijbkamkdkpnieednoedeakkdga";
 const BUILD_PATH_F = "/build.php";
 const XPATH_ACTIVE_VILLAGE_F = '//*[@id="sidebarBoxVillagelist"]/div[2]/ul/li[@class=" active"]/a';
 const REGEX_VILLAGE_LINK_F = 'newdid=(.*?)&';
-
-
 const MAX_RESOURCE_LVL = 10;
 const MAX_CAPITAL_RESOURCE_LVL = 20;
 const BUILDING_GID = "gid";
 const BUILDING_AID = "aid";
 const BUILDING_LEVEL = "level";
 const BUILDING_LOCATION_ID = "buildingSlot";
+const SELECT_OPTIONS_TRAIN = ['15min', '30min', '45min', '1h', '2h'];
+const ADD_BUILDING_NAME = 'add building ';
+const ADD_UNITS_NAME = 'train per ';
 
 // ACTIONS
 const CHANGE_VILLAGE_ACTION = 'change_village_action';
@@ -28,6 +29,7 @@ const UPDATE_BUILD_TASK_ACTION = "update_build_task_action";
 const UPDATE_VILLAGES_ACTION = "update_villages_action";
 const UPDATE_ALL_GUI_BOT_DATA_ACTION = "update_all_gui_bot_data_action";
 const ADD_BUILD_TASK_ACTION = "add_build_task_action";
+const ADD_TRAIN_TASK_ACTION = "add_train_task_action";
 const IS_ACTIVE_BOT_ACTION = "is_active_bot_action";
 const UPDATE_BOT_STATUS_ACTION = 'update_bot_status_action';
 
@@ -102,6 +104,17 @@ const CONTRACT_BUILDING = 'contract_building';
 const MAIN_BUILDING_ID = 15;
 
 
+//
+let DROP_DOWN = '    <div id="" class="bootstrap">\n' +
+    '        <div class="col-lg-12">\n' +
+    '<div id="btn-container">\n'+
+    '            <button id="build-btn" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></button>\n' +
+    '            <ul id="" class="dropdown-menu scrollable-menu" role="menu">\n' +
+    '            </ul>\n' +
+    '      </div>\n' +
+    '      </div>\n' +
+    '</div>\n' +
+    '</div>\n';
 
 // REQUESTS
 

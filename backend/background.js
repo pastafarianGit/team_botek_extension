@@ -37,6 +37,10 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
                 sendResponse(true);
                 break;
+            case ADD_TRAIN_TASK_ACTION:
+                console.log("train task", request.data);
+                sendResponse(true);
+                break;
         }
         return true;
     });

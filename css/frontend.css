@@ -22,19 +22,28 @@
 }
 
 
-#build-container-old{
+#build-container-existing{
     margin: 0 10px 10px;
 }
 
 #build-container-new{
-    margin: 10px 10px 10px -10px;
+    margin: 10px 10px 10px -15px;
 }
 
-#add-task-ul-old{
-    margin-left: 50px;
+#build-container-train{
+    margin-left: -15px;
+}
+
+
+#add-task-ul-existing{
+    margin-left: 60px;
 }
 
 #add-task-ul-new{
+    margin-left: 10px;
+}
+
+#add-task-ul-train{
     margin-left: 0;
 }
 
