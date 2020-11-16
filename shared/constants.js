@@ -116,6 +116,59 @@ let DROP_DOWN = '    <div id="" class="bootstrap">\n' +
     '</div>\n' +
     '</div>\n';
 
+const HEADERS_TO_STRIP = [
+    "content-security-policy",
+    "x-frame-options"
+];
+
+const ACCESIBLE_URLS= [
+    "https://request.urih.com/",
+    "*://*.travianteambot.com/*",
+    "*://*.kingdoms.com/*",
+    "http://*.localhost/*",
+    "https://*.travian.ae/*",
+    "https://*.travian.com/*",
+    "https://*.travian.asia/*",
+    "https://*.travian.com.au/*",
+    "https://*.travian.ba/*",
+    "https://*.travian.bg/*",
+    "https://*.travian.com.br/*",
+    "https://*.travian.cl/*",
+    "https://*.travian.cz/*",
+    "https://*.travian.de/*",
+    "https://*.travian.dk/*",
+    "https://*.travian.com.eg/*",
+    "https://*.travian.fi/*",
+    "https://*.travian.fr/*",
+    "https://*.travian.gr/*",
+    "https://*.travian.hk/*",
+    "https://*.travian.com.hr/*",
+    "https://*.travian.hu/*",
+    "https://*.travian.co.id/*",
+    "https://*.travian.co.il/*",
+    "https://*.travian.ir/*",
+    "https://*.travian.it/*",
+    "https://*.travian.jp/*",
+    "https://*.travian.lt/*",
+    "https://*.travian.com.my/*",
+    "https://*.travian.net/*",
+    "https://*.travian.nl/*",
+    "https://*.travian.no/*",
+    "https://*.travian.pl/*",
+    "https://*.travian.pt/*",
+    "https://*.travian.ro/*",
+    "https://*.travian.rs/*",
+    "https://*.travian.ru/*",
+    "https://*.travian.com.sa/*",
+    "https://*.travian.se/*",
+    "https://*.travian.si/*",
+    "https://*.travian.sk/*",
+    "https://*.travian.com.tr/*",
+    "https://*.travian.tw/*",
+    "https://*.travian.co.uk/*",
+    "https://*.travian.us/*",
+    "https://*.travian.vn/*"
+];
 // REQUESTS
 
 const REQUESTS_INFO =

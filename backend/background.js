@@ -94,7 +94,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
 
     },
     {
-        urls:["<all_urls>"]
+        urls:ACCESIBLE_URLS
     },
     [ 'blocking', 'requestHeaders', 'extraHeaders']
 )
@@ -117,7 +117,7 @@ chrome.webRequest.onBeforeRequest.addListener(
             }
         }
     },
-    {urls: ["<all_urls>"]},
+    {urls: ACCESIBLE_URLS},
     ["blocking", "requestBody"]);
 
 function addUser(result, newUser) {
@@ -176,4 +176,33 @@ function modifyHeaderOrigin (url, requestHeaders) {
         addHeader({name: 'origin', value: baseServerUrl}, requestHeaders)
     }
     referer = url;
+}
+
+chrome.webRequest.onHeadersReceived.addListener(
+    function (details) {
+       modifyCookie(details);
+        return {
+            responseHeaders:  removeSecurityHeaders(details)
+        };
+    },
+    {
+        urls: ACCESIBLE_URLS
+    },
+    ["blocking", "responseHeaders", "extraHeaders"]
+);
+
+function modifyCookie(details) {
+    details.responseHeaders.forEach(function (header) {
+        if (header.name.toLowerCase() === "set-cookie") {
+            header.value = header.value + ";Secure;SameSite=None;";
+        }
+    });
+}
+
+function removeSecurityHeaders(details) {
+    return details.responseHeaders.filter((header) => {
+        return (
+            !HEADERS_TO_STRIP.includes(header.name.toLowerCase())
+        );
+    })
 }
