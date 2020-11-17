@@ -96,11 +96,6 @@ function setFrontEndUrl(url, tab) {
     }
 }
 
-/*async function loginFlow(url) {
-    let login = await analyseIsUserLoggedIn(DORF1_PATHNAME);
-    return await makePostRequest(url + LOGIN_PATHNAME, storedUser);
-}*/
-
 function mainLoop (){
 
     if(villages.length === 0 || !isBotOn)//if(!isBotOn)

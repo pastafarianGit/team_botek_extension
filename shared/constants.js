@@ -1,4 +1,5 @@
 
+const PRIMARY_COLOR = '#ff4081';
 
 const TRIBE_ROMANS = 1;
 const TRIBE_GAULS = 3;
@@ -121,7 +122,11 @@ const HEADERS_TO_STRIP = [
     "x-frame-options"
 ];
 
-const ACCESIBLE_URLS= [
+const WALL_LOCATION = 40;
+const WALL_IDS = [31, 32, 33];
+const TYPE_FREE_SLOT = 'gid0';
+
+const ACCESSIBLE_URLS= [
     "https://request.urih.com/",
     "*://*.travianteambot.com/*",
     "*://*.kingdoms.com/*",

@@ -164,21 +164,23 @@ class BuildTaskHelper {
 
     static deleteTask(uuid, tasks){
         for(let i = 0; i < tasks.length; i++) {
-            if(Array.isArray(tasks[i])){
-                if(this.deleteTask(uuid, tasks[i])){
-                    if(tasks[i].length === 0 && tasks.length > 1){ // remove empty array if there is more than one internal array
-                        tasks.splice(i, 1);
-                    }
-                    return true;
-                }
-            }else{
-                if(tasks[i].uuid === uuid){
-                    tasks.splice(i, 1);
+            for (let j = 0; j < tasks[i].length; j++){
+                if(tasks[i][j].uuid === uuid){
+                    tasks[i].splice(j, 1);      //remove task
+                    BuildTaskHelper.fixArrayAfterTaskDelete(tasks, i);
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    static fixArrayAfterTaskDelete(tasks, i){
+        if(tasks[i].length === 0 && tasks.length > 1){ // remove empty array if there is more than one internal array
+            tasks.splice(i, 1);
+        }else if(tasks[i].length > 0){
+            tasks[i][0].isChecked = false; // remove check for first in line
+        }
     }
 
     static isTaskUnderLvl(task, village){
@@ -237,7 +239,7 @@ class BuildTaskHelper {
             if(Array.isArray(task)){
                 buildTasks.push(this.convertToBuildTaskObject(task));
             }else{
-                buildTasks.push(new BuildTask(new Building(task.building.locationId, task.building.type, task.building.lvl), task.villageDid, task.uuid, task.isChecked));
+                buildTasks.push(new BuildTask(new Building(task.building.locationId, task.building.type, task.building.lvl), task.did, task.uuid, task.isChecked));
             }
         }
         return buildTasks;
@@ -275,9 +277,9 @@ class BuildTask {
     uuid;
     isChecked;
 
-    constructor(building, villageDid, uuid, isChecked) {
+    constructor(building, did, uuid, isChecked) {
         this.building = building;
-        this.villageDid = villageDid;
+        this.did = did;
         this.uuid = uuid;
         this.setTimerType();
         this.isChecked = isChecked;

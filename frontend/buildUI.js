@@ -53,8 +53,10 @@ function highLightTasks() {
 }
 
 function isOnNewBuildingsPage() {
-    const tabWrapper = document.getElementsByClassName('tabWrapper')[0];
-    return (tabWrapper !== undefined);
+    const build = document.getElementById('build');
+    return (build.classList.contains(TYPE_FREE_SLOT));
+    /*const tabWrapper = document.getElementsByClassName('tabWrapper')[0];
+    return (tabWrapper !== undefined);*/
 }
 
 function showDropDownForNewBuilding() {
@@ -125,11 +127,17 @@ function setHiddenChildToTakeSpace() {
 
 function onBuildDropdownSelected(type, lvl) {
     const locationId = getParamFromUrl("id");
-    const buildTask = {lvl: parseInt(lvl), type: type, locationId: parseInt(locationId), villageDid: activeVillage.did};
-
+    const buildTask = {lvl: parseInt(lvl), type: type, locationId: parseInt(locationId), did: activeVillage.did};
+    modifyLocationForWall(buildTask);
     sendMessageToExtension(ADD_BUILD_TASK_ACTION, buildTask, (villages) => {
         console.log("is task complete", villages);
     });
+}
+
+function modifyLocationForWall(buildTask) {
+    if(WALL_IDS.includes(buildTask.type)){
+        buildTask.locationId = WALL_LOCATION;
+    }
 }
 
 function getParamFromUrl (name) {

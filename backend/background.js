@@ -28,7 +28,6 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn});
                 break;
             case CHANGE_VILLAGE_ACTION:
-                //const villageDid = regexSearchOne(REGEX_VILLAGE_LINK_TEXT, request.data, "g");
                 sendResponse(true);
                 sendMessageToGUI(CHANGE_VILLAGE_ACTION, request.data);
                 break;
@@ -39,6 +38,7 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 break;
             case ADD_TRAIN_TASK_ACTION:
                 console.log("train task", request.data);
+                addNewTrainTask(request.data);
                 sendResponse(true);
                 break;
         }
@@ -80,7 +80,7 @@ chrome.runtime.onConnectExternal.addListener((port) => { // connection with GUI
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
     (info) =>{
-        // console.log("info: ", info);
+        console.log("info1: ", info);
         let url = new URL(info.url);
         //console.log("inside send requests", url);
         // console.log("url origin", url);
@@ -89,12 +89,25 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
             console.log("modify header");
             modifyHeaders(url.pathname, info.requestHeaders);
             modifyHeaderOrigin(info.url, info.requestHeaders);
+        }else{
+            console.log("modify others", url);
+            modifyHeaders(url.pathname, info.requestHeaders);
+            modifyHeaderOrigin(info.url, info.requestHeaders);
+        }
+
+        for (let header of info.requestHeaders){
+            if(header.name === 'Authorization'){
+                if(header.value === 'Bearer false'){
+                    console.log("info2", info)
+                    // header.value = 'Bearer dcc0c7df8590973688944f0ee9e26d38';
+                }
+            }
         }
         return {requestHeaders: info.requestHeaders};
 
     },
     {
-        urls:ACCESIBLE_URLS
+        urls:ACCESSIBLE_URLS
     },
     [ 'blocking', 'requestHeaders', 'extraHeaders']
 )
@@ -117,7 +130,7 @@ chrome.webRequest.onBeforeRequest.addListener(
             }
         }
     },
-    {urls: ACCESIBLE_URLS},
+    {urls: ACCESSIBLE_URLS},
     ["blocking", "requestBody"]);
 
 function addUser(result, newUser) {
@@ -186,13 +199,13 @@ chrome.webRequest.onHeadersReceived.addListener(
         };
     },
     {
-        urls: ACCESIBLE_URLS
+        urls: ACCESSIBLE_URLS
     },
     ["blocking", "responseHeaders", "extraHeaders"]
 );
 
 function modifyCookie(details) {
-    details.responseHeaders.forEach(function (header) {
+    details.responseHeaders.forEach((header) => {
         if (header.name.toLowerCase() === "set-cookie") {
             header.value = header.value + ";Secure;SameSite=None;";
         }
@@ -206,3 +219,44 @@ function removeSecurityHeaders(details) {
         );
     })
 }
+
+// cookie change
+
+chrome.cookies.onChanged.addListener( (object) => {
+    if (object.cookie.domain.indexOf("travian.") !== -1 || object.cookie.domain.indexOf("kingdoms.") !== -1) {
+        if (object.removed === false && object.cookie.sameSite !== "no_restriction" && object.cookie.secure !== true) {
+            let cookie = object.cookie;
+            let d = cookie.domain.indexOf('.') === 0 ? cookie.domain.replace('.', '') : cookie.domain;
+            let newCookie = {
+                url: "https://" + d,
+                name: cookie.name,
+                value: cookie.value,
+                secure: true,
+                sameSite: "no_restriction",
+                expirationDate: cookie.expirationDate,
+                storeId: cookie.storeId,
+
+            }
+            chrome.cookies.set(newCookie);
+        }
+    }
+});
+
+chrome.cookies.getAll({}, function (callback) {
+    callback.forEach(function (cookie) {
+        if (cookie.domain.indexOf("travian.") !== -1 || cookie.domain.indexOf("kingdoms.") !== -1) {
+            let d = cookie.domain.indexOf('.') === 0 ? cookie.domain.replace('.', '') : cookie.domain;
+            let newCookie = {
+                url: "https://" + d,
+                name: cookie.name,
+                value: cookie.value,
+                secure: true,
+                sameSite: "no_restriction",
+                expirationDate: cookie.expirationDate,
+                storeId: cookie.storeId,
+
+            }
+            chrome.cookies.set(newCookie);
+        }
+    })
+});

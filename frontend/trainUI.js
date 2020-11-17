@@ -20,7 +20,7 @@ function onSelectedTrain(buildingType) {
 
     const trainUnitsContainer = document.getElementsByClassName('trainUnits')[0];
     const inputs = trainUnitsContainer.getElementsByClassName('text');
-    let trainTask = {villageDid: activeVillage.did, locationId: parseInt(locationId), buildingType: parseInt(buildingType)};
+    let trainTask = {did: activeVillage.did, locationId: parseInt(locationId), buildingType: parseInt(buildingType)};
     //let availableUnits = [];
     for(let input of inputs){
         const name = input.name;

@@ -1,5 +1,5 @@
 function buildAndHandleErrors(task){
-    let village = VillagesHelper.findVillage(villages, task.villageDid);
+    let village = VillagesHelper.findVillage(villages, task.did);
     updateBotStatus(BOT_IS_BUILDING_STATUS);
     build(task, village)
         .then(result => {
@@ -41,7 +41,7 @@ function handleBuildErrors(err, task, village){
 }
 
 async function build (task, village) {
-    // let village = VillagesHelper.findVillage(villages, task.villageDid);
+    // let village = VillagesHelper.findVillage(villages, task.did);
     await analyseAndSwitchTo(task.building, village);
 
     let taskStatus = isTaskAvailable(task, village);
@@ -95,14 +95,11 @@ function isTaskCostSmallerThanWarehouse(cost, warehouse) {
 }
 
 function addNewBuildTask(data) {
-    for(let village of villages){
-        if(village.did === data.villageDid){
-            let building = new Building(data.locationId, data.type, data.lvl);
-            let newBuildTask = new BuildTask(building, data.villageDid, getUuidv4(), (village.buildTasks[0].length > 0));
-            BuildTaskHelper.addTask(newBuildTask, village.buildTasks);
-            village.timers.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask);
-        }
-    }
+    let village = VillagesHelper.findVillage(villages, data.did);
+    let building = new Building(data.locationId, data.type, data.lvl);
+    let newBuildTask = new BuildTask(building, data.did, getUuidv4(), (village.buildTasks[0].length > 0));
+    BuildTaskHelper.addTask(newBuildTask, village.buildTasks);
+    village.timers.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask);
 }
 
 function calcTimeToBuild (village, building, serverSpeed) {
@@ -145,7 +142,6 @@ async function createNewBuilding(taskBuilding, pageString) {
 
 
     let button = parseGetNewBuildingButton(changeTab, taskBuilding.type);
-    console.log("button is", button);
     if(button === undefined){
         return Promise.reject(ERROR_NO_PREREQUISITE);
     }
@@ -153,7 +149,6 @@ async function createNewBuilding(taskBuilding, pageString) {
     if(cssClass.includes('new')){
         let onClick = button.getAttribute('onclick')
         const buildPath = regexSearchOne(REGEX_BUILD_PATH_ON_NEW_BUILDING, onClick, 'g');
-        console.log("buildPath", buildPath);
         return await getTextAndCheckLogin(buildPath, "", 3000);
     }else if(cssClass.includes('builder')){
         console.log("can only build with GOLD builder");

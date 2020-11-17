@@ -56,11 +56,13 @@ function parseTribe (pageString) {
 }
 
 async function getDorf1AndAnalyse(village) {
+    sendMessageToBotTab(CHANGE_VILLAGE_ACTION, village);
     let pageString = await getTextAndCheckLogin(DORF1_PATHNAME, NEW_DID_PARAM + village.did, 3000);
     analyseAndUpdateDorf1Buildings(pageString, village);
 }
 
 async function getDorf2AndAnalyse(village) {
+    sendMessageToBotTab(CHANGE_VILLAGE_ACTION, village);
     let pageString = await getTextAndCheckLogin(DORF2_PATHNAME, NEW_DID_PARAM + village.did, 3000);
     analyseAndUpdateDorf2Buildings(pageString, village);
 }

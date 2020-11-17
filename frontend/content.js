@@ -104,6 +104,25 @@ function setElementVisibility(element, visibility){
 }
 
 
+function addBorderToBotActiveVillage(did) {
+
+   const sidebarBoxVillageList =  document.getElementById("sidebarBoxVillagelist");
+   const allLinks = sidebarBoxVillageList.getElementsByTagName('a');
+   console.log("all links", allLinks);
+   for(let a of allLinks){
+       if(a.href.includes(did)){
+           a.style.borderBottom = '3px solid #ff4081';
+           a.style.borderRight = '3px solid #ff4081';
+       }else{
+           a.style.borderBottom = '';
+           a.style.borderRight = '';
+       }
+
+   }
+   //border-right: 3px solid #ff4081;
+    //border-bottom: 3px solid #ff4081;
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log("on msg request qweqwe", request);
     if(isBotPage()){
@@ -114,6 +133,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         case UPDATE_VILLAGES_ACTION:
             updateGlobalVariables(request.data);
             highlightTasks();
+            break;
+        case CHANGE_VILLAGE_ACTION:
+            console.log("change border");
+            addBorderToBotActiveVillage(request.data.did);
+            // call obroba
             break;
     }
     return false;
