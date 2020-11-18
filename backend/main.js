@@ -10,6 +10,7 @@ let isBotOn = false;
 let guiPortConnection = null;
 let newBotOpen = {updateProfile: false, updateTribe: false};
 let botSleep = {isSleeping: true, timer: Date.now() + hoursToMiliSec(0)};
+let windowTab = "";
 
 onStartUp();
 
@@ -61,14 +62,17 @@ function testStartup() {
 function openBot() {
 
     runOnActiveId((tab) => {
-        let url = new URL(tab.url);
-        console.log("open bot", tab);
-        botTabId = tab.id;
-        baseServerUrl = url.origin;
-        newBotOpen.updateProfile = true;
-        newBotOpen.updateTribe = true;
-        setFrontEndUrl(url, tab);
-
+        setTimeout(()=> {
+            console.log("tab", tab);
+            let url = new URL(tab.url);
+            console.log("open bot", tab);
+            botTabId = tab.id;
+            baseServerUrl = url.origin;
+            newBotOpen.updateProfile = true;
+            newBotOpen.updateTribe = true;
+            windowTab = tab.windowId =
+            setFrontEndUrl(url, tab);
+        }, 150)
     })
 }
 
@@ -151,7 +155,7 @@ function addToQueueAndUpdateTimer (task, village, timerType) {
     village.timers.add15Mins(timerType);
 }
 
-function updateBotStatus(data) {
+function updateBotStatusGUI(data) {
     sendMessageToGUI(UPDATE_BOT_STATUS_ACTION, data);
 }
 
@@ -159,11 +163,11 @@ function updateWorkingBotStatus() {
     if(isBotOn){
         toggleSleep();
         if(botSleep.isSleeping){
-            updateBotStatus(BOT_IS_SLEEPING_STATUS);
+            updateBotStatusGUI(BOT_IS_SLEEPING_STATUS);
         }else{
-            updateBotStatus(BOT_IS_WORKING_STATUS);
+            updateBotStatusGUI(BOT_IS_WORKING_STATUS);
         }
     }else{
-        updateBotStatus(BOT_IS_ON_PAUSE_STATUS);
+        updateBotStatusGUI(BOT_IS_ON_PAUSE_STATUS);
     }
 }

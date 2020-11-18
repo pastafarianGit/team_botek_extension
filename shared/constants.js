@@ -33,7 +33,7 @@ const ADD_BUILD_TASK_ACTION = "add_build_task_action";
 const ADD_TRAIN_TASK_ACTION = "add_train_task_action";
 const IS_ACTIVE_BOT_ACTION = "is_active_bot_action";
 const UPDATE_BOT_STATUS_ACTION = 'update_bot_status_action';
-
+const BEARER_KEY_ACTION = 'bearer_key_action';
 
 const BOT_IS_SLEEPING_STATUS = "sleeping";
 const BOT_IS_WORKING_STATUS = "working";

@@ -42,6 +42,7 @@ function handleBotekPageOpened(){
 }
 
 function handleTravianPageOpened(){
+    checkPageVariables();
 
     sendMessageToExtension(IS_TAB_ACTIVE_ACTION, {},(data) => {
         if(data.isActive && data.villages.length !== 0){
@@ -58,6 +59,25 @@ function handleTravianPageOpened(){
             }
         }else{
             toggleElements("visible");
+        }
+    });
+}
+
+function checkPageVariables(){
+    console.log("hey check page variables");
+    let s = document.createElement('script');
+    s.src = chrome.extension.getURL('js/script.js');
+    (document.head||document.documentElement).appendChild(s);
+    s.onload = function() {
+        s.remove();
+    };
+
+// Event listener
+    document.addEventListener(BEARER_KEY_ACTION, (e) => {
+        console.log("event", e);
+        console.log("window", window);
+        if(e.detail !== 'false'){
+            sendMessageToExtension(BEARER_KEY_ACTION, e.detail, ()=> {});
         }
     });
 }
@@ -108,7 +128,6 @@ function addBorderToBotActiveVillage(did) {
 
    const sidebarBoxVillageList =  document.getElementById("sidebarBoxVillagelist");
    const allLinks = sidebarBoxVillageList.getElementsByTagName('a');
-   console.log("all links", allLinks);
    for(let a of allLinks){
        if(a.href.includes(did)){
            a.style.borderBottom = '3px solid #ff4081';
@@ -124,7 +143,7 @@ function addBorderToBotActiveVillage(did) {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log("on msg request qweqwe", request);
+    // console.log("on msg request qweqwe", request);
     if(isBotPage()){
         return false;
     }
@@ -135,11 +154,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             highlightTasks();
             break;
         case CHANGE_VILLAGE_ACTION:
-            console.log("change border");
             addBorderToBotActiveVillage(request.data.did);
-            // call obroba
             break;
     }
+    sendResponse("true");
     return false;
 });
 /*

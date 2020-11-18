@@ -10,6 +10,8 @@
       "all_frames": true
     }
   ],
+  "web_accessible_resources":  ["js/script.js"],
+
   "background": {
     "scripts": ["shared/res/buildings.js", "shared/res/troops.js","shared/constants.js","shared/helperFun.js", "shared/classes.js", "shared/parse.js", "backend/tabs.js","backend/analyse.js", "backend/build.js","backend/main.js","backend/background.js"]
   },

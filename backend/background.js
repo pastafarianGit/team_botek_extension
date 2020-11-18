@@ -1,4 +1,7 @@
 console.log("background botek ext")
+let bearerKey = false;
+let backgroundWindow = null;
+
 
 chrome.browserAction.onClicked.addListener(tab =>{
     console.log("background button clicked1", tab);
@@ -16,8 +19,9 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
         switch (request.action) {
             case IS_TAB_ACTIVE_ACTION:
                 if(newBotOpen.updateProfile){
-                    updateBotStatus(BOT_IS_ANALYSING_VILLAGES);
+                    updateBotStatusGUI(BOT_IS_ANALYSING_VILLAGES);
                     analyseVillagesAfterLogin(sendResponse);
+                    handleNoBearerKey();
                     newBotOpen.updateProfile = false;
                 }else{
                     isTabActive(sendResponse);
@@ -32,6 +36,7 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 sendMessageToGUI(CHANGE_VILLAGE_ACTION, request.data);
                 break;
             case ADD_BUILD_TASK_ACTION:
+                console.log("build task", request.data);
                 addNewBuildTask(request.data);
                 sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
                 sendResponse(true);
@@ -41,9 +46,32 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 addNewTrainTask(request.data);
                 sendResponse(true);
                 break;
+            case BEARER_KEY_ACTION:
+                console.log("bearer", request.data);
+                if(request.data){
+                    console.log("changed bearer", request.data);
+                    bearerKey = request.data;
+                    closeBackgroundWindow();
+                }
+                break;
         }
         return true;
     });
+
+function handleNoBearerKey() {
+    if(!bearerKey){
+        handleNotCorrectBearerKey();
+    }
+}
+
+function closeBackgroundWindow(){
+    if(backgroundWindow){
+        chrome.windows.remove(backgroundWindow.id, ()=> {
+            console.log("removed background window");
+        });
+        backgroundWindow = null;
+    }
+}
 
 chrome.runtime.onMessageExternal.addListener(   // from botkeGui
 (request, sender, sendResponse) => {
@@ -73,36 +101,25 @@ chrome.runtime.onConnectExternal.addListener((port) => { // connection with GUI
     //console.log("gui onConnectExternal");
     guiPortConnection = port;
     port.onMessage.addListener((msg) => {
-        // console.log("gui on msg");
+        console.log("gui on msg");
+        return false;
         // See other examples for sample onMessage handlers.
     });
+    return false;
 });
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
     (info) =>{
-        console.log("info1: ", info);
+        //console.log("info1: ", info);
         let url = new URL(info.url);
-        //console.log("inside send requests", url);
-        // console.log("url origin", url);
-
         if(info.initiator !== undefined && info.initiator.includes(EXTENSION_ID) && !SERVER_URL.includes(url.origin)){
-            console.log("modify header");
             modifyHeaders(url.pathname, info.requestHeaders);
             modifyHeaderOrigin(info.url, info.requestHeaders);
         }else{
-            console.log("modify others", url);
             modifyHeaders(url.pathname, info.requestHeaders);
             modifyHeaderOrigin(info.url, info.requestHeaders);
         }
-
-        for (let header of info.requestHeaders){
-            if(header.name === 'Authorization'){
-                if(header.value === 'Bearer false'){
-                    console.log("info2", info)
-                    // header.value = 'Bearer dcc0c7df8590973688944f0ee9e26d38';
-                }
-            }
-        }
+        addBearerKey(info);
         return {requestHeaders: info.requestHeaders};
 
     },
@@ -111,6 +128,18 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     },
     [ 'blocking', 'requestHeaders', 'extraHeaders']
 )
+
+function addBearerKey(info){
+    for (let header of info.requestHeaders){
+        if(header.name === 'Authorization'){
+            if(header.value === 'Bearer false'){
+                if(bearerKey){
+                    header.value = "Bearer " + bearerKey;
+                }
+            }
+        }
+    }
+}
 
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
@@ -191,9 +220,20 @@ function modifyHeaderOrigin (url, requestHeaders) {
     referer = url;
 }
 
+function handleNotCorrectBearerKey(){
+        chrome.windows.create({url: baseServerUrl + DORF1_PATHNAME, state: 'minimized'}, (window)=> {
+            backgroundWindow = window;
+            console.log("opened new page on ", window);
+        });
+}
+
 chrome.webRequest.onHeadersReceived.addListener(
     function (details) {
-       modifyCookie(details);
+        console.log("ON RECEIVED", details.statusCode === 401);
+        if(details.statusCode === 401) {
+            handleNotCorrectBearerKey();
+        }
+        modifyCookie(details);
         return {
             responseHeaders:  removeSecurityHeaders(details)
         };
