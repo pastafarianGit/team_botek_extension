@@ -5,46 +5,37 @@ async function analyseVillageProfile () { //get all villages -> link, name, coor
     return parseVillages(pageString, villagesLinks);
 }
 
-function analyseVillagesAfterLogin(sendResponse){
+function analyseVillagesOnStart(sendResponse){
+    updateBotStatusGUI(BOT_IS_ANALYSING_VILLAGES);
     analyseVillageProfile()
         .then(result => {
             villages = result;
             sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn});
-            isTabActive(sendResponse);
-
+            if(sendResponse){
+                isTabActive(sendResponse);
+            }
             return analyseBuildingsInAllVillages();
         }).then(result => {
         updateWorkingBotStatus();
     }).catch(err=> {
         console.log("err updating villages", err);
     });
+    newBotOpen.updateProfile = false;
 }
 
-async function analyseBuildingsInAllVillages(){
-    for (let village of villages){
-        await getDorf1AndAnalyse(village);
-        await getDorf2AndAnalyse(village);
-    }
-}
 
-async function analyseAndSwitchTo(building, village) {
-    if(building.isResourceBuilding()){
-        return await getDorf1AndAnalyse(village);
-    }
-    return await getDorf2AndAnalyse(village)
-}
 
 async function analyseVillagesTest() {
     let village = villages[0];
-    await getDorf1AndAnalyse(village);
-    await getDorf2AndAnalyse(village);
+    await analyseDorf1(village);
+    await analyseDorf2(village);
 }
 
 function analysePageStringDorf12 (pageString, village,  isRes) {
     if(isRes){
-        analyseAndUpdateDorf1Buildings(pageString, village);
+        parseAndUpdateDorf1(pageString, village);
     }else{
-        analyseAndUpdateDorf2Buildings(pageString, village);
+        parseAndUpdateDorf2(pageString, village);
     }
 }
 
@@ -55,36 +46,47 @@ function parseTribe (pageString) {
     }
 }
 
-async function getDorf1AndAnalyse(village) {
+async function analyseDorf1(village) {
     sendMessageToBotTab(CHANGE_VILLAGE_ACTION, village);
     let pageString = await getTextAndCheckLogin(DORF1_PATHNAME, NEW_DID_PARAM + village.did, 3000);
-    analyseAndUpdateDorf1Buildings(pageString, village);
+    parseAndUpdateDorf1(pageString, village);
 }
 
-async function getDorf2AndAnalyse(village) {
+async function analyseDorf2(village) {
     sendMessageToBotTab(CHANGE_VILLAGE_ACTION, village);
     let pageString = await getTextAndCheckLogin(DORF2_PATHNAME, NEW_DID_PARAM + village.did, 3000);
-    analyseAndUpdateDorf2Buildings(pageString, village);
+    parseAndUpdateDorf2(pageString, village);
 }
 
-function analyseAndUpdateDorf1Buildings (pageString, village){
+function parseAndUpdateDorf1 (pageString, village){
     parseTribe(pageString);
     let resourceBuildings = parseResourceLvls(pageString);
     village.updateBuildingInfo(resourceBuildings);
-    analyseCurrResBuildings(village, pageString);
+    analyseBackgroundContent(village, pageString);
 }
 
-function analyseAndUpdateDorf2Buildings (pageString, village) {
+function parseAndUpdateDorf2 (pageString, village) {
     let townBuildings = parseBuildingLvls(pageString);
     village.updateBuildingInfo(townBuildings);
-    analyseCurrResBuildings(village, pageString);
+    analyseBackgroundContent(village, pageString);
 }
 
-function analyseCurrResBuildings (village, pageString) {
+
+
+function analyseBackgroundContent (village, pageString) {
     village.resources = parseResources(pageString);
     village.currentlyBuilding = parseCurrentlyBuilding(pageString, village);
     village.timers.updateTimers(village.currentlyBuilding);
+    checkForNewVillage(pageString);
+}
 
+function checkForNewVillage(pageString){
+    const sideBar = getSidebarVillageBox(pageString);
+    let ul = sideBar.getElementsByTagName('ul')[0];
+    if(ul.childElementCount !== villages.length){
+        console.log("number of villages", ul.childElementCount);
+        queue.push(new AnalyseTask());
+    }
 }
 
 async function fetchAndCheckIfLoggedIn(pathname){
@@ -129,3 +131,18 @@ async function analyseIsUserLoggedIn1(pathname) {
    // const doc = convertFromPageStringToHtml(pageString);
 
 }
+
+async function analyseBuildingsInAllVillages(){
+    for (let village of villages){
+        await analyseDorf1(village);
+        await analyseDorf2(village);
+    }
+}
+
+async function analyseAndSwitchTo(building, village) {
+    if(building.isResourceBuilding()){
+        return await analyseDorf1(village);
+    }
+    return await analyseDorf2(village)
+}
+

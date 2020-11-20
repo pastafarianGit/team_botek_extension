@@ -1,10 +1,56 @@
+let all_res = {1: true, 2: true, 3: true, 4: true};
 
 function showBuildUI() {
     // const pathname = window.location.pathname;
     if(pathname === BUILD_PATH_F){
-        showDropDownOnExistingBuilding();
-        showDropDownForNewBuilding();
+        showUIOnExistingBuilding();
+        showUIOnNewBuilding();
+    }else if(pathname === DORF1_PATHNAME){
+        showAllResourcesUI();
     }
+}
+
+function showAllResourcesUI() {
+    const productionContainer = getProductionTableBodyContainerF();
+    createCheckboxes(productionContainer);
+    createAllResDropDown();
+}
+
+function createAllResDropDown() {
+    const maxLvl = getMaxResourceLvl();
+    const selectOptions = createArrayWithItemsInRange(1, maxLvl);
+    const dropDown = createDropDown(selectOptions, onAllResDropDownSelected, WOOD_TYPE, DROPDOWN_CSS_NEW,  ADD_BUILDING_NAME);
+
+    let production = document.getElementsByClassName('production')[0];
+    production.lastElementChild.replaceWith(dropDown);
+}
+
+function onAllResDropDownSelected(type, lvl) {
+    console.log("on all res", lvl, all_res);
+
+}
+
+function createCheckboxes(productionTable) {
+    for(let tr of productionTable.children){
+        const link = tr.getElementsByTagName('i')[0];
+        if(link.className.startsWith('r')){
+            const checkbox = createResCheckbox(link.className[1]);
+            tr.insertBefore(checkbox, tr.firstChild);
+        }
+    }
+}
+
+function createResCheckbox(resType) {
+    const td = document.createElement('td');
+    let input = document.createElement("input");
+    input.setAttribute('value', resType);
+    input.setAttribute('type', 'checkbox');
+    input.checked = true;
+    input.addEventListener('change', ()=> {
+       all_res[input.value] = input.checked;
+    });
+    td.appendChild(input);
+    return td;
 }
 
 function highlightTasks() {
@@ -14,7 +60,6 @@ function highlightTasks() {
     else if (pathname === DORF2_PATHNAME) {
         highlightBuildingsTasks();
         console.log("hey");
-        let asd = 1 + 1;
     }
 }
 
@@ -59,7 +104,7 @@ function isOnNewBuildingsPage() {
     return (tabWrapper !== undefined);*/
 }
 
-function showDropDownForNewBuilding() {
+function showUIOnNewBuilding() {
     if(!isOnNewBuildingsPage()){
         return;
     }
@@ -72,7 +117,7 @@ function showDropDownForNewBuilding() {
         console.log("my type ", buildingType);
         const maxLvl = getMaxLvl(buildingType);
         const selectOptions = createArrayWithItemsInRange(1, maxLvl);
-        const dropDownNode = createDropDown(selectOptions, onBuildDropdownSelected, buildingType, '-new', ADD_BUILDING_NAME);
+        const dropDownNode = createDropDown(selectOptions, onBuildDropdownSelected, buildingType, DROPDOWN_CSS_NEW, ADD_BUILDING_NAME);
 
         const contractLink = wrapper.getElementsByClassName('contractLink')[0];
         contractLink.append(dropDownNode);
@@ -84,6 +129,7 @@ function showDropDownForNewBuilding() {
 
 function getTypeFromBuildingWrapper(wrapper) {
     for(let child of wrapper.children){
+
         let id = child.getAttribute('id');
         if(id !== null && id.startsWith(CONTRACT_BUILDING)){
             return parseInt(id.substring(CONTRACT_BUILDING.length));
@@ -92,11 +138,11 @@ function getTypeFromBuildingWrapper(wrapper) {
     return null;
 }
 
-function showDropDownOnExistingBuilding() {
+function showUIOnExistingBuilding() {
     const {buildingType, buildingLvl} = getBuildingTypeLevel();
     const maxLvl = getMaxLvl(buildingType);
     const selectOptions = createArrayWithItemsInRange(buildingLvl+1, maxLvl);
-    const dropDownNode = createDropDown(selectOptions, onBuildDropdownSelected, buildingType, '-existing', ADD_BUILDING_NAME);
+    const dropDownNode = createDropDown(selectOptions, onBuildDropdownSelected, buildingType, DROPDOWN_CSS_EXISTING, ADD_BUILDING_NAME);
 
     appendToSection(dropDownNode);
 }
@@ -119,7 +165,7 @@ function getMaxLvl(buildingType) {
 
 function setHiddenChildToTakeSpace() {
     const section2 = document.getElementsByClassName("section2")[0];
-    const dropDownNode1 = createDropDown([], ()=>{}, 0, '-old', ADD_BUILDING_NAME);
+    const dropDownNode1 = createDropDown([], ()=>{}, 0, DROPDOWN_CSS_EXISTING, ADD_BUILDING_NAME);
     section2.insertBefore(dropDownNode1, section2.firstChild);
     section2.firstChild.style.visibility = 'hidden';
 }

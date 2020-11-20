@@ -1,34 +1,3 @@
-function regexSearchOne(regex, text, flags) {
-    let re = new RegExp(regex,flags);
-    let result = re.exec(text);
-    if(result !== null && result.length > 1){
-        return  result[1];
-    }
-    return null;
-}
-
-function regexSearchMultiple(regex, text) {
-    let results = [];
-    let re = new RegExp(regex,"g");
-    let matches = re[Symbol.matchAll](text);
-    for (const match of matches) {
-        //console.log("multiple matches", match);
-        if(match !== null && match.length > 1){
-            results.push(match[1]);
-        }
-    }
-    return results;
-}
-
-function xPathSearch(xPath, htmlString) {
-    let doc = toHtmlElement(htmlString);
-    return doc.evaluate(xPath, doc.body, null, XPathResult.ANY_TYPE, null);
-}
-
-async function getTextFromPage(pathname, params, time) {
-    let pageCall = await callFetchWithBaseUrl(pathname + params, {}, time);
-    return  await pageCall.text();
-}
 
 async function getTextAndCheckLogin(pathname, params, time){
     let pageString = await getTextFromPage(pathname, params, time);
@@ -124,23 +93,6 @@ function calcNextCheckTime (secTimeToDo) { // in sec
     return Date.now() + (secTimeToDo * 1000);
 }
 
-function sendMessageToGUI(action, data) {
-    if(guiPortConnection !== null){
-        guiPortConnection.postMessage({action: action, data:data});
-    }
-}
-
-function sendMessageToBotTab(action, data){
-    chrome.tabs.sendMessage(botTabId, {action: action, data: data}, function(response) {});
-}
-
-function openBotTab(tabId){
-    chrome.tabs.update(tabId, {url: SERVER_URL});
-}
-
-function sendMessageToExtension(action, data, callback) {
-    chrome.runtime.sendMessage({action: action, data: data}, callback);
-}
 
 function toHtmlElement(str){
     let parser = new DOMParser();
@@ -151,6 +103,7 @@ function toHtmlElement(str){
 function toHtmlGetBodyFirstChild(str){
     let parser = new DOMParser();
     let doc =  parser.parseFromString(str, 'text/html');
+    console.log("doc", doc, str);
     return doc.body.firstChild;
 }
 
@@ -173,21 +126,6 @@ function findUser(users){
         }
     }
     return Promise.reject(NO_USER);
-}
-
-function parseBuildingInfoOnResource(divResource) {
-    let locationId, gid;
-    let lvl;
-    for(let divClass of divResource.classList){
-        if(divClass.startsWith(BUILDING_LOCATION_ID)){
-            locationId = parseInt(divClass.substring(BUILDING_LOCATION_ID.length));
-        }
-        if(divClass.startsWith(BUILDING_GID)){
-            gid = parseInt(divClass.substring(BUILDING_GID.length));
-        }
-    }
-    lvl = parseInt(divResource.getElementsByTagName('div')[0].innerText);
-    return new Building(locationId, gid, lvl);
 }
 
 function getBuildingCost(task, village) {
@@ -221,3 +159,14 @@ function createDropDown(options, onSelectedFun, buildingType, cssSelector, name)
     }
     return dropDownNode;
 }
+
+function sendMessageToExtension(action, data, callback) {
+    chrome.runtime.sendMessage({action: action, data: data}, callback);
+}
+
+function createPause(second) {
+    setTimeout(()=> {
+        console.log("pause over");
+    }, second)
+}
+

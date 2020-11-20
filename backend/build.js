@@ -157,18 +157,18 @@ async function createNewBuilding(taskBuilding, pageString) {
 }
 
 
-function addBuildingTasks(village) {
+function addBuildTaskToQueue(village) {
     if(village.buildTasks.length > 0){
         if(tribe === TRIBE_ROMANS){
-            addBuildTaskToQueue(village, ROMANS_DORF1_ID);
-            addBuildTaskToQueue(village, ROMANS_DORF2_ID);
+            buildTaskPushToQueue(village, ROMANS_DORF1_ID);
+            buildTaskPushToQueue(village, ROMANS_DORF2_ID);
         }else{
-            addBuildTaskToQueue(village, BOTH_BUILD_ID);
+            buildTaskPushToQueue(village, BOTH_BUILD_ID);
         }
     }
 }
 
-function addBuildTaskToQueue (village, timerType) {
+function buildTaskPushToQueue (village, timerType) {
     console.log("next check time is: ", village.timers.nextCheckTime(timerType), "type: ", timerType);
     if(village.timers.isNextCheckTime(timerType)){
         const buildTask = BuildTaskHelper.getNextTask(village, timerType);

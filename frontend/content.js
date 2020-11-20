@@ -16,9 +16,10 @@ function init() {
 function onPageLoad(){
     if(isBotPage()){
         handleBotekPageOpened();
+
     }else{
         if(isLoginPage()){
-           return;
+            return;
         }
         handleTravianPageOpened();
     }
@@ -36,7 +37,6 @@ function isBotPage() {
 function handleBotekPageOpened(){
 
     sendMessageToExtension(GET_IFRAME_URL_ACTION, {}, (url) => {
-        console.log('on handle botke page opened', url);
         window.document.getElementById('iframe-container').setAttribute('src', url);
     });
 }
@@ -45,26 +45,26 @@ function handleTravianPageOpened(){
     checkPageVariables();
 
     sendMessageToExtension(IS_TAB_ACTIVE_ACTION, {},(data) => {
-        if(data.isActive && data.villages.length !== 0){
-            updateGlobalVariables(data.villages);
-            /*villages = data.villages;
-            activeVillage = findActiveVillage();
-            pathname = window.location.pathname;*/
-            if(activeVillage !== null){
-                sendMessageToExtension(CHANGE_VILLAGE_ACTION, activeVillage.did,
-                    (r)=>{console.log("change village response", r);});
-                showBuildUI();
-                showTrainUI();
-                highlightTasks();
+        if(data.isActive){
+            if(data.villages.length !== 0){
+                updateContentVariables(data.villages);
+                if(activeVillage !== null){
+                    sendMessageToExtension(CHANGE_VILLAGE_ACTION, activeVillage.did,
+                        (r)=>{console.log("change village response", r);});
+                    showBuildUI();
+                    showTrainUI();
+                    highlightTasks();
+                }
             }
-        }else{
+        }
+        else{
+            console.log("IS TAB ACTIVE false", data);
             toggleElements("visible");
         }
     });
 }
 
 function checkPageVariables(){
-    console.log("hey check page variables");
     let s = document.createElement('script');
     s.src = chrome.extension.getURL('js/script.js');
     (document.head||document.documentElement).appendChild(s);
@@ -72,43 +72,18 @@ function checkPageVariables(){
         s.remove();
     };
 
-// Event listener
     document.addEventListener(BEARER_KEY_ACTION, (e) => {
-        console.log("event", e);
-        console.log("window", window);
         if(e.detail !== 'false'){
             sendMessageToExtension(BEARER_KEY_ACTION, e.detail, ()=> {});
         }
     });
 }
 
-function updateGlobalVariables(newVillages) {
+function updateContentVariables(newVillages) {
     villages = newVillages;
     activeVillage = findActiveVillage();
     pathname = window.location.pathname;
 }
-
-/*
-function setOnVillageChangeListener() {
-    const sideBox = document.getElementById('sidebarBoxVillagelist');
-    const ul = sideBox.getElementsByTagName('ul')[0];
-    console.log("sidebox", sideBox);
-    console.log("ul", ul);
-
-    ul.addEventListener('click', (event) => {
-        for(let element of event.path){
-            if(element.nodeName === 'A'){
-                element.getAttribute('href');
-                sendMessageToExtension(CHANGE_VILLAGE_ACTION, element.getAttribute('href'),
-                    (response) => {
-                    }
-                );
-
-            }
-        }
-
-    })
-}*/
 
 function toggleElements(visibility){
     let sideBarContent = document.getElementById('sidebarBeforeContent');
@@ -122,7 +97,6 @@ function setElementVisibility(element, visibility){
         element.style.visibility = visibility;
     }
 }
-
 
 function addBorderToBotActiveVillage(did) {
 
@@ -138,19 +112,16 @@ function addBorderToBotActiveVillage(did) {
        }
 
    }
-   //border-right: 3px solid #ff4081;
-    //border-bottom: 3px solid #ff4081;
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    // console.log("on msg request qweqwe", request);
     if(isBotPage()){
         return false;
     }
 
     switch (request.action) {
         case UPDATE_VILLAGES_ACTION:
-            updateGlobalVariables(request.data);
+            updateContentVariables(request.data);
             highlightTasks();
             break;
         case CHANGE_VILLAGE_ACTION:
@@ -160,10 +131,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse("true");
     return false;
 });
-/*
-function unHideElements(){
-    let sideBarContent = document.getElementById('sidebarBeforeContent');
-    let sidebarBoxActiveVillage = document.getElementById('sidebarBoxActiveVillage');
-    setElementVisibility(sideBarContent, "visible");
-    setElementVisibility(sidebarBoxActiveVillage, "visible");
-}*/

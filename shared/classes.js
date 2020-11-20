@@ -270,6 +270,10 @@ class BuildTaskHelper {
         return false;
     }
 }
+class AnalyseTask {
+    constructor() {
+    }
+}
 
 class BuildTask {
     timeToBuild;

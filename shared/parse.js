@@ -1,3 +1,52 @@
+function regexSearchOne(regex, text, flags) {
+    let re = new RegExp(regex,flags);
+    let result = re.exec(text);
+    if(result !== null && result.length > 1){
+        return  result[1];
+    }
+    return null;
+}
+
+function parseBuildingInfoOnResource(divResource) {
+    let locationId, gid;
+    let lvl;
+    for(let divClass of divResource.classList){
+        if(divClass.startsWith(BUILDING_LOCATION_ID)){
+            locationId = parseInt(divClass.substring(BUILDING_LOCATION_ID.length));
+        }
+        if(divClass.startsWith(BUILDING_GID)){
+            gid = parseInt(divClass.substring(BUILDING_GID.length));
+        }
+    }
+    lvl = parseInt(divResource.getElementsByTagName('div')[0].innerText);
+    return new Building(locationId, gid, lvl);
+}
+
+
+
+function regexSearchMultiple(regex, text) {
+    let results = [];
+    let re = new RegExp(regex,"g");
+    let matches = re[Symbol.matchAll](text);
+    for (const match of matches) {
+        //console.log("multiple matches", match);
+        if(match !== null && match.length > 1){
+            results.push(match[1]);
+        }
+    }
+    return results;
+}
+
+function xPathSearch(xPath, htmlString) {
+    let doc = toHtmlElement(htmlString);
+    return doc.evaluate(xPath, doc.body, null, XPathResult.ANY_TYPE, null);
+}
+
+async function getTextFromPage(pathname, params, time) {
+    let pageCall = await callFetchWithBaseUrl(pathname + params, {}, time);
+    return  await pageCall.text();
+}
+
 function parseResources (pageString) {
     let resourceText = regexSearchOne(REGEX_RESOURCES_VAR, pageString, "gs");
     resourceText = makeValidJsonResource(resourceText);
@@ -165,4 +214,14 @@ function parseCurrentlyBuildingJS (pageString) {
         }
     }
     return buildings;
+}
+
+function getSidebarVillageBox(pageString) {
+    let doc = toHtmlElement(pageString);
+    return doc.getElementById('sidebarBoxVillagelist');
+}
+
+function getProductionTableBodyContainerF() {
+    let production = document.getElementById('production');
+    return  production.getElementsByTagName('tbody')[0];
 }

@@ -15,13 +15,3 @@ function xPathSearchDoc(xPath) {
     return  document.evaluate(xPath, document.body, null, XPathResult.ANY_TYPE, null);
 }
 
-/*
-const regexSearchSingle = (regex, text) => {
-    let re = new RegExp(regex,"g");
-    let result = re.exec(text);
-    if(result !== null && result.length > 1){
-        return  result[1];
-    }
-    return null;
-}*/
-

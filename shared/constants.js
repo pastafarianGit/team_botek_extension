@@ -103,7 +103,10 @@ const REGEX_TRIBE = 'tribe(\\d)"';
 const CONTRACT_BUILDING = 'contract_building';
 
 const MAIN_BUILDING_ID = 15;
-
+const WOOD_TYPE = 1;
+const DROPDOWN_CSS_NEW = "-new";
+const DROPDOWN_CSS_TRAIN = "-train";
+const DROPDOWN_CSS_EXISTING = "-existing";
 
 //
 let DROP_DOWN = '    <div id="" class="bootstrap">\n' +
@@ -116,6 +119,10 @@ let DROP_DOWN = '    <div id="" class="bootstrap">\n' +
     '      </div>\n' +
     '</div>\n' +
     '</div>\n';
+
+let CHECKBOX = '<td class="all-res"> ' +
+                    '<input type="checkbox" id="" name="" value=""> ' +
+                '</td>'
 
 const HEADERS_TO_STRIP = [
     "content-security-policy",

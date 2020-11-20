@@ -11,7 +11,7 @@ function showDropDownForTrainPer() {
     }
 
     const {buildingType, buildingLvl} = getBuildingTypeLevel();
-    const dropDownNode = createDropDown(SELECT_OPTIONS_TRAIN, onSelectedTrain, buildingType, '-train', ADD_UNITS_NAME);
+    const dropDownNode = createDropDown(SELECT_OPTIONS_TRAIN, onSelectedTrain, buildingType, DROPDOWN_CSS_TRAIN, ADD_UNITS_NAME);
     trainUnitsContainer.append(dropDownNode);
 }
 
