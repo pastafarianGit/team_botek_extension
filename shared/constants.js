@@ -18,10 +18,13 @@ const BUILDING_GID = "gid";
 const BUILDING_AID = "aid";
 const BUILDING_LEVEL = "level";
 const BUILDING_LOCATION_ID = "buildingSlot";
-const SELECT_OPTIONS_TRAIN = ['15min', '30min', '45min', '1h', '2h'];
+const HOUR = "h";
+const MIN = "min";
+const SELECT_OPTIONS_TRAIN = ['15 '+ MIN, '30 '+ MIN, '45 '+MIN, '1 '+HOUR, '2 '+HOUR];
 const ADD_BUILDING_NAME = 'add building ';
 const ADD_UNITS_NAME = 'train per ';
-
+const ALL_RES_LOCATION_ID = 100;
+const TPYES_NAMES = {1: "Wood", 2: "Clay", 3: "Iron", 4: "Crop"};
 // ACTIONS
 const CHANGE_VILLAGE_ACTION = 'change_village_action';
 const IS_TAB_ACTIVE_ACTION = "is_tab_active_action";

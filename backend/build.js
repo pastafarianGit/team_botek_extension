@@ -3,7 +3,7 @@ function buildAndHandleErrors(task){
     updateBotStatusGUI(BOT_IS_BUILDING_STATUS);
     build(task, village)
         .then(result => {
-            console.log("update_villages_action", villages);
+            console.log("update_villages_action", villages, result);
             sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
             updateWorkingBotStatus();
 
@@ -23,7 +23,7 @@ function handleBuildErrors(err, task, village){
             console.log("add time from now when next task available", minTime);
             break;
         case ERROR_TASK_LOWER_LVL_THAN_BUILDING:
-            BuildTaskHelper.deleteTask(task.uuid, village.buildTasks);
+            BuildTaskHelper.deleteTaskIfDone(task, village);
             break;
         case ERROR_TASK_DIFF_TYPE_THAN_BUILDING:
             BuildTaskHelper.deleteTask(task.uuid, village.buildTasks);
@@ -136,7 +136,7 @@ async function upgradeBuilding(taskBuilding, pageString) {
 
 
 
-async function createNewBuilding(taskBuilding, pageString) {
+async function createNewBuilding(taskBuilding) {
     const storedBuilding = buildingsData[taskBuilding.type];
     let changeTab = await getTextAndCheckLogin(BUILD_PATH + taskBuilding.locationId  , CATEGORY_PARAM + storedBuilding.category, 3000);
 
@@ -160,10 +160,11 @@ async function createNewBuilding(taskBuilding, pageString) {
 function addBuildTaskToQueue(village) {
     if(village.buildTasks.length > 0){
         if(tribe === TRIBE_ROMANS){
-            buildTaskPushToQueue(village, ROMANS_DORF1_ID);
-            buildTaskPushToQueue(village, ROMANS_DORF2_ID);
+            const b1 = buildTaskPushToQueue(village, ROMANS_DORF1_ID);
+            const b2 = buildTaskPushToQueue(village, ROMANS_DORF2_ID);
+            return (b1 || b2);
         }else{
-            buildTaskPushToQueue(village, BOTH_BUILD_ID);
+            return  buildTaskPushToQueue(village, BOTH_BUILD_ID);
         }
     }
 }
@@ -172,6 +173,6 @@ function buildTaskPushToQueue (village, timerType) {
     console.log("next check time is: ", village.timers.nextCheckTime(timerType), "type: ", timerType);
     if(village.timers.isNextCheckTime(timerType)){
         const buildTask = BuildTaskHelper.getNextTask(village, timerType);
-        addToQueueAndUpdateTimer(buildTask, village, timerType);
+        return addToQueueAndUpdateTimer(buildTask, village, timerType);
     }
 }

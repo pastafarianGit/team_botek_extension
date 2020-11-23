@@ -16,7 +16,7 @@ onStartUp();
 
 function onStartUp() {
     setInterval(mainLoop, 15000);
-    //testStartup();
+    testStartup();
 }
 
 function testStartup() {
@@ -84,7 +84,8 @@ function toggleSleep() {
 
 function addTasksToQueue() {
     for (let village of villages){
-        addBuildTaskToQueue(village);
+        const isBuildAdded = addBuildTaskToQueue(village);
+        addTrainTaskToQueue(village, isBuildAdded);
     }
 }
 
@@ -94,6 +95,8 @@ function addToQueueAndUpdateTimer (task, village, timerType) {
     }
     console.log("add 15 mins to timerType", timerType);
     village.timers.add15Mins(timerType);
+
+    return (task !== null);
 }
 
 async function checkAndLogin() {

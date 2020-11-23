@@ -77,6 +77,7 @@ function analyseBackgroundContent (village, pageString) {
     village.resources = parseResources(pageString);
     village.currentlyBuilding = parseCurrentlyBuilding(pageString, village);
     village.timers.updateTimers(village.currentlyBuilding);
+    BuildTaskHelper.addLvlForCurrentlyBuilding(village);
     checkForNewVillage(pageString);
 }
 

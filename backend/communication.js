@@ -1,6 +1,7 @@
 
 chrome.runtime.onMessage.addListener(  // from inside content extension
     function(request, sender, sendResponse) {
+        console.log("on content communication", request);
         if(baseServerUrl === ""){
             sendResponse(false);
             return false;
@@ -10,7 +11,7 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
             case IS_TAB_ACTIVE_ACTION:
                 if(newBotOpen.updateProfile){
                     analyseVillagesOnStart(sendResponse);
-                    isTabActive(sendResponse);
+                    //isTabActive(sendResponse);
                     handleNoBearerKey();
                 }else{
                     isTabActive(sendResponse);
@@ -49,7 +50,8 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
 
 chrome.runtime.onMessageExternal.addListener(   // from botkeGui
     (request, sender, sendResponse) => {
-        //console.log("onMessageExternal", request);
+        console.log("on botkeGui communication", request);
+
         switch (request.action) {
             case UPDATE_BUILD_TASK_ACTION:
                 let village = VillagesHelper.findVillage(villages, request.data.village.did);
@@ -75,9 +77,8 @@ chrome.runtime.onConnectExternal.addListener((port) => { // connection with GUI
     //console.log("gui onConnectExternal");
     guiPortConnection = port;
     port.onMessage.addListener((msg) => {
-        console.log("gui on msg");
+        console.log("gui on msg", msg);
         return false;
-        // See other examples for sample onMessage handlers.
     });
     return false;
 });
@@ -101,12 +102,19 @@ function updateWorkingBotStatus() {
 
 function sendMessageToGUI(action, data) {
     if(guiPortConnection !== null){
-        guiPortConnection.postMessage({action: action, data:data});
+        console.log("on GUI msg send", action);
+        guiPortConnection.postMessage({action: action, data:data}, (response)=>{
+            console.log("on GUI response", response);
+        });
     }
 }
 
 function sendMessageToBotTab(action, data){
-    chrome.tabs.sendMessage(botTabId, {action: action, data: data}, function(response) {});
+    try {
+        chrome.tabs.sendMessage(botTabId, {action: action, data: data}, function(response) {});
+    }catch (e) {
+        console.log("ERROR send msg to BOT TAB", e);
+    }
 }
 
 function openBotTab(tabId){

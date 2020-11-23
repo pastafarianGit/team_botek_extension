@@ -15,12 +15,12 @@ function showDropDownForTrainPer() {
     trainUnitsContainer.append(dropDownNode);
 }
 
-function onSelectedTrain(buildingType) {
+function onSelectedTrain(buildingType, timeText) {
     const locationId = getParamFromUrl("id");
-
+    //const time = parseInt(timeString.split[' '][0]);
     const trainUnitsContainer = document.getElementsByClassName('trainUnits')[0];
     const inputs = trainUnitsContainer.getElementsByClassName('text');
-    let trainTask = {did: activeVillage.did, locationId: parseInt(locationId), buildingType: parseInt(buildingType)};
+    let trainTask = {did: activeVillage.did, locationId: parseInt(locationId), buildingType: parseInt(buildingType), timeText: timeText};
     //let availableUnits = [];
     for(let input of inputs){
         const name = input.name;

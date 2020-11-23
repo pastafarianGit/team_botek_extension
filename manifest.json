@@ -13,7 +13,7 @@
   "web_accessible_resources":  ["js/script.js"],
 
   "background": {
-    "scripts": ["shared/res/buildings.js", "shared/res/troops.js","shared/constants.js","shared/helperFun.js", "shared/classes.js", "shared/parse.js", "backend/tabs.js","backend/analyse.js", "backend/build.js","backend/communication.js","backend/main.js","backend/background.js"]
+    "scripts": ["shared/res/buildings.js", "shared/res/troops.js","shared/constants.js","shared/helperFun.js", "shared/classes.js", "shared/parse.js", "backend/tabs.js","backend/analyse.js", "backend/build.js","backend/train.js","backend/communication.js","backend/main.js","backend/background.js"]
   },
   "externally_connectable": {
     "matches": ["http://localhost:8080/*", "http://localhost:4200/", "http://www.travianteambot.com/*"]

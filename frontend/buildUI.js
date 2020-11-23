@@ -1,7 +1,9 @@
-let all_res = {1: true, 2: true, 3: true, 4: true};
+let allResources = {1: true, 2: true, 3: true, 4: true};
 
 function showBuildUI() {
     // const pathname = window.location.pathname;
+    console.log("response showBuildUI ", pathname);
+
     if(pathname === BUILD_PATH_F){
         showUIOnExistingBuilding();
         showUIOnNewBuilding();
@@ -19,15 +21,31 @@ function showAllResourcesUI() {
 function createAllResDropDown() {
     const maxLvl = getMaxResourceLvl();
     const selectOptions = createArrayWithItemsInRange(1, maxLvl);
-    const dropDown = createDropDown(selectOptions, onAllResDropDownSelected, WOOD_TYPE, DROPDOWN_CSS_NEW,  ADD_BUILDING_NAME);
+    const dropDown = createDropDown(selectOptions, allResSelectedListener, WOOD_TYPE, DROPDOWN_CSS_NEW,  ADD_BUILDING_NAME);
 
     let production = document.getElementsByClassName('production')[0];
     production.lastElementChild.replaceWith(dropDown);
 }
 
-function onAllResDropDownSelected(type, lvl) {
-    console.log("on all res", lvl, all_res);
+function allResSelectedListener(type, lvl) {
+    console.log("on all res", lvl, allResources);
+    const locationId = ALL_RES_LOCATION_ID;
+    const types = getSelectedTypes();
+    const buildTask = {lvl: parseInt(lvl), type: types, locationId: parseInt(locationId), did: activeVillage.did};
+    sendMessageToExtension(ADD_BUILD_TASK_ACTION, buildTask, (villages) => {
+        console.log("is task complete", villages);
+    });
+}
 
+function getSelectedTypes() {
+    let selected = [];
+    for (const [key, value] of Object.entries(allResources)) {
+        console.log(key, value);
+        if(value){
+            selected.push(parseInt(key));
+        }
+    }
+    return selected;
 }
 
 function createCheckboxes(productionTable) {
@@ -47,7 +65,7 @@ function createResCheckbox(resType) {
     input.setAttribute('type', 'checkbox');
     input.checked = true;
     input.addEventListener('change', ()=> {
-       all_res[input.value] = input.checked;
+       allResources[input.value] = input.checked;
     });
     td.appendChild(input);
     return td;
@@ -66,7 +84,6 @@ function highlightTasks() {
 function highlightBuildingsTasks() {
     let buildingElements = getBuildingsElements(document);
     for (let element of buildingElements){
-        const container = element.divContainer;
         const isOnLocation = BuildTaskHelper.isTaskOnLocation(element.building.locationId, activeVillage.buildTasks)
         const labelLayer = element.divContainer.getElementsByClassName('labelLayer')[0];
         highlightElement(labelLayer, isOnLocation);
@@ -117,7 +134,7 @@ function showUIOnNewBuilding() {
         console.log("my type ", buildingType);
         const maxLvl = getMaxLvl(buildingType);
         const selectOptions = createArrayWithItemsInRange(1, maxLvl);
-        const dropDownNode = createDropDown(selectOptions, onBuildDropdownSelected, buildingType, DROPDOWN_CSS_NEW, ADD_BUILDING_NAME);
+        const dropDownNode = createDropDown(selectOptions, onBuildDropdownSelectedListener, buildingType, DROPDOWN_CSS_NEW, ADD_BUILDING_NAME);
 
         const contractLink = wrapper.getElementsByClassName('contractLink')[0];
         contractLink.append(dropDownNode);
@@ -142,7 +159,7 @@ function showUIOnExistingBuilding() {
     const {buildingType, buildingLvl} = getBuildingTypeLevel();
     const maxLvl = getMaxLvl(buildingType);
     const selectOptions = createArrayWithItemsInRange(buildingLvl+1, maxLvl);
-    const dropDownNode = createDropDown(selectOptions, onBuildDropdownSelected, buildingType, DROPDOWN_CSS_EXISTING, ADD_BUILDING_NAME);
+    const dropDownNode = createDropDown(selectOptions, onBuildDropdownSelectedListener, buildingType, DROPDOWN_CSS_EXISTING, ADD_BUILDING_NAME);
 
     appendToSection(dropDownNode);
 }
@@ -171,9 +188,9 @@ function setHiddenChildToTakeSpace() {
 }
 
 
-function onBuildDropdownSelected(type, lvl) {
+function onBuildDropdownSelectedListener(type, lvl) {
     const locationId = getParamFromUrl("id");
-    const buildTask = {lvl: parseInt(lvl), type: type, locationId: parseInt(locationId), did: activeVillage.did};
+    const buildTask = {lvl: parseInt(lvl), type: parseInt(type), locationId: parseInt(locationId), did: activeVillage.did};
     modifyLocationForWall(buildTask);
     sendMessageToExtension(ADD_BUILD_TASK_ACTION, buildTask, (villages) => {
         console.log("is task complete", villages);
