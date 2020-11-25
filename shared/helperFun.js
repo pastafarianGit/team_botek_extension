@@ -1,5 +1,5 @@
 
-async function getTextAndCheckLogin(pathname, params, time){
+async function getText(pathname, params, time){
     let pageString = await getTextFromPage(pathname, params, time);
 
     const isLogInPage = isOnLogInPage(pathname, pageString);
@@ -15,7 +15,8 @@ async function logIn(isLogIn){
     let users = await getFromStorage('users');
     let user = findUser(users);
     user.login = isLogIn;
-    return makePostRequest(baseServerUrl + LOGIN_PATHNAME, user);
+    let bodyData = "name=" + encodeURIComponent(user.name) + "&password=" + encodeURIComponent(user.password) + "&s1=" + encodeURIComponent(user.s1) + "&w=" + encodeURIComponent(user.w) + "&login=" + encodeURIComponent(user.login);
+    return makePostRequest(baseServerUrl + LOGIN_PATHNAME, bodyData);
 }
 
 async function getFromStorage(data){
@@ -48,12 +49,12 @@ function makeValidJsonResource(text) {
     return text;
 }
 
-async function makePostRequest(url, params){
+async function makePostRequest(url, body){
+    console.log("make post request", url);
 
-    let formData = "name=" + encodeURIComponent(params.name) + "&password=" + encodeURIComponent(params.password) + "&s1=" + encodeURIComponent(params.s1) + "&w=" + encodeURIComponent(params.w) + "&login=" + encodeURIComponent(params.login);
     const headers = {
         method: 'POST',
-        body: formData,
+        body: body,
         headers:{
             'content-type': 'application/x-www-form-urlencoded',
         }

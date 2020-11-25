@@ -1,17 +1,18 @@
-function buildAndHandleErrors(task){
+function buildWrapper(task){
     let village = VillagesHelper.findVillage(villages, task.did);
     updateBotStatusGUI(BOT_IS_BUILDING_STATUS);
     build(task, village)
         .then(result => {
             console.log("update_villages_action", villages, result);
-            sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
             updateWorkingBotStatus();
-
         }).catch(err => {
             handleBuildErrors(err, task, village);
-            sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
             updateBotStatusGUI(err);
-    });
+        }).finally(() => {
+            sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
+        });
+
+
 }
 
 function handleBuildErrors(err, task, village){
@@ -44,7 +45,7 @@ async function build (task, village) {
     // let village = VillagesHelper.findVillage(villages, task.did);
     await analyseAndSwitchTo(task.building, village);
 
-    let taskStatus = isTaskAvailable(task, village);
+    let taskStatus = BuildTaskHelper.isTaskAvailable(task, village);
     if(taskStatus !== TASK_OK){
         return taskStatus;
     }
@@ -62,22 +63,6 @@ async function tryBuildingAndAnalyse(task, village) {
     analysePageStringDorf12(pageString, village, task.building.isResourceBuilding());
     village.timers.updateTimers(village.currentlyBuilding);
     CurrentlyBuildingHelper.updateIfTaskDone(village);
-}
-
-function isTaskAvailable(task, village) {
-    if(BuildTaskHelper.isTaskUnderLvl(task, village)){
-        return Promise.reject(ERROR_TASK_LOWER_LVL_THAN_BUILDING);
-    }
-    else if (BuildTaskHelper.isTaskDifferentType(task, village)){
-        return Promise.reject(ERROR_TASK_DIFF_TYPE_THAN_BUILDING);
-    }
-    else if(isNotEnoughWarehouseLvl(task, village)){
-        return Promise.reject(ERROR_WAREHOUSE_TOO_LOW);
-    }
-    else if(!village.isEnoughRes(task)){
-        return Promise.reject(ERROR_NOT_ENOUGH_RES);
-    }
-    return TASK_OK;
 }
 
 function isNotEnoughWarehouseLvl (task, village) {
@@ -120,7 +105,7 @@ async function  retrieveC (pageText){
 async function simulateClickBuildingAndPressUpgrade (taskBuilding, village) {
     const liveBuilding = village.buildingsInfo.get(taskBuilding.locationId);
 
-    let buildingPhpPageString = await getTextAndCheckLogin(BUILD_PATH + taskBuilding.locationId, "", 3000);
+    let buildingPhpPageString = await getText(BUILD_PATH + taskBuilding.locationId, "", 3000);
 
     if(liveBuilding.lvl === 0 && !taskBuilding.isResourceBuilding()){ // create new building
         return await createNewBuilding(taskBuilding, buildingPhpPageString);
@@ -131,14 +116,14 @@ async function simulateClickBuildingAndPressUpgrade (taskBuilding, village) {
 
 async function upgradeBuilding(taskBuilding, pageString) {
     let c = await retrieveC(pageString);
-    return await getTextAndCheckLogin(taskBuilding.getLocationTypeURL(), "?a="+taskBuilding.locationId+"&c="+c, 3000)
+    return await getText(taskBuilding.getLocationTypeURL(), "?a="+taskBuilding.locationId+"&c="+c, 3000)
 }
 
 
 
 async function createNewBuilding(taskBuilding) {
     const storedBuilding = buildingsData[taskBuilding.type];
-    let changeTab = await getTextAndCheckLogin(BUILD_PATH + taskBuilding.locationId  , CATEGORY_PARAM + storedBuilding.category, 3000);
+    let changeTab = await getText(BUILD_PATH + taskBuilding.locationId  , CATEGORY_PARAM + storedBuilding.category, 3000);
 
 
     let button = parseGetNewBuildingButton(changeTab, taskBuilding.type);
@@ -149,7 +134,7 @@ async function createNewBuilding(taskBuilding) {
     if(cssClass.includes('new')){
         let onClick = button.getAttribute('onclick')
         const buildPath = regexSearchOne(REGEX_BUILD_PATH_ON_NEW_BUILDING, onClick, 'g');
-        return await getTextAndCheckLogin(buildPath, "", 3000);
+        return await getText(buildPath, "", 3000);
     }else if(cssClass.includes('builder')){
         console.log("can only build with GOLD builder");
     }
@@ -170,7 +155,7 @@ function addBuildTaskToQueue(village) {
 }
 
 function buildTaskPushToQueue (village, timerType) {
-    console.log("next check time is: ", village.timers.nextCheckTime(timerType), "type: ", timerType);
+    // console.log("next check time is: ", village.timers.nextCheckTime(timerType), "type: ", timerType);
     if(village.timers.isNextCheckTime(timerType)){
         const buildTask = BuildTaskHelper.getNextTask(village, timerType);
         return addToQueueAndUpdateTimer(buildTask, village, timerType);

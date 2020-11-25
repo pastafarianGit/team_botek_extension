@@ -47,6 +47,21 @@ async function getTextFromPage(pathname, params, time) {
     return  await pageCall.text();
 }
 
+function parseHiddenInputValuesOnTrain(pageString) {
+    const doc = toHtmlElement(pageString);
+    const buildActionDiv = doc.getElementsByClassName("buildActionOverview")[0];
+    let hiddenInput = {};
+    for(const child of buildActionDiv.children){
+        //console.log("child on train", {child});
+        if(child.tagName === 'INPUT'){
+            hiddenInput[child.name] = child.value;
+            //console.log("input1 ", child.name);
+           // console.log("input2 ", child.value);
+        }
+    }
+    return hiddenInput;
+}
+
 function parseResources (pageString) {
     let resourceText = regexSearchOne(REGEX_RESOURCES_VAR, pageString, "gs");
     resourceText = makeValidJsonResource(resourceText);

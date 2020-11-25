@@ -56,16 +56,22 @@ function mainLoop (){
     }
 
     console.log("main loop", villages);
-    addTasksToQueue();     //ANALYSE WORK TODO
+    addTasksToQueue();
 
     //DO WORK TASK FROM QUEUE
     if(queue.length !== 0){
         const task = queue.shift();
-        console.log("Doing task", task);
-        if(task instanceof BuildTask){
-            buildAndHandleErrors(task);
-        }else if(task instanceof AnalyseTask){
-            analyseVillagesOnStart(null);
+        console.log("doing task: ", task);
+        switch (task.constructor) {
+            case BuildTask:
+                buildWrapper(task);
+                break;
+            case AnalyseTask:
+                analyseVillagesOnStart(null);
+                break;
+            case TrainTask:
+                trainWrapper(task);
+                break;
         }
     }
 }

@@ -125,7 +125,9 @@ function modifyHeaderOrigin (url, requestHeaders) {
     if(url.includes('login')){
         addHeader({name: 'origin', value: baseServerUrl}, requestHeaders)
     }
-    referer = url;
+    if(url.includes(baseServerUrl) && !url.includes('api')){
+        referer = url;
+    }
 }
 
 function handleNotCorrectBearerKey(){
@@ -137,7 +139,7 @@ function handleNotCorrectBearerKey(){
 
 chrome.webRequest.onHeadersReceived.addListener(
     function (details) {
-        console.log("ON RECEIVED", details.statusCode === 401);
+        //console.log("ON RECEIVED", details.statusCode === 401);
         if(details.statusCode === 401) {
             handleNotCorrectBearerKey();
         }

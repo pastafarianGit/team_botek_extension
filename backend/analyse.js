@@ -1,5 +1,5 @@
 async function analyseVillageProfile () { //get all villages -> link, name, coordinates
-    const pageString = await getTextAndCheckLogin(PROFILE_PATHNAME, "", 300);
+    const pageString = await getText(PROFILE_PATHNAME, "", 300);
     serverSettings = parseServerSettings(pageString);
     let villagesLinks  = regexSearchMultiple(REGEX_VILLAGE_LINK, pageString);
     return parseVillages(pageString, villagesLinks);
@@ -48,13 +48,13 @@ function parseTribe (pageString) {
 
 async function analyseDorf1(village) {
     sendMessageToBotTab(CHANGE_VILLAGE_ACTION, village);
-    let pageString = await getTextAndCheckLogin(DORF1_PATHNAME, NEW_DID_PARAM + village.did, 3000);
+    let pageString = await getText(DORF1_PATHNAME, NEW_DID_PARAM + village.did, 3000);
     parseAndUpdateDorf1(pageString, village);
 }
 
 async function analyseDorf2(village) {
     sendMessageToBotTab(CHANGE_VILLAGE_ACTION, village);
-    let pageString = await getTextAndCheckLogin(DORF2_PATHNAME, NEW_DID_PARAM + village.did, 3000);
+    let pageString = await getText(DORF2_PATHNAME, NEW_DID_PARAM + village.did, 3000);
     parseAndUpdateDorf2(pageString, village);
 }
 
@@ -88,6 +88,13 @@ function checkForNewVillage(pageString){
         console.log("number of villages", ul.childElementCount);
         queue.push(new AnalyseTask());
     }
+}
+
+function analyseTrainBuilding(pageString){
+    // pridobi z, a, s, s1
+    const hiddenInputValuesOnTrain = parseHiddenInputValuesOnTrain(pageString);
+    return hiddenInputValuesOnTrain;
+    //return {z: 1, a: 2, s: 3, s1: 4};
 }
 
 async function fetchAndCheckIfLoggedIn(pathname){

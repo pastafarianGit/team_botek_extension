@@ -20,11 +20,12 @@ const BUILDING_LEVEL = "level";
 const BUILDING_LOCATION_ID = "buildingSlot";
 const HOUR = "h";
 const MIN = "min";
-const SELECT_OPTIONS_TRAIN = ['15 '+ MIN, '30 '+ MIN, '45 '+MIN, '1 '+HOUR, '2 '+HOUR];
+const DONE = 'done';
+const SELECT_OPTIONS_TRAIN = ['1 ' + MIN, '2 ' + MIN, '15 '+ MIN, '30 '+ MIN, '45 '+MIN, '1 '+HOUR, '2 '+HOUR];
 const ADD_BUILDING_NAME = 'add building ';
 const ADD_UNITS_NAME = 'train per ';
 const ALL_RES_LOCATION_ID = 100;
-const TPYES_NAMES = {1: "Wood", 2: "Clay", 3: "Iron", 4: "Crop"};
+const TYPES_NAMES = {1: "Wood", 2: "Clay", 3: "Iron", 4: "Crop"};
 // ACTIONS
 const CHANGE_VILLAGE_ACTION = 'change_village_action';
 const IS_TAB_ACTIVE_ACTION = "is_tab_active_action";
@@ -57,6 +58,7 @@ const ERROR_NO_PREREQUISITE = "Not meeting prerequisite";
 const HIGHLIGHT_TASK_CSS = 'highlight-task';
 const TASK_OK = "TASK_ok";
 const ERROR_WAREHOUSE_TOO_LOW = "warehouse too low";
+const ERROR_NO_UNITS_TO_TRAIN = "no units to train";
 
 const BOTH_BUILD_ID = 0;
 const RES_ID = 1;
@@ -79,7 +81,7 @@ const DORF2_PATHNAME = "/dorf2.php";
 const LOGIN_PATHNAME = "/login.php";
 const BUILD_PATH = "/build.php?id=";
 const PROFILE_PATHNAME ="/profile";
-
+const AND_GID_PARAM = '&gid='
 const CATEGORY_PARAM = "&category=";
 const NEW_DID_PARAM = "?newdid="
 

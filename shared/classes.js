@@ -19,6 +19,7 @@ let Village = class {
         this.trainTasks = [];
         this.currentlyBuilding = [];
         this.isCapital = false;
+        this.isInQueue = false
     }
 
     addParams(x, y, isCapital, name) {
@@ -113,6 +114,7 @@ class ServerSettings {
 }
 
 class TrainTaskHelper {
+
     static getTimeInMiliSec(trainTask){
         let split = trainTask.timeText.split(" ");
         let time = parseInt(split[0]);
@@ -122,6 +124,51 @@ class TrainTaskHelper {
         }
         return time * 60 * 1000;
     }
+
+    static initTimers(trainTask){
+        trainTask.timer = TrainTaskHelper.getTimeInMiliSec(trainTask);
+        trainTask.timerUpdate = Date.now() + trainTask.timer;
+    }
+
+    static isTaskOverdo(task) {
+        return (task.timerUpdate < Date.now());
+    }
+
+    static resetTask(task){
+        task.timerUpdate = Date.now() + task.timer;
+        for(const unit of task.units){
+            unit.todo = unit.value;
+        }
+    }
+
+    static isThereUnitToTrain(task){
+        for(let unit of task.units){
+            if(unit.todo > 0){
+                return true
+            }
+        }
+        return  false;
+    }
+
+    static subtractDoneUnits(task){ // TODO subtract number and not all
+        for(const unit of task.units){
+            unit.todo = 0;
+        }
+    }
+
+    static isTaskAvailable(task, village) {
+        if(!TrainTaskHelper.isThereUnitToTrain(task)){
+            return Promise.reject(ERROR_NO_UNITS_TO_TRAIN);
+        }
+        return TASK_OK;
+    }
+
+
+    static isTimerAfterAwhile(task) {
+        const halfWayPoint  = task.timerUpdate - (task.timer / 2);
+        return (Date.now() > halfWayPoint);
+    }
+
 }
 
 
@@ -165,7 +212,7 @@ class Building {
     getNamesFromTypes(types){
         let name = "";
         for(let type of types){
-           name += TPYES_NAMES[type] + ", "
+           name += TYPES_NAMES[type] + ", "
         }
         name = name.slice(0, -2);
         return name;
@@ -372,6 +419,22 @@ class BuildTaskHelper {
                }
         }
     }
+
+    static isTaskAvailable(task, village) {
+        if(BuildTaskHelper.isTaskUnderLvl(task, village)){
+            return Promise.reject(ERROR_TASK_LOWER_LVL_THAN_BUILDING);
+        }
+        else if (BuildTaskHelper.isTaskDifferentType(task, village)){
+            return Promise.reject(ERROR_TASK_DIFF_TYPE_THAN_BUILDING);
+        }
+        else if(isNotEnoughWarehouseLvl(task, village)){
+            return Promise.reject(ERROR_WAREHOUSE_TOO_LOW);
+        }
+        else if(!village.isEnoughRes(task)){
+            return Promise.reject(ERROR_NOT_ENOUGH_RES);
+        }
+        return TASK_OK;
+    }
 }
 class AnalyseTask {
     constructor() {
@@ -410,6 +473,28 @@ class BuildTask {
     }
 }
 
+class TrainTask {
+    building;
+    did;
+    timeText;
+    timer;
+    uuid;
+    timerUpdate;
+    constructor(trainData, village){
+        this.building = village.buildingsInfo.get(trainData.locationId)
+        delete trainData.locationId;
+
+        for (const property in trainData) {
+            if(trainData.hasOwnProperty(property)){
+                this[property] = trainData[property];
+            }
+        }
+        this.timer = TrainTaskHelper.getTimeInMiliSec(trainData);
+        this.uuid = getUuidv4();
+        this.timerUpdate = Date.now();
+        //TrainTaskHelper.resetTaskTimer(this);
+    }
+}
 
 class CurrentlyBuildingHelper {
 

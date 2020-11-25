@@ -1,7 +1,7 @@
 
 chrome.runtime.onMessage.addListener(  // from inside content extension
     function(request, sender, sendResponse) {
-        console.log("on content communication", request);
+        //console.log("on content communication", request);
         if(baseServerUrl === ""){
             sendResponse(false);
             return false;
@@ -37,9 +37,9 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 sendResponse(true);
                 break;
             case BEARER_KEY_ACTION:
-                console.log("bearer", request.data);
+                // console.log("bearer", request.data);
                 if(request.data){
-                    console.log("changed bearer", request.data);
+                    // console.log("changed bearer", request.data);
                     bearerKey = request.data;
                     closeBackgroundWindow();
                 }
@@ -103,9 +103,13 @@ function updateWorkingBotStatus() {
 function sendMessageToGUI(action, data) {
     if(guiPortConnection !== null){
         console.log("on GUI msg send", action);
-        guiPortConnection.postMessage({action: action, data:data}, (response)=>{
-            console.log("on GUI response", response);
-        });
+        try {
+            guiPortConnection.postMessage({action: action, data:data}, (response)=>{
+                console.log("on GUI response", response);
+            });
+        }catch (e) {
+            console.error("error sending msg to GUI", action, data, guiPortConnection);
+        }
     }
 }
 
@@ -116,6 +120,8 @@ function sendMessageToBotTab(action, data){
         console.log("ERROR send msg to BOT TAB", e);
     }
 }
+
+
 
 function openBotTab(tabId){
     chrome.tabs.update(tabId, {url: SERVER_URL});

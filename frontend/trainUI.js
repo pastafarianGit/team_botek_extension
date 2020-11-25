@@ -20,12 +20,13 @@ function onSelectedTrain(buildingType, timeText) {
     //const time = parseInt(timeString.split[' '][0]);
     const trainUnitsContainer = document.getElementsByClassName('trainUnits')[0];
     const inputs = trainUnitsContainer.getElementsByClassName('text');
-    let trainTask = {did: activeVillage.did, locationId: parseInt(locationId), buildingType: parseInt(buildingType), timeText: timeText};
+    let trainTask = {did: activeVillage.did, locationId: parseInt(locationId), timeText: timeText};
     //let availableUnits = [];
+    trainTask.units = [];
     for(let input of inputs){
         const name = input.name;
-        const value = input.value;
-        trainTask[name] = value;
+        const value = parseInt(input.value);
+        trainTask.units.push({name: name, value: value, todo: value});
         console.log("on train selected", input);
         console.log("on train selected", name, value);
     }
