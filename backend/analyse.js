@@ -6,11 +6,12 @@ async function analyseVillageProfile () { //get all villages -> link, name, coor
 }
 
 function analyseVillagesOnStart(sendResponse){
+    console.log("analyse villages on start");
     updateBotStatusGUI(BOT_IS_ANALYSING_VILLAGES);
     analyseVillageProfile()
         .then(result => {
             villages = result;
-            sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn});
+            sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn, tribe: tribe});
             if(sendResponse){
                 isTabActive(sendResponse);
             }

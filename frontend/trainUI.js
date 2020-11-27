@@ -24,11 +24,11 @@ function onSelectedTrain(buildingType, timeText) {
     //let availableUnits = [];
     trainTask.units = [];
     for(let input of inputs){
-        const name = input.name;
+        const type = input.name;
         const value = parseInt(input.value);
-        trainTask.units.push({name: name, value: value, todo: value});
+        trainTask.units.push({type: type, value: value, todo: value});
         console.log("on train selected", input);
-        console.log("on train selected", name, value);
+        console.log("on train selected", type, value);
     }
 
     sendMessageToExtension(ADD_TRAIN_TASK_ACTION, trainTask, (villages) => {

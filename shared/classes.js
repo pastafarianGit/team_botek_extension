@@ -169,6 +169,21 @@ class TrainTaskHelper {
         return (Date.now() > halfWayPoint);
     }
 
+    static deserializationToTrainTaskObject(trainTasks) {
+        console.log("qwe trainTasks", trainTasks);
+        let convertTrainTasks = [];
+        for(const _task of trainTasks){
+            Object.setPrototypeOf( _task.building, Building.prototype)
+            let task = Object.setPrototypeOf(_task, TrainTask.prototype);
+            convertTrainTasks.push(task);
+
+            /*let building = Object.assign(new Building(), task.building);
+            console.log("building", building);
+            let task = Object.assign(new TrainTask(), task);
+            console.log("task", task);*/
+        }
+        return convertTrainTasks;
+    }
 }
 
 
@@ -372,11 +387,11 @@ class BuildTaskHelper {
         return newTasks;
     }
 
-    static convertToBuildTaskObject(data){
+    static deserializationToBuildTaskObject(data){
         let buildTasks = [];
         for(let task of data){
             if(Array.isArray(task)){
-                buildTasks.push(this.convertToBuildTaskObject(task));
+                buildTasks.push(this.deserializationToBuildTaskObject(task));
             }else{
                 buildTasks.push(new BuildTask(new Building(task.building.locationId, task.building.type, task.building.lvl), task.did, task.uuid, task.isChecked));
             }
@@ -480,6 +495,7 @@ class TrainTask {
     timer;
     uuid;
     timerUpdate;
+    units = [];
     constructor(trainData, village){
         this.building = village.buildingsInfo.get(trainData.locationId)
         delete trainData.locationId;
@@ -492,7 +508,31 @@ class TrainTask {
         this.timer = TrainTaskHelper.getTimeInMiliSec(trainData);
         this.uuid = getUuidv4();
         this.timerUpdate = Date.now();
-        //TrainTaskHelper.resetTaskTimer(this);
+        this.addNames();
+    }
+
+    addNames() {
+        const unitsData = this.getTribeUnitData();
+        for(let unit of this.units){
+            const index = this.getUnitId(unit);
+            unit.typeNum = index;
+            unit.name = unitsData[index].name;
+        }
+    }
+
+    getUnitId(unit){
+        return parseInt(unit.type.substring(1));
+    }
+
+    getTribeUnitData(){
+        switch(tribe){
+            case (TRIBE_ROMANS):
+                return romanTroops;
+            case (TRIBE_GAULS):
+                return gaulTroops;
+            case (TRIBE_TEUTONS):
+                return teutonTroops;
+        }
     }
 }
 
@@ -552,17 +592,6 @@ class CurrentlyBuildingHelper {
         }
         return false;
     }
-
-    /*static getFinishBuildingTime(isRes, tasks){
-        if(isRes){
-            for (let task of tasks){
-                if(task.building.isResourceBuilding() === isRes){
-                    return task.timeToBuild;
-                }
-            }
-        }
-        return -1;
-    }*/
 }
 
 class Timers {

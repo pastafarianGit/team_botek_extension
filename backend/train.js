@@ -56,7 +56,7 @@ async function train(task, village) {
 function createUriComponentUnits(units){
     let unitsString = "";
     for(const unit of units){
-        unitsString += "&" + unit.name +"=" + encodeURIComponent(unit.value);
+        unitsString += "&" + unit.type +"=" + encodeURIComponent(unit.value);
     }
     return unitsString;
 }

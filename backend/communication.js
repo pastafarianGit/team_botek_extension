@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 break;
             case GET_IFRAME_URL_ACTION:
                 sendResponse(urlForFrontEnd);
-                sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn});
+                sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn, tribe: tribe});
                 break;
             case CHANGE_VILLAGE_ACTION:
                 sendResponse(true);
@@ -55,7 +55,8 @@ chrome.runtime.onMessageExternal.addListener(   // from botkeGui
         switch (request.action) {
             case UPDATE_BUILD_TASK_ACTION:
                 let village = VillagesHelper.findVillage(villages, request.data.village.did);
-                village.buildTasks = BuildTaskHelper.convertToBuildTaskObject(request.data.village.buildTasks);
+                village.buildTasks = BuildTaskHelper.deserializationToBuildTaskObject(request.data.village.buildTasks);
+                village.trainTasks = TrainTaskHelper.deserializationToTrainTaskObject(request.data.village.trainTasks);
                 sendMessageToBotTab(UPDATE_VILLAGES_ACTION, villages);
                 sendResponse(true);
                 break;
