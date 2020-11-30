@@ -30,3 +30,9 @@ function runOnActiveId(runFun) {
         }
     )
 }
+
+function closeBotIfAlreadyOpened(tabId) {
+    if(tabId){
+        chrome.tabs.remove(tabId, () => {});
+    }
+}

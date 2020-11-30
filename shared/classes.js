@@ -450,6 +450,11 @@ class BuildTaskHelper {
         }
         return TASK_OK;
     }
+
+    static setNewTimeToBuild(task, secToBuild){
+        task.timeToBuild = Date.now() + secToBuild * 1000;
+    }
+
 }
 class AnalyseTask {
     constructor() {
@@ -469,10 +474,6 @@ class BuildTask {
         this.uuid = uuid;
         this.setTimerType();
         this.isChecked = isChecked;
-    }
-
-    setNewTimeToBuild(secToBuild){
-        this.timeToBuild = Date.now() + secToBuild * 1000;
     }
 
     setTimerType(){

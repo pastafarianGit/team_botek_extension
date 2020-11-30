@@ -5,9 +5,9 @@ function buildWrapper(task){
         .then(result => {
             console.log("update_villages_action", villages, result);
             updateWorkingBotStatus();
-        }).catch(err => {
-            handleBuildErrors(err, task, village);
-            updateBotStatusGUI(err);
+        }).catch(error => {
+            handleBuildErrors(error, task, village);
+            updateBotStatusGUI(error);
         }).finally(() => {
             sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
         });
@@ -105,7 +105,7 @@ async function  retrieveC (pageText){
 async function simulateClickBuildingAndPressUpgrade (taskBuilding, village) {
     const liveBuilding = village.buildingsInfo.get(taskBuilding.locationId);
 
-    let buildingPhpPageString = await getText(BUILD_PATH + taskBuilding.locationId, "", 3000);
+    let buildingPhpPageString = await getText(BUILD_PATH + PARAM_ID + taskBuilding.locationId, "", 3000);
 
     if(liveBuilding.lvl === 0 && !taskBuilding.isResourceBuilding()){ // create new building
         return await createNewBuilding(taskBuilding, buildingPhpPageString);
@@ -123,7 +123,7 @@ async function upgradeBuilding(taskBuilding, pageString) {
 
 async function createNewBuilding(taskBuilding) {
     const storedBuilding = buildingsData[taskBuilding.type];
-    let changeTab = await getText(BUILD_PATH + taskBuilding.locationId  , CATEGORY_PARAM + storedBuilding.category, 3000);
+    let changeTab = await getText(BUILD_PATH + PARAM_ID + taskBuilding.locationId  , CATEGORY_PARAM + storedBuilding.category, 3000);
 
 
     let button = parseGetNewBuildingButton(changeTab, taskBuilding.type);

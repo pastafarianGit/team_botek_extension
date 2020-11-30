@@ -42,6 +42,7 @@ const BEARER_KEY_ACTION = 'bearer_key_action';
 const BOT_IS_SLEEPING_STATUS = "sleeping";
 const BOT_IS_WORKING_STATUS = "working";
 const BOT_IS_BUILDING_STATUS = "building";
+const BOT_IS_TRAINING_STATUS = "training";
 const BOT_IS_ON_PAUSE_STATUS = "on pause";
 const BOT_IS_ANALYSING_VILLAGES = "analysing all villages";
 
@@ -79,11 +80,13 @@ const ANALYSE_TYPE = "build_dorf1";
 const DORF1_PATHNAME = "/dorf1.php"; // todo changing to dorf1.php
 const DORF2_PATHNAME = "/dorf2.php";
 const LOGIN_PATHNAME = "/login.php";
-const BUILD_PATH = "/build.php?id=";
+const BUILD_PATH = "/build.php?";
 const PROFILE_PATHNAME ="/profile";
 const AND_GID_PARAM = '&gid='
 const CATEGORY_PARAM = "&category=";
 const NEW_DID_PARAM = "?newdid="
+const PARAM_ID = "id="
+const FARM_LIST_PARAMS = "?id=39&gid=16&tt=99";
 
 
 const REGEX_VILLAGE_NAME = "<span class=\"name\">(.*)<\\/span>";

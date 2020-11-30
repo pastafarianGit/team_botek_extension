@@ -23,15 +23,19 @@ function addTrainTaskToQueue(village, isBuildTaskAdded) {
 
 function trainWrapper(task) {
     let village = VillagesHelper.findVillage(villages, task.did);
+    updateBotStatusGUI(BOT_IS_TRAINING_STATUS);
 
     train(task, village)
         .then(result => {
             console.log("train worked", result, new Date().toLocaleTimeString());
+            updateWorkingBotStatus();
         })
         .catch(error => {
             console.log("train error", error);
+            updateBotStatusGUI(error);
         }).finally(() => {
-            if(TrainTaskHelper.isTaskOverdo(task)){
+
+        if(TrainTaskHelper.isTaskOverdo(task)){
                 TrainTaskHelper.resetTask(task);
             }
             task.isInQueue = false;
@@ -65,10 +69,10 @@ async function simulateClickBuildingAndTrain(task) {
     const building = task.building;
     const params = building.locationId + AND_GID_PARAM + building.type;
 
-    let buildingPageString = await getText(BUILD_PATH, params, 2000);
+    let buildingPageString = await getText(BUILD_PATH + PARAM_ID, params, 2000);
 
     const bodyData = createBodyData(task, buildingPageString);
-    return makePostRequest(baseServerUrl+ BUILD_PATH +params, bodyData);
+    return makePostRequest(baseServerUrl+ BUILD_PATH + PARAM_ID + params, bodyData);
 }
 
 function createBodyData(task, pageString) {

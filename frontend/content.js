@@ -51,6 +51,7 @@ function handleTravianPageOpened(){
                 updateContentVariables(data.villages);
                 showBuildUI();
                 showTrainUI();
+                showFarmUI();
                 highlightTasks();
                 if(activeVillage !== null){
                     console.log("response active village ", activeVillage);

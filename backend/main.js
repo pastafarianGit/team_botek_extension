@@ -16,16 +16,15 @@ onStartUp();
 
 function onStartUp() {
     setInterval(mainLoop, 15000);
-    testStartup();
+    //testStartup();
 }
 
 function testStartup() {
         let newURL = "https://tx3.travian.hu/";
-        chrome.tabs.create({ windowId: 1312, url: newURL, active: true }, (tab)=> {
+        chrome.tabs.create({ windowId: 355, url: newURL, active: true }, (tab)=> {
             setTimeout(()=> {
                 openBot();
-            }, 1000)
-           // openBot();
+            }, 2000)
         });
 
 }
@@ -33,16 +32,22 @@ function testStartup() {
 function openBot() {
 
     runOnActiveId((tab) => {
+        closeBotIfAlreadyOpened(botTabId);
         console.log("tab", tab);
         let url = new URL(tab.url);
         console.log("open bot", tab);
         botTabId = tab.id;
         baseServerUrl = url.origin;
-        newBotOpen.updateProfile = true;
-        newBotOpen.updateTribe = true;
-        windowTab = tab.windowId =
+        initVariables();
+        windowTab = tab.windowId;
         setFrontEndUrl(url, tab);
     })
+}
+
+function initVariables() {
+    newBotOpen.updateProfile = true;
+    newBotOpen.updateTribe = true;
+    isBotOn = false;
 }
 
 function mainLoop (){

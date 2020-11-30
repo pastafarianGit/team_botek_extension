@@ -199,7 +199,7 @@ function parseCurrentlyBuilding (pageString, village) {
 
     for(let i = 0; i < timers.length; i++){
         let buildTask = new BuildTask(buildings[i], village.did, null, false);
-        buildTask.setNewTimeToBuild(timers[i]);
+        BuildTaskHelper.setNewTimeToBuild(buildTask, timers[i]);
         currentlyBuildingData.push(buildTask);
     }
     return currentlyBuildingData;

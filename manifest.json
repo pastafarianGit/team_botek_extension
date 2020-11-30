@@ -4,7 +4,7 @@
   "version": "0.0.2",
   "content_scripts": [
     {"matches": ["http://localhost:4200/*","*://*.travian.ae/*", "*://*.travian.com/*", "*://*.travian.asia/*", "*://*.travian.com.au/*", "*://*.travian.ba/*", "*://*.travian.bg/*", "*://*.travian.com.br/*", "*://*.travian.cl/*", "*://*.travian.cz/*", "*://*.travian.de/*", "*://*.travian.dk/*", "*://*.travian.com.eg/*", "*://*.travian.fi/*", "*://*.travian.fr/*", "*://*.travian.gr/*", "*://*.travian.hk/*", "*://*.travian.com.hr/*", "*://*.travian.hu/*", "*://*.travian.co.id/*", "*://*.travian.co.il/*", "*://*.travian.ir/*", "*://*.travian.it/*", "*://*.travian.jp/*", "*://*.travian.lt/*", "*://*.travian.com.my/*", "*://*.travian.net/*", "*://*.travian.nl/*", "*://*.travian.no/*", "*://*.travian.pl/*", "*://*.travian.pt/*", "*://*.travian.ro/*", "*://*.travian.rs/*", "*://*.travian.ru/*", "*://*.travian.com.sa/*", "*://*.travian.se/*", "*://*.travian.si/*", "*://*.travian.sk/*", "*://*.travian.com.tr/*", "*://*.travian.tw/*", "*://*.travian.co.uk/*", "*://*.travian.us/*", "*://*.travian.vn/*", "http://www.travianteambot.com/*"],
-      "js": ["js/jquery.js","js/bootstrap.min.js","shared/res/buildings.js","shared/constants.js","shared/helperFun.js", "shared/classes.js", "shared/parse.js","frontend/analyse.js", "frontend/buildUI.js", "frontend/trainUI.js","frontend/content.js"],
+      "js": ["js/jquery.js","js/bootstrap.min.js","shared/res/buildings.js","shared/constants.js","shared/helperFun.js", "shared/classes.js", "shared/parse.js","frontend/analyse.js", "frontend/buildUI.js", "frontend/trainUI.js","frontend/farmUI.js","frontend/content.js"],
       "css": ["css/bootstrap.min2.css", "css/frontend.css"],
       "run_at": "document_start",
       "all_frames": true

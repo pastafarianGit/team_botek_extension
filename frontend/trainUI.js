@@ -1,4 +1,6 @@
 function showTrainUI(){
+    console.log("train pathname", pathname);
+    console.log("train window location", window.location);
     if(pathname === BUILD_PATH_F) {
         showDropDownForTrainPer();
     }
