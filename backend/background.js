@@ -22,11 +22,12 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
         //console.log("info1: ", info);
         let url = new URL(info.url);
         if(info.initiator !== undefined && info.initiator.includes(EXTENSION_ID) && !SERVER_URL.includes(url.origin)){
+            console.log("url", url);
+            console.log("info", info);
             modifyHeaders(url.pathname, info.requestHeaders);
             modifyHeaderOrigin(info.url, info.requestHeaders);
         }else{
-            modifyHeaders(url.pathname, info.requestHeaders);
-            modifyHeaderOrigin(info.url, info.requestHeaders);
+            //console.log("ELSE INFO", info);
         }
         addBearerKey(info);
         return {requestHeaders: info.requestHeaders};
@@ -125,8 +126,11 @@ function modifyHeaderOrigin (url, requestHeaders) {
     if(url.includes('login')){
         addHeader({name: 'origin', value: baseServerUrl}, requestHeaders)
     }
-    if(url.includes(baseServerUrl) && !url.includes('api')){
-        referer = url;
+    if(url.includes(baseServerUrl)){
+        if(url.includes('.php') || url.endsWith('hero')){
+            console.log("referer new value", url);
+            referer = url;
+        }
     }
 }
 
@@ -210,3 +214,4 @@ chrome.cookies.getAll({}, function (callback) {
         }
     })
 });
+

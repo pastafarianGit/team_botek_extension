@@ -2,11 +2,12 @@
 chrome.runtime.onMessage.addListener(  // from inside content extension
     function(request, sender, sendResponse) {
         //console.log("on content communication", request);
+
         if(baseServerUrl === ""){
             sendResponse(false);
             return false;
         }
-
+        //console.log("sender ", sender);
         switch (request.action) {
             case IS_TAB_ACTIVE_ACTION:
                 if(newBotOpen.updateProfile){
@@ -34,6 +35,7 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
             case ADD_TRAIN_TASK_ACTION:
                 console.log("train task", request.data);
                 addNewTrainTask(request.data);
+                sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
                 sendResponse(true);
                 break;
             case BEARER_KEY_ACTION:
@@ -131,6 +133,5 @@ function openBotTab(tabId){
 
 chrome.browserAction.onClicked.addListener(tab =>{
     console.log("background button clicked1", tab);
-    //travianServer = tab.url;
-    //chrome.tabs.update(tab.id, {url:"http://localhost:4200/"});
+
 });
