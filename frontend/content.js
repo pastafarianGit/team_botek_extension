@@ -5,7 +5,9 @@ console.log("hey botek extension", window.location);
 init();
 
 function init() {
-    document.getElementsByTagName("html")[0].style.display = "none";
+    if(window.location.pathname !== KARTE_PATHNAME){  // bugs map if hiding it there
+        document.getElementsByTagName("html")[0].style.display = "none";
+    }
     window.onload = function () {
         toggleElements("hidden");
         onPageLoad();

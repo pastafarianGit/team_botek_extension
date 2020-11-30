@@ -9,7 +9,6 @@ const TRIBE_TEUTONS = 2;
 const SERVER_URL = "http://localhost:4200/";
 const EXTENSION_ID = "cbnloeijbkamkdkpnieednoedeakkdga";
 // FRONTEND
-const BUILD_PATH_F = "/build.php";
 const XPATH_ACTIVE_VILLAGE_F = '//*[@id="sidebarBoxVillagelist"]/div[2]/ul/li[@class=" active"]/a';
 const REGEX_VILLAGE_LINK_F = 'newdid=(.*?)&';
 const MAX_RESOURCE_LVL = 10;
@@ -77,9 +76,11 @@ const BUILD_TYPE = "build_dorf1";
 const ANALYSE_TYPE = "build_dorf1";
 
 // const BASE_URL = "https://tx3.balkans.travian.com/";
-const DORF1_PATHNAME = "/dorf1.php"; // todo changing to dorf1.php
+const DORF1_PATHNAME = "/dorf1.php";
 const DORF2_PATHNAME = "/dorf2.php";
 const LOGIN_PATHNAME = "/login.php";
+const KARTE_PATHNAME = "/karte.php";
+const BUILD_PATH_F = "/build.php";
 const BUILD_PATH = "/build.php?";
 const PROFILE_PATHNAME ="/profile";
 const AND_GID_PARAM = '&gid='
