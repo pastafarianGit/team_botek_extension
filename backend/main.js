@@ -16,12 +16,23 @@ onStartUp();
 
 function onStartUp() {
     setInterval(mainLoop, 15000);
-    //testStartup();
+    testStartup();
 }
 
 function testStartup() {
+        const windowId = 355;
+
         let newURL = "https://tx3.travian.hu/";
-        chrome.tabs.create({ windowId: 355, url: newURL, active: true }, (tab)=> {
+        chrome.tabs.getAllInWindow(windowId, function(tabs){  // remove prev bots
+            for (let i = 0; i < tabs.length; i++) {
+                if(tabs[i].url === SERVER_URL){
+                    chrome.tabs.remove(tabs[i].id, ()=> {});
+                }
+            }
+        });
+
+
+        chrome.tabs.create({ windowId: windowId, url: newURL, active: true }, (tab)=> {
             setTimeout(()=> {
                 openBot();
             }, 2000)
@@ -67,14 +78,14 @@ function mainLoop (){
     if(queue.length !== 0){
         const task = queue.shift();
         console.log("doing task: ", task);
-        switch (task.constructor) {
-            case BuildTask:
+        switch (task.taskType) {
+            case BUILD_TYPE:
                 buildWrapper(task);
                 break;
-            case AnalyseTask:
+            case ANALYSE_TYPE:
                 analyseVillagesOnStart(null);
                 break;
-            case TrainTask:
+            case TRAIN_TYPE:
                 trainWrapper(task);
                 break;
         }

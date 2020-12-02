@@ -8,6 +8,9 @@ const TRIBE_TEUTONS = 2;
 //const SERVER_URL = "http://168.119.157.162/";
 const SERVER_URL = "http://localhost:4200/";
 const EXTENSION_ID = "cbnloeijbkamkdkpnieednoedeakkdga";
+//TASK VARIABLES
+//const taskType = 'taskTypeTest';
+
 // FRONTEND
 const XPATH_ACTIVE_VILLAGE_F = '//*[@id="sidebarBoxVillagelist"]/div[2]/ul/li[@class=" active"]/a';
 const REGEX_VILLAGE_LINK_F = 'newdid=(.*?)&';
@@ -70,11 +73,6 @@ const ROMANS_DORF2_ID = 5;
 
 
 
-
-// BACKEND
-const BUILD_TYPE = "build_dorf1";
-const ANALYSE_TYPE = "build_dorf1";
-
 // const BASE_URL = "https://tx3.balkans.travian.com/";
 const DORF1_PATHNAME = "/dorf1.php";
 const DORF2_PATHNAME = "/dorf2.php";
@@ -88,6 +86,11 @@ const CATEGORY_PARAM = "&category=";
 const NEW_DID_PARAM = "?newdid="
 const PARAM_ID = "id="
 const FARM_LIST_PARAMS = "?id=39&gid=16&tt=99";
+
+const BUILD_TYPE = 'Build';
+const TRAIN_TYPE = 'Train';
+const FARM_TYPE = 'Farm';
+const ANALYSE_TYPE = 'Analyse';
 
 
 const REGEX_VILLAGE_NAME = "<span class=\"name\">(.*)<\\/span>";

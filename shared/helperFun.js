@@ -65,7 +65,7 @@ async function makePostRequest(url, body){
 function getBuildingOnLocationForTask(taskBuilding, village) {
     let building = village.buildingsInfo.get(taskBuilding.locationId);
     if(building.type === 0){
-        building = new Building(taskBuilding.locationId, taskBuilding.type, 0);
+        building = BuildingHelper.createBuilding(taskBuilding.locationId, taskBuilding.type, 0);
     }
     return building;
 }

@@ -19,7 +19,7 @@ function parseBuildingInfoOnResource(divResource) {
         }
     }
     lvl = parseInt(divResource.getElementsByTagName('div')[0].innerText);
-    return new Building(locationId, gid, lvl);
+    return BuildingHelper.createBuilding(locationId, gid, lvl);
 }
 
 
@@ -117,7 +117,7 @@ function getBuildingsElements(doc) {
                     if(labelLayer){
                         lvl = parseInt(labelLayer.innerText);
                     }
-                    elements.push({divContainer: child, building: new Building(locationId, gid, lvl)});
+                    elements.push({divContainer: child, building: BuildingHelper.createBuilding(locationId, gid, lvl)});
                 }
             }
         }
@@ -198,8 +198,8 @@ function parseCurrentlyBuilding (pageString, village) {
     const buildings = parseCurrentlyBuildingJS(pageString);
 
     for(let i = 0; i < timers.length; i++){
-        let buildTask = new BuildTask(buildings[i], village.did, null, false);
-        BuildTaskHelper.setNewTimeToBuild(buildTask, timers[i]);
+        let buildTask = BuildHelper.createTask(buildings[i], village.did, null, false);
+        BuildHelper.setNewTimeToBuild(buildTask, timers[i]);
         currentlyBuildingData.push(buildTask);
     }
     return currentlyBuildingData;
@@ -225,7 +225,7 @@ function parseCurrentlyBuildingJS (pageString) {
     const buildingsJson = JSON.parse(currentlyText);
     if(buildingsJson !== null){
         for(let building of buildingsJson){
-            buildings.push(new Building(parseInt(building.aid), building.gid, parseInt(building.stufe)));
+            buildings.push(BuildingHelper.createBuilding(parseInt(building.aid), building.gid, parseInt(building.stufe)));
         }
     }
     return buildings;

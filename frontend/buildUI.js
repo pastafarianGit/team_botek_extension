@@ -84,7 +84,7 @@ function highlightTasks() {
 function highlightBuildingsTasks() {
     let buildingElements = getBuildingsElements(document);
     for (let element of buildingElements){
-        const isOnLocation = BuildTaskHelper.isTaskOnLocation(element.building.locationId, activeVillage.buildTasks)
+        const isOnLocation = BuildHelper.isTaskOnLocation(element.building.locationId, activeVillage.buildTasks)
         const labelLayer = element.divContainer.getElementsByClassName('labelLayer')[0];
         highlightElement(labelLayer, isOnLocation);
     }
@@ -94,7 +94,7 @@ function highlightResourcesTasks() {
     let resourceElements = getResourceElements(document);
     console.log("highlight active village", activeVillage.buildTasks);
     for (let element of resourceElements) {
-        let isOnLocation = BuildTaskHelper.isTaskOnLocation(element.building.locationId, activeVillage.buildTasks)
+        let isOnLocation = BuildHelper.isTaskOnLocation(element.building.locationId, activeVillage.buildTasks)
         highlightElement(element.divContainer.firstChild, isOnLocation);
     }
 }

@@ -57,8 +57,9 @@ chrome.runtime.onMessageExternal.addListener(   // from botkeGui
         switch (request.action) {
             case UPDATE_BUILD_TASK_ACTION:
                 let village = VillagesHelper.findVillage(villages, request.data.village.did);
-                village.buildTasks = BuildTaskHelper.deserializationToBuildTaskObject(request.data.village.buildTasks);
-                village.trainTasks = TrainTaskHelper.deserializationToTrainTaskObject(request.data.village.trainTasks);
+                village.buildTasks = request.data.village.buildTasks;
+                village.trainTasks = request.data.village.trainTasks;
+                //village.trainTasks = TrainHelper.deserializationToTrainTaskObject(request.data.village.trainTasks);
                 sendMessageToBotTab(UPDATE_VILLAGES_ACTION, villages);
                 sendResponse(true);
                 break;

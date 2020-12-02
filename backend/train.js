@@ -1,16 +1,16 @@
 
 function addNewTrainTask(trainData) {
     let village = VillagesHelper.findVillage(villages, trainData.did);
-    village.trainTasks.push(new TrainTask(trainData, village));
+    village.trainTasks.push(TrainHelper.createTask(trainData, village));
 }
 
 
 function addTrainTaskToQueue(village, isBuildTaskAdded) {
        for(const task of village.trainTasks){
-           const isOverdo = TrainTaskHelper.isTaskOverdo(task);
+           const isOverdo = TrainHelper.isTaskOverdo(task);
            console.log("task timer - Date.now", (task.timerUpdate - Date.now()) / 1000);
 
-           let isAfterPoint  = TrainTaskHelper.isTimerAfterAwhile(task);
+           let isAfterPoint  = TrainHelper.isTimerAfterAwhile(task);
            let shouldTrain = isAfterPoint && isBuildTaskAdded;
            if(!task.isInQueue){
                if(isOverdo || shouldTrain){
@@ -35,8 +35,8 @@ function trainWrapper(task) {
             updateBotStatusGUI(error);
         }).finally(() => {
 
-        if(TrainTaskHelper.isTaskOverdo(task)){
-                TrainTaskHelper.resetTask(task);
+        if(TrainHelper.isTaskOverdo(task)){
+                TrainHelper.resetTask(task);
             }
             task.isInQueue = false;
         });
@@ -44,7 +44,7 @@ function trainWrapper(task) {
 
 
 async function train(task, village) {
-    const taskStatus = TrainTaskHelper.isTaskAvailable(task);
+    const taskStatus = TrainHelper.isTaskAvailable(task);
     if(taskStatus !== TASK_OK){
         return taskStatus;
     }
@@ -53,7 +53,7 @@ async function train(task, village) {
     const pageStringOnPOST = await simulateClickBuildingAndTrain(task, village);
     console.log("page string on POST", pageStringOnPOST);
     if(pageStringOnPOST.status === 200){
-        TrainTaskHelper.subtractDoneUnits(task);
+        TrainHelper.subtractDoneUnits(task);
     }
 }
 

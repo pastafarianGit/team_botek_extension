@@ -78,7 +78,7 @@ function analyseBackgroundContent (village, pageString) {
     village.resources = parseResources(pageString);
     village.currentlyBuilding = parseCurrentlyBuilding(pageString, village);
     village.timers.updateTimers(village.currentlyBuilding);
-    BuildTaskHelper.addLvlForCurrentlyBuilding(village);
+    BuildHelper.addLvlForCurrentlyBuilding(village);
     checkForNewVillage(pageString);
 }
 
@@ -87,7 +87,7 @@ function checkForNewVillage(pageString){
     let ul = sideBar.getElementsByTagName('ul')[0];
     if(ul.childElementCount !== villages.length){
         console.log("number of villages", ul.childElementCount);
-        queue.push(new AnalyseTask());
+        queue.push(AnalyseHelper.createTask());
     }
 }
 
@@ -149,7 +149,7 @@ async function analyseBuildingsInAllVillages(){
 }
 
 async function analyseAndSwitchTo(building, village) {
-    if(building.isResourceBuilding()){
+    if(BuildingHelper.isResource(building)){
         return await analyseDorf1(village);
     }
     return await analyseDorf2(village)

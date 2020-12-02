@@ -8,9 +8,9 @@ function buildWrapper(task){
         }).catch(error => {
             handleBuildErrors(error, task, village);
             updateBotStatusGUI(error);
-        }).finally(() => {
+        })/*.finally(() => {
             sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
-        });
+        });*/
 
 
 }
@@ -19,21 +19,21 @@ function handleBuildErrors(err, task, village){
     console.log("error", err);
     switch (err) {
         case ERROR_NOT_ENOUGH_RES:
-            let minTime = BuildTaskHelper.calcWhenFirstTaskIsAvailable(village, task.timerType);
+            let minTime = BuildHelper.calcWhenFirstTaskIsAvailable(village, task.timerType);
             village.timers.addTimeFromNowMins(task.timerType, minTime);
             console.log("add time from now when next task available", minTime);
             break;
         case ERROR_TASK_LOWER_LVL_THAN_BUILDING:
-            BuildTaskHelper.deleteTaskIfDone(task, village);
+            BuildHelper.deleteTaskIfDone(task, village);
             break;
         case ERROR_TASK_DIFF_TYPE_THAN_BUILDING:
-            BuildTaskHelper.deleteTask(task.uuid, village.buildTasks);
+            BuildHelper.deleteTask(task.uuid, village.buildTasks);
             break;
         case ERROR_NO_PREREQUISITE:
-            BuildTaskHelper.deleteTask(task.uuid, village.buildTasks);
+            BuildHelper.deleteTask(task.uuid, village.buildTasks);
             break;
         case ERROR_WAREHOUSE_TOO_LOW:
-            BuildTaskHelper.deleteTask(task.uuid, village.buildTasks);
+            BuildHelper.deleteTask(task.uuid, village.buildTasks);
             break;
         default:
             console.error("unhandled error: ", err);
@@ -45,7 +45,7 @@ async function build (task, village) {
     // let village = VillagesHelper.findVillage(villages, task.did);
     await analyseAndSwitchTo(task.building, village);
 
-    let taskStatus = BuildTaskHelper.isTaskAvailable(task, village);
+    let taskStatus = BuildHelper.isTaskAvailable(task, village);
     if(taskStatus !== TASK_OK){
         return taskStatus;
     }
@@ -60,7 +60,7 @@ async function build (task, village) {
 
 async function tryBuildingAndAnalyse(task, village) {
     const pageString = await simulateClickBuildingAndPressUpgrade(task.building, village);
-    analysePageStringDorf12(pageString, village, task.building.isResourceBuilding());
+    analysePageStringDorf12(pageString, village, BuildingHelper.isResource(task.building));
     village.timers.updateTimers(village.currentlyBuilding);
     CurrentlyBuildingHelper.updateIfTaskDone(village);
 }
@@ -81,9 +81,10 @@ function isTaskCostSmallerThanWarehouse(cost, warehouse) {
 
 function addNewBuildTask(data) {
     let village = VillagesHelper.findVillage(villages, data.did);
-    let building = new Building(data.locationId, data.type, data.lvl);
-    let newBuildTask = new BuildTask(building, data.did, getUuidv4(), (village.buildTasks[0].length > 0));
-    BuildTaskHelper.addTask(newBuildTask, village.buildTasks);
+    let building = BuildingHelper.createBuilding(data.locationId, data.type, data.lvl);
+    let newBuildTask = BuildHelper.createTask(building, data.did, getUuidv4(), (village.buildTasks[0].length > 0));
+    //let newBuildTask = new BuildTask(building, data.did, getUuidv4(), (village.buildTasks[0].length > 0));
+    BuildHelper.addTask(newBuildTask, village.buildTasks);
     village.timers.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask);
 }
 
@@ -107,7 +108,7 @@ async function simulateClickBuildingAndPressUpgrade (taskBuilding, village) {
 
     let buildingPhpPageString = await getText(BUILD_PATH + PARAM_ID + taskBuilding.locationId, "", 3000);
 
-    if(liveBuilding.lvl === 0 && !taskBuilding.isResourceBuilding()){ // create new building
+    if(liveBuilding.lvl === 0 && !BuildingHelper.isResource(taskBuilding)){ // create new building
         return await createNewBuilding(taskBuilding, buildingPhpPageString);
     }else{
         return await upgradeBuilding(taskBuilding, buildingPhpPageString);
@@ -116,7 +117,7 @@ async function simulateClickBuildingAndPressUpgrade (taskBuilding, village) {
 
 async function upgradeBuilding(taskBuilding, pageString) {
     let c = await retrieveC(pageString);
-    return await getText(taskBuilding.getLocationTypeURL(), "?a="+taskBuilding.locationId+"&c="+c, 3000)
+    return await getText(BuildingHelper.getLocationTypeURL(taskBuilding), "?a="+taskBuilding.locationId+"&c="+c, 3000)
 }
 
 
@@ -157,7 +158,7 @@ function addBuildTaskToQueue(village) {
 function buildTaskPushToQueue (village, timerType) {
     // console.log("next check time is: ", village.timers.nextCheckTime(timerType), "type: ", timerType);
     if(village.timers.isNextCheckTime(timerType)){
-        const buildTask = BuildTaskHelper.getNextTask(village, timerType);
+        const buildTask = BuildHelper.getNextTask(village, timerType);
         return addToQueueAndUpdateTimer(buildTask, village, timerType);
     }
 }
