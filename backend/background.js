@@ -102,6 +102,7 @@ function addHeader (newHeader, headers) {
 }
 
 function modifyHeaders (pathname, reqHeaders) {
+    console.log("modify headers pathname", pathname);
     let constHeaders = REQUESTS_INFO[pathname];
     if(constHeaders === undefined){
         constHeaders = REQUESTS_INFO['others'];

@@ -48,7 +48,7 @@ function handleTravianPageOpened(){
 
     sendMessageToExtension(IS_TAB_ACTIVE_ACTION, {},(data) => {
         if(data.isActive){
-            //if(data.villages.length !== 0){
+            if(data.villages.length !== 0){
                 console.log("response is tab active ", data.villages);
                 updateContentVariables(data.villages);
                 showBuildUI();
@@ -61,7 +61,9 @@ function handleTravianPageOpened(){
                         (r)=>{console.log("change village response", r);});
 
                 }
-            //}
+            }else{
+                console.log("else data villages length", data.villages.length);
+            }
         }
         else{
             console.log("IS TAB ACTIVE false", data);
@@ -95,8 +97,10 @@ function updateContentVariables(newVillages) {
 function toggleElements(visibility){
     let sideBarContent = document.getElementById('sidebarBeforeContent');
     let sidebarBoxActiveVillage = document.getElementById('sidebarBoxActiveVillage');
+    let logo = document.getElementById('logo');
     setElementVisibility(sideBarContent, visibility);
     setElementVisibility(sidebarBoxActiveVillage, visibility);
+    setElementVisibility(logo, visibility);
 }
 
 function setElementVisibility(element, visibility){

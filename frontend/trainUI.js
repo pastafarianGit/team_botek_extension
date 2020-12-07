@@ -13,7 +13,7 @@ function showDropDownForTrainPer() {
     }
 
     const {buildingType, buildingLvl} = getBuildingTypeLevel();
-    const dropDownNode = createDropDown(SELECT_OPTIONS_TRAIN, onSelectedTrain, buildingType, DROPDOWN_CSS_TRAIN, ADD_UNITS_NAME);
+    const dropDownNode = createDropDown(SELECT_OPTIONS_TRAIN, onSelectedTrain, buildingType, DROPDOWN_EXTRA_TRAIN);
     trainUnitsContainer.append(dropDownNode);
 }
 
@@ -22,7 +22,8 @@ function onSelectedTrain(buildingType, timeText) {
     //const time = parseInt(timeString.split[' '][0]);
     const trainUnitsContainer = document.getElementsByClassName('trainUnits')[0];
     const inputs = trainUnitsContainer.getElementsByClassName('text');
-    let trainTask = {did: activeVillage.did, locationId: parseInt(locationId), timeText: timeText};
+    let trainTask = {taskType: TRAIN_TYPE, did: activeVillage.did,
+        locationId: parseInt(locationId), timeText: timeText};
     //let availableUnits = [];
     trainTask.units = [];
     for(let input of inputs){
@@ -33,7 +34,7 @@ function onSelectedTrain(buildingType, timeText) {
         console.log("on train selected", type, value);
     }
 
-    sendMessageToExtension(ADD_TRAIN_TASK_ACTION, trainTask, (villages) => {
+    sendMessageToExtension(ADD_TASK_ACTION, trainTask, (villages) => {
         console.log("is train task complete", villages);
     });
 }

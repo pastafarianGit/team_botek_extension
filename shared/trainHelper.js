@@ -26,12 +26,12 @@ class TrainHelper {
         trainTask.timerUpdate = Date.now() + trainTask.timer;
     }
 
-    static isTaskOverdo(task) {
+    /*static isTaskOverdo(task) {
         return (task.timerUpdate < Date.now());
-    }
+    }*/
 
     static resetTask(task){
-        task.timerUpdate = Date.now() + task.timer;
+        TaskHelper.resetTimer(task);
         for(const unit of task.units){
             unit.todo = unit.value;
         }
@@ -65,7 +65,7 @@ class TrainHelper {
         return (Date.now() > halfWayPoint);
     }
 
-    static deserializationToTrainTaskObject(trainTasks) {
+    /*static deserializationToTrainTaskObject(trainTasks) {
         console.log("qwe trainTasks", trainTasks);
         let convertTrainTasks = [];
         for(const _task of trainTasks){
@@ -74,7 +74,7 @@ class TrainHelper {
             convertTrainTasks.push(task);
         }
         return convertTrainTasks;
-    }
+    }*/
 
     static addNames(task) {
         const unitsData = this.getTribeUnitData();

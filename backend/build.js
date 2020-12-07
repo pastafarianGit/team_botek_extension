@@ -1,5 +1,5 @@
 function buildWrapper(task){
-    let village = VillagesHelper.findVillage(villages, task.did);
+    let village = VillageHelper.findVillage(villages, task.did);
     updateBotStatusGUI(BOT_IS_BUILDING_STATUS);
     build(task, village)
         .then(result => {
@@ -20,7 +20,7 @@ function handleBuildErrors(err, task, village){
     switch (err) {
         case ERROR_NOT_ENOUGH_RES:
             let minTime = BuildHelper.calcWhenFirstTaskIsAvailable(village, task.timerType);
-            village.timers.addTimeFromNowMins(task.timerType, minTime);
+            TimersHelper.addTimeFromNowMins(task.timerType, minTime, village.timers);
             console.log("add time from now when next task available", minTime);
             break;
         case ERROR_TASK_LOWER_LVL_THAN_BUILDING:
@@ -61,12 +61,12 @@ async function build (task, village) {
 async function tryBuildingAndAnalyse(task, village) {
     const pageString = await simulateClickBuildingAndPressUpgrade(task.building, village);
     analysePageStringDorf12(pageString, village, BuildingHelper.isResource(task.building));
-    village.timers.updateTimers(village.currentlyBuilding);
+    TimersHelper.updateTimers(village.currentlyBuilding, village.timers);
     CurrentlyBuildingHelper.updateIfTaskDone(village);
 }
 
 function isNotEnoughWarehouseLvl (task, village) {
-    const cost = getBuildingCost(task, village);
+    const cost = BuildingHelper.getBuildingCost(task, village);
     return !isTaskCostSmallerThanWarehouse(cost, village.resources.maxStorage);
 }
 
@@ -80,17 +80,17 @@ function isTaskCostSmallerThanWarehouse(cost, warehouse) {
 }
 
 function addNewBuildTask(data) {
-    let village = VillagesHelper.findVillage(villages, data.did);
+    let village = VillageHelper.findVillage(villages, data.did);
     let building = BuildingHelper.createBuilding(data.locationId, data.type, data.lvl);
     let newBuildTask = BuildHelper.createTask(building, data.did, getUuidv4(), (village.buildTasks[0].length > 0));
     //let newBuildTask = new BuildTask(building, data.did, getUuidv4(), (village.buildTasks[0].length > 0));
     BuildHelper.addTask(newBuildTask, village.buildTasks);
-    village.timers.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask);
+    TimersHelper.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask, village.timers);
 }
 
 function calcTimeToBuild (village, building, serverSpeed) {
     let timeToBuild = buildingsData[building.type].cost[building.lvl + 1].timeToBuild;  // + 1 to get for next lvl
-    let decreaseMB = village.getMainBuildingSpeed();
+    let decreaseMB = VillageHelper.getMainBuildingSpeed(village);
     return  timeToBuild * decreaseMB / serverSpeed;
 }
 
@@ -157,7 +157,7 @@ function addBuildTaskToQueue(village) {
 
 function buildTaskPushToQueue (village, timerType) {
     // console.log("next check time is: ", village.timers.nextCheckTime(timerType), "type: ", timerType);
-    if(village.timers.isNextCheckTime(timerType)){
+    if(TimersHelper.isNextCheckTime(timerType, village.timers)){
         const buildTask = BuildHelper.getNextTask(village, timerType);
         return addToQueueAndUpdateTimer(buildTask, village, timerType);
     }

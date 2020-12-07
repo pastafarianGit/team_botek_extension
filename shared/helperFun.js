@@ -16,7 +16,7 @@ async function logIn(isLogIn){
     let user = findUser(users);
     user.login = isLogIn;
     let bodyData = "name=" + encodeURIComponent(user.name) + "&password=" + encodeURIComponent(user.password) + "&s1=" + encodeURIComponent(user.s1) + "&w=" + encodeURIComponent(user.w) + "&login=" + encodeURIComponent(user.login);
-    return makePostRequest(baseServerUrl + LOGIN_PATHNAME, bodyData);
+    return makePostRequest(baseServerUrl + LOGIN_PATHNAME, bodyData, URL_ENCODED_CONTENT_TYPE);
 }
 
 async function getFromStorage(data){
@@ -49,26 +49,26 @@ function makeValidJsonResource(text) {
     return text;
 }
 
-async function makePostRequest(url, body){
+async function makePostRequest(url, body, contentType){
     console.log("make post request", url);
 
     const headers = {
         method: 'POST',
         body: body,
         headers:{
-            'content-type': 'application/x-www-form-urlencoded',
+            'content-type': contentType,
         }
     }
     return await fetch(url, headers);
 }
-
+/*
 function getBuildingOnLocationForTask(taskBuilding, village) {
     let building = village.buildingsInfo.get(taskBuilding.locationId);
     if(building.type === 0){
         building = BuildingHelper.createBuilding(taskBuilding.locationId, taskBuilding.type, 0);
     }
     return building;
-}
+}*/
 
 function hoursToMiliSec(hours){
     return minsToMiliSec(hours) * 60;
@@ -129,11 +129,6 @@ function findUser(users){
     return Promise.reject(NO_USER);
 }
 
-function getBuildingCost(task, village) {
-    const building = village.buildingsInfo.get(task.building.locationId);
-    return  buildingsData[task.building.type].cost[building.lvl + 1];
-}
-
 function createArrayWithItemsInRange(min, max) {
     let rangeArray = [];
     for(let i = min; i <= max; i++){
@@ -142,21 +137,21 @@ function createArrayWithItemsInRange(min, max) {
     return rangeArray;
 }
 
-function createDropDown(options, onSelectedFun, buildingType, cssSelector, name) {
+function createDropDown(options, onSelectedFun, extraInfo, type) {
     let dropDownNode = toHtmlGetBodyFirstChild(DROP_DOWN);
     let btnNode = dropDownNode.getElementsByTagName("button")[0];
     let ulNode = dropDownNode.getElementsByTagName("ul")[0];
 
-    dropDownNode.id = 'build-container'+ cssSelector;
-    btnNode.insertBefore(document.createTextNode(name), btnNode.firstChild);
-    ulNode.id = "add-task-ul" + cssSelector;
+    dropDownNode.id = 'build-container'+ type.css;
+    btnNode.insertBefore(document.createTextNode(type.name), btnNode.firstChild);
+    ulNode.id = "add-task-ul" + type.css;
     for(let i = 0; i < options.length; i++){
-        ulNode.appendChild(getItemLI(options[i]));
-    }
-
-    ulNode.onclick = (event) => {
-        let lvl = event.target.innerText;
-        onSelectedFun(buildingType, lvl);
+        let li = getItemLI(options[i]);
+        li.onclick = (event) => {
+            let lvl = event.target.innerText;
+            onSelectedFun(extraInfo, lvl);
+        }
+        ulNode.appendChild(li);
     }
     return dropDownNode;
 }
@@ -171,3 +166,21 @@ function createPause(second) {
     }, second)
 }
 
+function randomiseW8Timer(timer) { // change timer by %
+    const fraction =  timer * 0.2;
+    let randomOfFraction = getRandInteger(0, fraction)
+    let change = randomOfFraction * getRandPlusMinus();
+    return timer + change;
+}
+
+function getRandPlusMinus() {
+    const number = getRandInteger(0, 1);
+    if(number === 1){
+        return 1;
+    }
+    return -1;
+}
+
+function getRandInteger(min, max) {
+    return Math.floor(Math.random() * (max - min) ) + min;
+}

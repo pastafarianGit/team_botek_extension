@@ -24,19 +24,21 @@ const HOUR = "h";
 const MIN = "min";
 const DONE = 'done';
 const SELECT_OPTIONS_TRAIN = ['1 ' + MIN, '2 ' + MIN, '15 '+ MIN, '30 '+ MIN, '45 '+MIN, '1 '+HOUR, '2 '+HOUR];
-const ADD_BUILDING_NAME = 'add building ';
-const ADD_UNITS_NAME = 'train per ';
+const SELECT_OPTIONS_FARM = ['1 ' + MIN, '15 '+ MIN, '30 '+ MIN, '45 '+MIN, '1 '+HOUR, '2 '+HOUR, '3 '+HOUR];
 const ALL_RES_LOCATION_ID = 100;
 const TYPES_NAMES = {1: "Wood", 2: "Clay", 3: "Iron", 4: "Crop"};
 // ACTIONS
 const CHANGE_VILLAGE_ACTION = 'change_village_action';
 const IS_TAB_ACTIVE_ACTION = "is_tab_active_action";
 const GET_IFRAME_URL_ACTION = "get_iframe_url_action";
-const UPDATE_BUILD_TASK_ACTION = "update_build_task_action";
+const UPDATE_TASKS_ACTION = "update_tasks_action";
 const UPDATE_VILLAGES_ACTION = "update_villages_action";
 const UPDATE_ALL_GUI_BOT_DATA_ACTION = "update_all_gui_bot_data_action";
 const ADD_BUILD_TASK_ACTION = "add_build_task_action";
 const ADD_TRAIN_TASK_ACTION = "add_train_task_action";
+const ADD_TASK_ACTION = "add_task_action";
+const ADD_FARMLIST_TASK_ACTION = "add_train_task_action";
+
 const IS_ACTIVE_BOT_ACTION = "is_active_bot_action";
 const UPDATE_BOT_STATUS_ACTION = 'update_bot_status_action';
 const BEARER_KEY_ACTION = 'bearer_key_action';
@@ -45,6 +47,7 @@ const BOT_IS_SLEEPING_STATUS = "sleeping";
 const BOT_IS_WORKING_STATUS = "working";
 const BOT_IS_BUILDING_STATUS = "building";
 const BOT_IS_TRAINING_STATUS = "training";
+const BOT_IS_FARMING_STATUS = "farming";
 const BOT_IS_ON_PAUSE_STATUS = "on pause";
 const BOT_IS_ANALYSING_VILLAGES = "analysing all villages";
 
@@ -81,17 +84,21 @@ const KARTE_PATHNAME = "/karte.php";
 const BUILD_PATH_F = "/build.php";
 const BUILD_PATH = "/build.php?";
 const PROFILE_PATHNAME ="/profile";
+const RAID_LIST_PATHNAME = '/api/v1/ajax/raidList';
 const AND_GID_PARAM = '&gid='
 const CATEGORY_PARAM = "&category=";
 const NEW_DID_PARAM = "?newdid="
 const PARAM_ID = "id="
 const FARM_LIST_PARAMS = "?id=39&gid=16&tt=99";
-
+const FETCH_SWITCH_TIME = 2000;
 const BUILD_TYPE = 'Build';
 const TRAIN_TYPE = 'Train';
 const FARM_TYPE = 'Farm';
 const ANALYSE_TYPE = 'Analyse';
 
+
+const URL_ENCODED_CONTENT_TYPE = 'application/x-www-form-urlencoded';
+const APP_JSON_CONTENT_TYPE = 'application/json; charset=UTF-8';
 
 const REGEX_VILLAGE_NAME = "<span class=\"name\">(.*)<\\/span>";
 /*const REGEX_COORDINATE_X = "<span class=\"coordinateX\">\\((.*)</span><span class=\"coordinatePipe\">";
@@ -116,9 +123,15 @@ const CONTRACT_BUILDING = 'contract_building';
 
 const MAIN_BUILDING_ID = 15;
 const WOOD_TYPE = 1;
-const DROPDOWN_CSS_NEW = "-new";
-const DROPDOWN_CSS_TRAIN = "-train";
-const DROPDOWN_CSS_EXISTING = "-existing";
+
+const ADD_BUILDING_NAME = 'add building ';
+const ADD_UNITS_NAME = 'train per ';
+const SEND_FARMLIST_NAME = 'send every ';
+
+const DROPDOWN_EXTRA_NEW = {css: "-new", name: ADD_BUILDING_NAME};
+const DROPDOWN_EXTRA_TRAIN = {css:  "-train", name: ADD_UNITS_NAME};
+const DROPDOWN_EXTRA_FARM = {css: "-farm", name: SEND_FARMLIST_NAME};
+const DROPDOWN_EXTRA_EXISTING = {css: "-existing", name: ADD_BUILDING_NAME};
 
 //
 let DROP_DOWN = '    <div id="" class="bootstrap">\n' +
@@ -196,6 +209,7 @@ const ACCESSIBLE_URLS= [
 // REQUESTS
 
 const REQUESTS_INFO =
+
     {
         "others": {
             "name":"others",
@@ -258,4 +272,18 @@ const REQUESTS_INFO =
                 {"name": "upgrade-insecure-requests", "value":"1"},
             ]
         },
+        "/api/v1/ajax/raidList": {
+            "name": "raidList",
+            "type":"POST",
+            "headers": [
+                {"name": "accept", "value":"application/json, text/javascript, */*; q=0.01"},
+                {"name": "Sec-Fetch-Dest", "value":"empty"},
+                {"name": "Authorization", "value":"Bearer false"},
+                {"name": "Sec-Fetch-Mode", "value":"cors"},
+                {"name": "x-requested-with", "value":"XMLHttpRequest"},
+                {"name": "Sec-Fetch-Site", "value":"same-origin"},
+                {"name": "x.version", "value":"902.10"},
+            ]
+        },
+
     };

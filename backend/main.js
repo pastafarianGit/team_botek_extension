@@ -88,6 +88,9 @@ function mainLoop (){
             case TRAIN_TYPE:
                 trainWrapper(task);
                 break;
+            case FARM_TYPE:
+                farmWrapper(task);
+                break;
         }
     }
 }
@@ -104,10 +107,15 @@ function toggleSleep() {
     }
 }
 
+
+
 function addTasksToQueue() {
+
     for (let village of villages){
         const isBuildAdded = addBuildTaskToQueue(village);
+
         addTrainTaskToQueue(village, isBuildAdded);
+        addFarmTaskToQueue(village);
     }
 }
 
@@ -116,7 +124,7 @@ function addToQueueAndUpdateTimer (task, village, timerType) {
         queue.push(task);
     }
     console.log("add 15 mins to timerType", timerType);
-    village.timers.add15Mins(timerType);
+    TimersHelper.add15Mins(timerType, village.timers);
 
     return (task !== null);
 }

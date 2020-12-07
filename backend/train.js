@@ -1,13 +1,13 @@
 
 function addNewTrainTask(trainData) {
-    let village = VillagesHelper.findVillage(villages, trainData.did);
+    let village = VillageHelper.findVillage(villages, trainData.did);
     village.trainTasks.push(TrainHelper.createTask(trainData, village));
 }
 
 
 function addTrainTaskToQueue(village, isBuildTaskAdded) {
        for(const task of village.trainTasks){
-           const isOverdo = TrainHelper.isTaskOverdo(task);
+           const isOverdo = TaskHelper.isTaskOverdo(task);
            console.log("task timer - Date.now", (task.timerUpdate - Date.now()) / 1000);
 
            let isAfterPoint  = TrainHelper.isTimerAfterAwhile(task);
@@ -22,7 +22,7 @@ function addTrainTaskToQueue(village, isBuildTaskAdded) {
 }
 
 function trainWrapper(task) {
-    let village = VillagesHelper.findVillage(villages, task.did);
+    let village = VillageHelper.findVillage(villages, task.did);
     updateBotStatusGUI(BOT_IS_TRAINING_STATUS);
 
     train(task, village)
@@ -35,7 +35,7 @@ function trainWrapper(task) {
             updateBotStatusGUI(error);
         }).finally(() => {
 
-        if(TrainHelper.isTaskOverdo(task)){
+        if(TaskHelper.isTaskOverdo(task)){
                 TrainHelper.resetTask(task);
             }
             task.isInQueue = false;
@@ -71,11 +71,11 @@ async function simulateClickBuildingAndTrain(task) {
 
     let buildingPageString = await getText(BUILD_PATH + PARAM_ID, params, 2000);
 
-    const bodyData = createBodyData(task, buildingPageString);
-    return makePostRequest(baseServerUrl+ BUILD_PATH + PARAM_ID + params, bodyData);
+    const bodyData = createBodyDataTrain(task, buildingPageString);
+    return makePostRequest(baseServerUrl+ BUILD_PATH + PARAM_ID + params, bodyData, URL_ENCODED_CONTENT_TYPE);
 }
 
-function createBodyData(task, pageString) {
+function createBodyDataTrain(task, pageString) {
     const {z, a, s, did} = analyseTrainBuilding(pageString);
     const hiddenValues = "z=" + encodeURIComponent(z) + "&a=" + encodeURIComponent(a) + "&s=" + encodeURIComponent(s) + "&did=" + encodeURIComponent(did);
     const units = createUriComponentUnits(task.units);

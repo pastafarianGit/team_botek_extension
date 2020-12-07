@@ -1,78 +1,58 @@
-let Village = class {
-    did;
-    x;
-    y;
-    isCapital;
-    name;
-    resources;
-    buildingsInfo;
-    currentlyBuilding;
-    timers;
-    buildTasks;
-    trainTasks;
+class VillageHelper {
 
-    constructor(did) {
-        this.did  = did;
-        this.timers = new Timers();
-        this.buildingsInfo = new Map();
-        this.buildTasks = [[]];
-        this.trainTasks = [];
-        this.currentlyBuilding = [];
-        this.isCapital = false;
-        this.isInQueue = false
+    static createVillage(did) {
+       return  {
+            did: did,
+            timers: TimersHelper.createTimers(),
+            buildingsInfo: new Map(),
+            buildTasks: [[]],
+            trainTasks: [],
+            farmTasks: [],
+            currentlyBuilding: [],
+            isCapital: false,
+            isInQueue: false
+        }
     }
 
-    addParams(x, y, isCapital, name) {
-        this.x  = x;
-        this.y  = y;
-        this.isCapital  = isCapital;
-        this.name  = name;
+    static updateBuildingInfo(updatedBuildings, village){
+        village.buildingsInfo = new Map([...village.buildingsInfo, ...updatedBuildings]);
     }
 
-    updateBuildingInfo(updatedBuildings){
-        this.buildingsInfo = new Map([...this.buildingsInfo, ...updatedBuildings]);
+    static isEnoughRes(task, village){
+        const cost = BuildingHelper.getBuildingCost(task, village);
+        return VillageHelper.checkCostVsStorage(cost, village);
     }
 
-    isEnoughRes(task){
-        // let building = this.buildingsInfo.get(task.building.locationId);
-        /*if(building.type === 0){
-            building = new Building(task.building.locationId, task.building.type, 0);
-        }*/
-        // let cost = buildingsData[task.building.type].cost[building.lvl + 1];
-        const cost = getBuildingCost(task, this);
-        return this.checkCostVsStorage(cost);
-    }
-
-    calcTimeTillTaskCanBeBuilt(task){
-        const building = this.buildingsInfo.get(task.building.locationId);
+    static calcTimeTillTaskCanBeBuilt(task, village){
+        const building = village.buildingsInfo.get(task.building.locationId);
         let cost = buildingsData[task.building.type].cost[building.lvl + 1];
 
-        const woodTime = this.calculateResourcesTime(cost.wood, this.resources.storage.l1, this.resources.production.l1);
-        const clayTime = this.calculateResourcesTime(cost.clay, this.resources.storage.l2, this.resources.production.l2);
-        const ironTime = this.calculateResourcesTime(cost.iron, this.resources.storage.l3, this.resources.production.l3);
-        const cropTime = this.calculateResourcesTime(cost.crop, this.resources.storage.l4, this.resources.production.l3);
+        const woodTime = VillageHelper.calculateResourcesTime(cost.wood, village.resources.storage.l1, village.resources.production.l1);
+        const clayTime = VillageHelper.calculateResourcesTime(cost.clay, village.resources.storage.l2, village.resources.production.l2);
+        const ironTime = VillageHelper.calculateResourcesTime(cost.iron, village.resources.storage.l3, village.resources.production.l3);
+        const cropTime = VillageHelper.calculateResourcesTime(cost.crop, village.resources.storage.l4, village.resources.production.l3);
         let times = [woodTime, clayTime, ironTime, cropTime];
         return Math.max(...times) * 60; // change to mins
     }
 
-    calculateResourcesTime(cost, resourcesStorage, production){
+    static calculateResourcesTime(cost, resourcesStorage, production){
         return (cost - resourcesStorage) / production
     }
 
-    setCoordinates(coordinates){
+    static setCoordinates(coordinates, village){
         const {x,y} = coordinates;
-        this.x = x;
-        this.y = y;
+        village.x = x;
+        village.y = y;
     }
 
-    getMainBuildingSpeed(){
-        const lvl = this.getMainBuildingLvl();
+    static getMainBuildingSpeed(village){
+        const lvl = VillageHelper.getMainBuildingLvl(village);
         return buildingsData[MAIN_BUILDING_ID].reduceTime[lvl];
     }
 
-    getMainBuildingLvl(){
+    static getMainBuildingLvl(village){
         let lvl = 0;
-        this.buildingsInfo.forEach((value, key) => {
+        village.buildingsInfo.forEach((value, key) => {
             if(value.gid === MAIN_BUILDING_ID){
                 lvl = value.lvl;
             }
@@ -80,16 +60,13 @@ let Village = class {
         return lvl;
     }
 
-    checkCostVsStorage(cost){
-        const wood = this.resources.storage.l1 >= cost.wood;
-        const clay = this.resources.storage.l2 >= cost.clay;
-        const iron = this.resources.storage.l3 >= cost.iron;
-        const crop = this.resources.storage.l4 >= cost.crop;
+    static checkCostVsStorage(cost, village){
+        const wood = village.resources.storage.l1 >= cost.wood;
+        const clay = village.resources.storage.l2 >= cost.clay;
+        const iron = village.resources.storage.l3 >= cost.iron;
+        const crop = village.resources.storage.l4 >= cost.crop;
         return (wood && clay && iron && crop);
     }
-};
-
-class VillagesHelper {
 
     static findVillage(villages, linkId){
         for(let i = 0; i < villages.length; i++){
@@ -99,6 +76,26 @@ class VillagesHelper {
             }
         }
         return null;
+    }
+}
+
+class TaskHelper {
+    static isTaskOverdo(task) {
+        return (task.timerUpdate < Date.now());
+    }
+
+    static resetTimer(task){
+        task.timerUpdate = Date.now() + task.timer;
+    }
+
+}
+
+class FarmHelper {
+    static createFarmTask(task){
+        task.timer = TrainHelper.getTimeInMiliSec(task);
+        task.uuid = getUuidv4();
+        task.timerUpdate = Date.now();
+        return task;
     }
 
 }
@@ -148,6 +145,11 @@ class BuildingHelper {
         }else{
             return "Empty";
         }
+    }
+
+    static getBuildingCost(task, village) {
+        const building = village.buildingsInfo.get(task.building.locationId);
+        return  buildingsData[task.building.type].cost[building.lvl + 1];
     }
 
     static getNamesFromTypes(types){
@@ -263,31 +265,34 @@ class CurrentlyBuildingHelper {
     }
 }
 
-class Timers {
+class TimersHelper {
 
-    constructor() {
+    static createTimers() {
         const date = Date.now();
-        this.buildingTimer = date;
-        this.romansDorf1Timer = date;
-        this.romansDorf2Timer = date;
-        this.armyTimer = date;
+        return {
+            buildingTimer : date,
+            romansDorf1Timer : date,
+            romansDorf2Timer : date
+        }
+
+        //this.armyTimer = date;
     }
 
-    isNextCheckTime(type) {
+    static isNextCheckTime(type, timers) {
         switch (type) {
             case ROMANS_DORF1_ID:
-                return (this.romansDorf1Timer < Date.now());
+                return (timers.romansDorf1Timer < Date.now());
             case ROMANS_DORF2_ID:
-                return (this.romansDorf2Timer < Date.now());
+                return (timers.romansDorf2Timer < Date.now());
             case BOTH_BUILD_ID:
-                return (this.buildingTimer < Date.now());
+                return (timers.buildingTimer < Date.now());
             default:
                 return false;
         }
 
     }
 
-    nextCheckTime(type){
+    /*nextCheckTime(type){
         let timer = null;
         switch (type) {
             case ROMANS_DORF1_ID:
@@ -305,22 +310,22 @@ class Timers {
         let nextCheck = timer - Date.now();
         return  nextCheck / 1000 / 60;
     }
-
-    addTimeFromNow(type, time){
+*/
+    static addTimeFromNow(type, time, timers){
         switch (type) {
             case ROMANS_DORF1_ID:
-               this.romansDorf1Timer =  Date.now() + time;
+               timers.romansDorf1Timer =  Date.now() + time;
                break;
             case ROMANS_DORF2_ID:
-                this.romansDorf2Timer =  Date.now() + time;
+                timers.romansDorf2Timer =  Date.now() + time;
                 break;
             case BOTH_BUILD_ID:
-                this.buildingTimer =  Date.now() + time;
+                timers.buildingTimer =  Date.now() + time;
                 break;
         }
     }
 
-    addTimeFromNowSec(type, sec){
+    /*addTimeFromNowSec(type, sec){
         const newTime = Date.now() + sec * 1000;
         switch (type) {
             case ROMANS_DORF1_ID:
@@ -333,49 +338,45 @@ class Timers {
                 this.buildingTimer =  newTime;
                 break;
         }
+    }*/
+
+    static addTimeFromNowMins(type, mins, timers){
+        this.addTimeFromNow(type, mins * 60 * 1000, timers);
     }
 
-    addTimeFromNowMins(type, mins){
-        this.addTimeFromNow(type, mins * 60 * 1000);
-    }
-
-    updateTimers(currentlyBuilding) {
+    static updateTimers(currentlyBuilding, timers) {
         console.log("currBuildings", currentlyBuilding);
         if (tribe === TRIBE_ROMANS) {
             for (let buildTask of currentlyBuilding) {
                 if (BuildingHelper.isResource(buildTask.building)) {
-                    this.romansDorf1Timer = buildTask.timeToBuild;
+                    timers.romansDorf1Timer = buildTask.timeToBuild;
                 } else {
-                    this.romansDorf2Timer = buildTask.timeToBuild;
+                    timers.romansDorf2Timer = buildTask.timeToBuild;
                 }
             }
         } else {
             for (let buildTask of currentlyBuilding) {
-                this.buildingTimer = buildTask.timeToBuild;
+                timers.buildingTimer = buildTask.timeToBuild;
             }
         }
     }
 
-    updateTimerOnNewTask(currentlyBuilding, newTask){
+    static updateTimerOnNewTask(currentlyBuilding, newTask, timers){
         let isBuildSlotFree = CurrentlyBuildingHelper.isBuildSlotFree(newTask.building, currentlyBuilding);
         if(isBuildSlotFree){
-            this.add5Sec(newTask.timerType);
+            this.add5Sec(newTask.timerType, timers);
         }
     }
 
-    add15Mins(type){
-        this.addTimeFromNow(type, 900000);
+    static add15Mins(type, timers){
+        this.addTimeFromNow(type, 900000, timers);
     }
 
-    add1Min(type){
-        this.addTimeFromNow(type, 60000);
+    static add5Sec(type, timers){
+        this.addTimeFromNow(type, 5000, timers);
     }
 
-    add5Sec(type){
-        this.addTimeFromNow(type, 5000);
-    }
-
-    add5Min(type){
+    /*add5Min(type){
         this.addTimeFromNow(type, 60000*5);
-    }
+    }*/
 }

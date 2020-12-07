@@ -95,7 +95,7 @@ class BuildHelper {
     static getNextTask(village, timerType){
         const currentGroup = this.getNextTaskGroup(village, timerType);
         for (const task of currentGroup) {
-            if(village.isEnoughRes(task)){
+            if(VillageHelper.isEnoughRes(task, village)){
                 return task;
             }
         }
@@ -181,7 +181,7 @@ class BuildHelper {
         const availableTasks  = this.getNextTaskGroup(village, timerType);
         let times = [];
         for(let task of availableTasks){
-            let taskTime = village.calcTimeTillTaskCanBeBuilt(task);
+            let taskTime = VillageHelper.calcTimeTillTaskCanBeBuilt(task,village);
             times.push(taskTime);
         }
         let minTime = Math.min(... times);
@@ -223,7 +223,7 @@ class BuildHelper {
         else if(isNotEnoughWarehouseLvl(task, village)){
             return Promise.reject(ERROR_WAREHOUSE_TOO_LOW);
         }
-        else if(!village.isEnoughRes(task)){
+        else if(!VillageHelper.isEnoughRes(task, village)){
             return Promise.reject(ERROR_NOT_ENOUGH_RES);
         }
         return TASK_OK;

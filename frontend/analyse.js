@@ -6,7 +6,7 @@ function findActiveVillage() {
     if(next){
         const text = next.getAttribute("href");
         const linkId = regexSearchOne(REGEX_VILLAGE_LINK_F, text, "g");
-        return VillagesHelper.findVillage(villages, linkId);
+        return VillageHelper.findVillage(villages, linkId);
     }
     return null;
 }

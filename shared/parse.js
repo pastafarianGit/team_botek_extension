@@ -142,7 +142,7 @@ function parseVillages (htmlString, villagesLinks) {
     let villageHtml = results.iterateNext();
     while (villageHtml) {
         const villageLink = villagesLinks.shift();
-        const village = parseBasicVillageData(villageHtml, new Village(villageLink));
+        const village = parseBasicVillageData(villageHtml, VillageHelper.createVillage(villageLink));
         villages.push(village);
         villageHtml = results.iterateNext();
     }
@@ -184,7 +184,7 @@ function parseBasicVillageData (villageHtml, village) {
             village.name = name;
             village.isCapital = isCapital;
         }else if(item.className === "coords"){
-            village.setCoordinates(parseCoordinates(item));
+            VillageHelper.setCoordinates(parseCoordinates(item), village);
         }
     })
     return village;

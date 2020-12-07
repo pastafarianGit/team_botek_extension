@@ -1,8 +1,6 @@
 
 chrome.runtime.onMessage.addListener(  // from inside content extension
     function(request, sender, sendResponse) {
-        //console.log("on content communication", request);
-
         if(baseServerUrl === ""){
             sendResponse(false);
             return false;
@@ -12,7 +10,6 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
             case IS_TAB_ACTIVE_ACTION:
                 if(newBotOpen.updateProfile){
                     analyseVillagesOnStart(sendResponse);
-                    //isTabActive(sendResponse);
                     handleNoBearerKey();
                 }else{
                     isTabActive(sendResponse);
@@ -26,22 +23,16 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 sendResponse(true);
                 sendMessageToGUI(CHANGE_VILLAGE_ACTION, request.data);
                 break;
-            case ADD_BUILD_TASK_ACTION:
-                console.log("build task", request.data);
-                addNewBuildTask(request.data);
-                sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
-                sendResponse(true);
-                break;
-            case ADD_TRAIN_TASK_ACTION:
-                console.log("train task", request.data);
-                addNewTrainTask(request.data);
+            case ADD_TASK_ACTION:
+                /*if(tribe === -1){
+
+                }*/
+                addTask(request.data);
                 sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
                 sendResponse(true);
                 break;
             case BEARER_KEY_ACTION:
-                // console.log("bearer", request.data);
                 if(request.data){
-                    // console.log("changed bearer", request.data);
                     bearerKey = request.data;
                     closeBackgroundWindow();
                 }
@@ -50,15 +41,31 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
         return true;
     });
 
+function addTask(taskData){
+    switch(taskData.taskType){
+        case BUILD_TYPE:
+            addNewBuildTask(taskData);
+            break;
+        case TRAIN_TYPE:
+            addNewTrainTask(taskData);
+            break;
+        case FARM_TYPE:
+            addNewFarmTask(taskData);
+            break;
+
+    }
+}
+
 chrome.runtime.onMessageExternal.addListener(   // from botkeGui
     (request, sender, sendResponse) => {
         console.log("on botkeGui communication", request);
 
         switch (request.action) {
-            case UPDATE_BUILD_TASK_ACTION:
-                let village = VillagesHelper.findVillage(villages, request.data.village.did);
+            case UPDATE_TASKS_ACTION:
+                let village = VillageHelper.findVillage(villages, request.data.village.did);
                 village.buildTasks = request.data.village.buildTasks;
                 village.trainTasks = request.data.village.trainTasks;
+                village.farmTasks = request.data.village.farmTasks;
                 //village.trainTasks = TrainHelper.deserializationToTrainTaskObject(request.data.village.trainTasks);
                 sendMessageToBotTab(UPDATE_VILLAGES_ACTION, villages);
                 sendResponse(true);
@@ -112,7 +119,7 @@ function sendMessageToGUI(action, data) {
                 console.log("on GUI response", response);
             });
         }catch (e) {
-            console.error("error sending msg to GUI", action, data, guiPortConnection);
+            console.log("error sending msg to GUI", e);
         }
     }
 }

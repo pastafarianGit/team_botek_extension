@@ -12,11 +12,11 @@ function analyseVillagesOnStart(sendResponse){
         .then(result => {
             villages = result;
             sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn, tribe: tribe});
-            if(sendResponse){
-                isTabActive(sendResponse);
-            }
             return analyseBuildingsInAllVillages();
         }).then(result => {
+        if(sendResponse){
+            isTabActive(sendResponse);
+        }
         updateWorkingBotStatus();
     }).catch(err=> {
         console.log("err updating villages", err);
@@ -49,26 +49,26 @@ function parseTribe (pageString) {
 
 async function analyseDorf1(village) {
     sendMessageToBotTab(CHANGE_VILLAGE_ACTION, village);
-    let pageString = await getText(DORF1_PATHNAME, NEW_DID_PARAM + village.did, 3000);
+    let pageString = await getText(DORF1_PATHNAME, NEW_DID_PARAM + village.did, 2000);
     parseAndUpdateDorf1(pageString, village);
 }
 
 async function analyseDorf2(village) {
     sendMessageToBotTab(CHANGE_VILLAGE_ACTION, village);
-    let pageString = await getText(DORF2_PATHNAME, NEW_DID_PARAM + village.did, 3000);
+    let pageString = await getText(DORF2_PATHNAME, NEW_DID_PARAM + village.did, 2000);
     parseAndUpdateDorf2(pageString, village);
 }
 
 function parseAndUpdateDorf1 (pageString, village){
     parseTribe(pageString);
     let resourceBuildings = parseResourceLvls(pageString);
-    village.updateBuildingInfo(resourceBuildings);
+    VillageHelper.updateBuildingInfo(resourceBuildings, village);
     analyseBackgroundContent(village, pageString);
 }
 
 function parseAndUpdateDorf2 (pageString, village) {
     let townBuildings = parseBuildingLvls(pageString);
-    village.updateBuildingInfo(townBuildings);
+    VillageHelper.updateBuildingInfo(townBuildings, village);
     analyseBackgroundContent(village, pageString);
 }
 
@@ -77,7 +77,7 @@ function parseAndUpdateDorf2 (pageString, village) {
 function analyseBackgroundContent (village, pageString) {
     village.resources = parseResources(pageString);
     village.currentlyBuilding = parseCurrentlyBuilding(pageString, village);
-    village.timers.updateTimers(village.currentlyBuilding);
+    TimersHelper.updateTimers(village.currentlyBuilding, village.timers);
     BuildHelper.addLvlForCurrentlyBuilding(village);
     checkForNewVillage(pageString);
 }

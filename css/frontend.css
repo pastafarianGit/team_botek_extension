@@ -34,6 +34,9 @@
     margin-left: -15px;
 }
 
+#build-container-farm{
+    margin-left: 0;
+}
 
 #add-task-ul-existing{
     margin-left: 60px;
@@ -46,6 +49,11 @@
 #add-task-ul-train{
     margin-left: 0;
 }
+
+#add-task-ul-farm{
+}
+
+
 
 .highlight-task{
     /*color: #ff4081;*/
