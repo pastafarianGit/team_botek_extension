@@ -79,7 +79,7 @@ class BuildHelper {
     static getNextTaskGroup(village, timerType){
         const tasks = village.buildTasks;
         if(timerType === BOTH_BUILD_ID){
-            return tasks[0];
+            return BuildHelper.expandAllResTasks(tasks[0], village);
         }
 
         let currentGroup = [];

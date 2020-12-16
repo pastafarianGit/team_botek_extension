@@ -17,9 +17,12 @@ function init() {
 
 function onPageLoad(){
     if(isBotPage()){
+        console.log("bot page");
         handleBotekPageOpened();
 
     }else{
+        console.log("travian page");
+
         if(isLoginPage()){
             return;
         }
@@ -33,12 +36,14 @@ function isLoginPage() {
 
 function isBotPage() {
     const hostname = window.location.hostname;
+    console.log("is bot page ", hostname);
     return (hostname.includes('teambot') || hostname.includes('localhost') || hostname.includes('168.119.157.162'));
 }
 
 function handleBotekPageOpened(){
 
     sendMessageToExtension(GET_IFRAME_URL_ACTION, {}, (url) => {
+        console.log("set new frontend url ", url);
         window.document.getElementById('iframe-container').setAttribute('src', url);
     });
 }
@@ -50,7 +55,8 @@ function handleTravianPageOpened(){
         if(data.isActive){
             if(data.villages.length !== 0){
                 console.log("response is tab active ", data.villages);
-                updateContentVariables(data.villages);
+
+                updateContentVariables(deSerializeVillages(data.villages));
                 showBuildUI();
                 showTrainUI();
                 showFarmUI();
@@ -59,7 +65,6 @@ function handleTravianPageOpened(){
                     console.log("response active village ", activeVillage);
                     sendMessageToExtension(CHANGE_VILLAGE_ACTION, activeVillage.did,
                         (r)=>{console.log("change village response", r);});
-
                 }
             }else{
                 console.log("else data villages length", data.villages.length);
@@ -89,6 +94,7 @@ function checkPageVariables(){
 }
 
 function updateContentVariables(newVillages) {
+    console.log("new villages", newVillages);
     villages = newVillages;
     activeVillage = findActiveVillage();
     pathname = window.location.pathname;

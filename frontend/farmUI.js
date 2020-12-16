@@ -16,18 +16,27 @@ function showDropDownForFarm(){
         console.log("village did ", did);
         const dropContainers = villageWrapper.getElementsByClassName('dropContainer');
         for(const container of dropContainers){
-            let farmListId = container.children[0].getAttribute('data-listid')
-            const dropDownNode = createDropDown(SELECT_OPTIONS_FARM, onSelectedFarm, {villageDid: did, farmId: farmListId}, DROPDOWN_EXTRA_FARM);
+            const farmListId = container.children[0].getAttribute('data-listid')
+            const name = getName(container);
+            const dropDownNode = createDropDown(SELECT_OPTIONS_FARM, onSelectedFarm, {villageDid: did, farmId: farmListId, name: name}, DROPDOWN_EXTRA_FARM);
             container.getElementsByClassName('listName')[0].append(dropDownNode, container.firstChild);
             console.log("drop container", container);
         }
     }
 }
 
+function getName(container) {
+    const listName = container.getElementsByClassName('listName')[0];
+    const span = listName.getElementsByTagName('span')[0];
+    console.log("name1 ", span);
+    console.log("name2 ", span.innerText);
+    return span.innerText;
+}
+
 function onSelectedFarm(extraInfo, timeText) {
     console.log("on selected farmlist", extraInfo.farmId);
     console.log("with time", extraInfo);
-    let farmListTask = {taskType: FARM_TYPE, did: extraInfo.villageDid, id: extraInfo.farmId, timeText: timeText};
+    let farmListTask = {taskType: FARM_TYPE, did: extraInfo.villageDid, id: extraInfo.farmId, name: extraInfo.name, timeText: timeText};
     sendMessageToExtension(ADD_TASK_ACTION, farmListTask, (villages) => {
         console.log("is train task complete", villages);
     });

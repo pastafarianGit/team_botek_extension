@@ -160,6 +160,31 @@ function sendMessageToExtension(action, data, callback) {
     chrome.runtime.sendMessage({action: action, data: data}, callback);
 }
 
+function mapToJson(map) {
+    return JSON.stringify([...map]);
+}
+function jsonToMap(jsonStr) {
+    return new Map(JSON.parse(jsonStr));
+}
+
+function deSerializeVillages(villages) {
+    console.log("villages desER", villages);
+    for (let village of villages){
+        village.buildingsInfo = jsonToMap(village.buildingsInfo);
+    }
+    return villages;
+}
+
+function serializeVillages(villages) {
+    let serializeVillages = [];
+    for(const village of villages){
+        let conVillage = JSON.parse(JSON.stringify(village));
+        conVillage.buildingsInfo = mapToJson(village.buildingsInfo);
+        serializeVillages.push(conVillage);
+    }
+    return serializeVillages;
+}
+
 function createPause(second) {
     setTimeout(()=> {
         console.log("pause over");

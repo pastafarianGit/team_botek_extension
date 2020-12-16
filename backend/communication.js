@@ -16,6 +16,7 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 }
                 break;
             case GET_IFRAME_URL_ACTION:
+                console.log("urlForFrontEnd: ", urlForFrontEnd)
                 sendResponse(urlForFrontEnd);
                 sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn, tribe: tribe});
                 break;

@@ -20,6 +20,7 @@ function showAllResourcesUI() {
 
 function createAllResDropDown() {
     const maxLvl = getMaxResourceLvl();
+    const minLvl = BuildingHelper.getMinLvlForAllResources(activeVillage);
     const selectOptions = createArrayWithItemsInRange(1, maxLvl);
     const dropDown = createDropDown(selectOptions, allResSelectedListener, WOOD_TYPE, DROPDOWN_EXTRA_NEW);
 

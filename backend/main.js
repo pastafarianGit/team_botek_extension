@@ -16,7 +16,7 @@ onStartUp();
 
 function onStartUp() {
     setInterval(mainLoop, 15000);
-    testStartup();
+    // testStartup();
 }
 
 function testStartup() {

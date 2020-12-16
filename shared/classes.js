@@ -171,6 +171,32 @@ class BuildingHelper {
         }
         return DORF2_PATHNAME;
     }
+
+    static getMinBuildingLvl(buildings){
+        return buildings.reduce((result, resource) => {
+            if(result.lvl < resource.lvl){
+                return result;
+            }
+            return resource;
+        } );
+    }
+
+    static getResourceBuildings(village){
+        let array = [...village.buildingsInfo];
+         return array
+             .filter(building => {
+                 console.log("building, ", building[1]);
+                 this.isResource(building[1])
+                 console.log("this.isResource(building), ", this.isResource(building[1]));
+
+             });
+    }
+
+    static getMinLvlForAllResources(village){
+        let resources = BuildingHelper.getResourceBuildings(village);
+        const minBuilding = BuildingHelper.getMinBuildingLvl(resources);
+        return minBuilding.lvl;
+    }
 }
 
 
