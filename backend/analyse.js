@@ -62,13 +62,13 @@ async function analyseDorf2(village) {
 function parseAndUpdateDorf1 (pageString, village){
     parseTribe(pageString);
     let resourceBuildings = parseResourceLvls(pageString);
-    VillageHelper.updateBuildingInfo(resourceBuildings, village);
+    BuildingHelper.updateBuildingInfo(resourceBuildings, village);
     analyseBackgroundContent(village, pageString);
 }
 
 function parseAndUpdateDorf2 (pageString, village) {
     let townBuildings = parseBuildingLvls(pageString);
-    VillageHelper.updateBuildingInfo(townBuildings, village);
+    BuildingHelper.updateBuildingInfo(townBuildings, village);
     analyseBackgroundContent(village, pageString);
 }
 

@@ -166,7 +166,7 @@ function mapToJson(map) {
 function jsonToMap(jsonStr) {
     return new Map(JSON.parse(jsonStr));
 }
-
+/*
 function deSerializeVillages(villages) {
     console.log("villages desER", villages);
     for (let village of villages){
@@ -183,7 +183,7 @@ function serializeVillages(villages) {
         serializeVillages.push(conVillage);
     }
     return serializeVillages;
-}
+}*/
 
 function createPause(second) {
     setTimeout(()=> {

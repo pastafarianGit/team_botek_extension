@@ -72,12 +72,12 @@ function parseResourceLvls (pageString) {
     let parser =  new DOMParser();
     let doc = parser.parseFromString(pageString, 'text/html');
     let resourceElements = getResourceElements(doc);
-    let map = new Map();
-
+    //let map = new Map();
+    let resources = [];
     for (let element of resourceElements){
-            map.set(element.building.locationId,  element.building);
+        resources.push(element.building);
     }
-    return  map;
+    return  resources;
 }
 
 function parseGetNewBuildingButton(pageString, type) {
@@ -128,12 +128,12 @@ function getBuildingsElements(doc) {
 function parseBuildingLvls (pageString) {
     let parser =  new DOMParser();
     let doc = parser.parseFromString(pageString, 'text/html');
-    let map = new Map();
+    let buildings = [];
     let elements  = getBuildingsElements(doc);
     for(let element of elements){
-        map.set(element.building.locationId, element.building);
+        buildings.push(element.building);
     }
-    return map;
+    return buildings;
 }
 
 function parseVillages (htmlString, villagesLinks) {

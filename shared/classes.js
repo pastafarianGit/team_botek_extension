@@ -4,7 +4,7 @@ class VillageHelper {
        return  {
             did: did,
             timers: TimersHelper.createTimers(),
-            buildingsInfo: new Map(),
+            buildingsInfo: [],
             buildTasks: [[]],
             trainTasks: [],
             farmTasks: [],
@@ -14,17 +14,14 @@ class VillageHelper {
         }
     }
 
-    static updateBuildingInfo(updatedBuildings, village){
-        village.buildingsInfo = new Map([...village.buildingsInfo, ...updatedBuildings]);
-    }
-
     static isEnoughRes(task, village){
         const cost = BuildingHelper.getBuildingCost(task, village);
         return VillageHelper.checkCostVsStorage(cost, village);
     }
 
     static calcTimeTillTaskCanBeBuilt(task, village){
-        const building = village.buildingsInfo.get(task.building.locationId);
+
+        const building = BuildingHelper.getBuildingOnLocation(task.building.locationId, village);
         let cost = buildingsData[task.building.type].cost[building.lvl + 1];
 
         const woodTime = VillageHelper.calculateResourcesTime(cost.wood, village.resources.storage.l1, village.resources.production.l1);
@@ -52,11 +49,11 @@ class VillageHelper {
 
     static getMainBuildingLvl(village){
         let lvl = 0;
-        village.buildingsInfo.forEach((value, key) => {
-            if(value.gid === MAIN_BUILDING_ID){
-                lvl = value.lvl;
+        for(let building of village.buildingsInfo){
+            if(building.gid === MAIN_BUILDING_ID){
+                lvl = building.lvl;
             }
-        })
+        }
         return lvl;
     }
 
@@ -148,7 +145,7 @@ class BuildingHelper {
     }
 
     static getBuildingCost(task, village) {
-        const building = village.buildingsInfo.get(task.building.locationId);
+        const building = BuildingHelper.getBuildingOnLocation(task.building.locationId, village);
         return  buildingsData[task.building.type].cost[building.lvl + 1];
     }
 
@@ -159,6 +156,15 @@ class BuildingHelper {
         }
         name = name.slice(0, -2);
         return name;
+    }
+
+    static getBuildingOnLocation(locationId, village){
+        for (const building of village.buildingsInfo){
+            if(building.locationId === locationId){
+                return building;
+            }
+        }
+        return null;
     }
 
     static isResource(building) {
@@ -173,6 +179,7 @@ class BuildingHelper {
     }
 
     static getMinBuildingLvl(buildings){
+        console.log("buildings", buildings);
         return buildings.reduce((result, resource) => {
             if(result.lvl < resource.lvl){
                 return result;
@@ -182,20 +189,28 @@ class BuildingHelper {
     }
 
     static getResourceBuildings(village){
-        let array = [...village.buildingsInfo];
-         return array
-             .filter(building => {
-                 console.log("building, ", building[1]);
-                 this.isResource(building[1])
-                 console.log("this.isResource(building), ", this.isResource(building[1]));
 
+         return village.buildingsInfo
+             .filter(building => {
+                 return this.isResource(building)
              });
+    }
+
+    static updateBuildingInfo(updatedBuildings, village){
+
+        for(const updateB of updatedBuildings){
+            let building = this.getBuildingOnLocation(updateB.locationId, village);
+            if(building){
+                building = updateB;
+            }else
+                village.buildingsInfo.push(updateB);
+        }
     }
 
     static getMinLvlForAllResources(village){
         let resources = BuildingHelper.getResourceBuildings(village);
         const minBuilding = BuildingHelper.getMinBuildingLvl(resources);
-        return minBuilding.lvl;
+        return minBuilding.lvl + 1;
     }
 }
 

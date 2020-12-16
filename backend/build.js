@@ -104,7 +104,8 @@ async function  retrieveC (pageText){
 }
 
 async function simulateClickBuildingAndPressUpgrade (taskBuilding, village) {
-    const liveBuilding = village.buildingsInfo.get(taskBuilding.locationId);
+
+    const liveBuilding = BuildingHelper.getBuildingOnLocation(taskBuilding.locationId, village);
 
     let buildingPhpPageString = await getText(BUILD_PATH + PARAM_ID + taskBuilding.locationId, "", 3000);
 

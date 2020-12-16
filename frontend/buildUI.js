@@ -14,18 +14,24 @@ function showBuildUI() {
 
 function showAllResourcesUI() {
     const productionContainer = getProductionTableBodyContainerF();
-    createCheckboxes(productionContainer);
-    createAllResDropDown();
+    let isCreatedDropDown = createAllResDropDown();
+    if(isCreatedDropDown) {
+        createCheckboxes(productionContainer);
+    }
+
 }
 
 function createAllResDropDown() {
     const maxLvl = getMaxResourceLvl();
     const minLvl = BuildingHelper.getMinLvlForAllResources(activeVillage);
-    const selectOptions = createArrayWithItemsInRange(1, maxLvl);
+    if(minLvl === maxLvl){
+        return false;
+    }
+    const selectOptions = createArrayWithItemsInRange(minLvl, maxLvl);
     const dropDown = createDropDown(selectOptions, allResSelectedListener, WOOD_TYPE, DROPDOWN_EXTRA_NEW);
-
     let production = document.getElementsByClassName('production')[0];
     production.lastElementChild.replaceWith(dropDown);
+    return true;
 }
 
 function allResSelectedListener(type, lvl) {

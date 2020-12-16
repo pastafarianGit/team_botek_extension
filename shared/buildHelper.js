@@ -55,8 +55,7 @@ class BuildHelper {
     }
 
     static isTaskUnderLvl(task, village){
-        const building = village.buildingsInfo.get(task.building.locationId);
-
+        const building = BuildingHelper.getBuildingOnLocation(task.building.locationId, village);
         if(task.building.lvl > building.lvl){
             return false;
         }
@@ -64,7 +63,7 @@ class BuildHelper {
     }
 
     static isTaskDifferentType(task, village){
-        const building = village.buildingsInfo.get(task.building.locationId);
+        const building = BuildingHelper.getBuildingOnLocation(task.building.locationId, village);
         if(building.type === 0){ //building on empty space
             return false;
         }
@@ -151,7 +150,7 @@ class BuildHelper {
         let newTasks = [];
         const taskBuilding = task.building;
 
-        for(const [key, building] of buildingsInfo.entries()){
+        for(const building of buildingsInfo){
             if(taskBuilding.type.includes(building.type)){
                 if(taskBuilding.lvl > building.lvl){
                     const createdTask = BuildHelper.newExpandTask(task, building);
@@ -206,7 +205,7 @@ class BuildHelper {
 
     static addLvlForCurrentlyBuilding(village) {
         for(const current of village.currentlyBuilding){
-            let building = village.buildingsInfo.get(current.building.locationId);
+            let building =BuildingHelper.getBuildingOnLocation(current.building.locationId, village);
             if(building){
                 building.lvl = current.building.lvl;
             }

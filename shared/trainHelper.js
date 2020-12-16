@@ -2,7 +2,7 @@ class TrainHelper {
 
     static createTask(task, village){
         task.taskType = TRAIN_TYPE;
-        task.building = village.buildingsInfo.get(task.locationId);
+        task.building = BuildingHelper.getBuildingOnLocation(task.locationId, village);
         task.timer = TrainHelper.getTimeInMiliSec(task);
         task.uuid = getUuidv4();
         task.timerUpdate = Date.now();

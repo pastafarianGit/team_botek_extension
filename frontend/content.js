@@ -55,8 +55,7 @@ function handleTravianPageOpened(){
         if(data.isActive){
             if(data.villages.length !== 0){
                 console.log("response is tab active ", data.villages);
-
-                updateContentVariables(deSerializeVillages(data.villages));
+                updateContentVariables(data.villages);
                 showBuildUI();
                 showTrainUI();
                 showFarmUI();
