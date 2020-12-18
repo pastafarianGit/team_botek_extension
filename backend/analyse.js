@@ -11,6 +11,7 @@ function analyseVillagesOnStart(sendResponse){
     analyseVillageProfile()
         .then(result => {
             villages = result;
+            loadUserData();
             sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn, tribe: tribe});
             return analyseBuildingsInAllVillages();
         }).then(result => {

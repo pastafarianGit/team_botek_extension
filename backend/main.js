@@ -52,6 +52,7 @@ function openBot() {
         initVariables();
         windowTab = tab.windowId;
         setFrontEndUrl(url, tab);
+
     })
 }
 

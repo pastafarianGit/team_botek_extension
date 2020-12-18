@@ -23,9 +23,9 @@ class BuildHelper {
     static getTimerType(task){
         if(tribe === TRIBE_ROMANS){
             if(BuildingHelper.isResource(task.building)){
-                return  ROMANS_DORF1_ID;
+                return ROMANS_DORF1_ID;
             }else{
-                return  ROMANS_DORF2_ID;
+                return ROMANS_DORF2_ID;
             }
         }else{
             return BOTH_BUILD_ID;

@@ -57,9 +57,10 @@ chrome.webRequest.onBeforeRequest.addListener(
                 chrome.storage.sync.get(['users'], (result) => {
                     console.log("result on before request", result);
                     let users = addUser(result, newUser);
-                    chrome.storage.sync.set({users: users}, () => {
+                    setToStorage("users", users);
+                    /*chrome.storage.sync.set({users: users}, () => {
                         console.log("saved user to exetension");
-                    });
+                    });*/
                 });
 
             }

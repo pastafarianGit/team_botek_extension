@@ -12,21 +12,46 @@ async function getText(pathname, params, time){
 }
 
 async function logIn(isLogIn){
-    let users = await getFromStorage('users');
-    let user = findUser(users);
+    let user = getUser();
     user.login = isLogIn;
     let bodyData = "name=" + encodeURIComponent(user.name) + "&password=" + encodeURIComponent(user.password) + "&s1=" + encodeURIComponent(user.s1) + "&w=" + encodeURIComponent(user.w) + "&login=" + encodeURIComponent(user.login);
     return makePostRequest(baseServerUrl + LOGIN_PATHNAME, bodyData, URL_ENCODED_CONTENT_TYPE);
 }
 
+function saveUserData(){
+
+    setToStorage(baseServerUrl, villages);
+}
+
+function loadUserData(){
+    getFromStorage(baseServerUrl)
+        .then(result => {
+            console.log("saved villages", result);
+            if(result){
+                for(const savedVillage of result){
+                    let village = VillageHelper.findVillage(villages, savedVillage.did);
+                    village.task
+                }
+            }
+            sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
+        });
+    //villages = savedData;
+}
+
 async function getFromStorage(data){
     let promise = new Promise( (resolve, reject) => {
         chrome.storage.sync.get([data], (result) => {
-            resolve(result.users);
+            resolve(result[data]);
         });
     });
 
     return await promise;
+}
+
+function setToStorage(name , data){
+    chrome.storage.sync.set({[name]: data}, (result) => {
+        console.log("saved to chrome exetension", result);
+    });
 }
 
 async function getHtmlDocFromPage(pathname) {
@@ -116,7 +141,9 @@ function getUuidv4() {
     );
 }
 
-function findUser(users){
+async function getUser(){
+    let users = await getFromStorage('users');
+
     if(users === undefined){
         return Promise.reject(NO_USER);
     }

@@ -53,8 +53,8 @@ function addTask(taskData){
         case FARM_TYPE:
             addNewFarmTask(taskData);
             break;
-
     }
+    saveUserData();
 }
 
 chrome.runtime.onMessageExternal.addListener(   // from botkeGui
