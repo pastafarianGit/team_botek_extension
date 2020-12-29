@@ -5,9 +5,12 @@ class VillageHelper {
             did: did,
             timers: TimersHelper.createTimers(),
             buildingsInfo: [],
-            buildTasks: [[]],
-            trainTasks: [],
-            farmTasks: [],
+            tasks : {
+                buildTasks: [[]],
+                trainTasks: [],
+                farmTasks: [],
+            },
+
             currentlyBuilding: [],
             isCapital: false,
             isInQueue: false
@@ -65,10 +68,10 @@ class VillageHelper {
         return (wood && clay && iron && crop);
     }
 
-    static findVillage(villages, linkId){
+    static findVillage(villages, did){
         for(let i = 0; i < villages.length; i++){
             const village = villages[i];
-            if(village.did === linkId){
+            if(village.did === did){
                 return village;
             }
         }
@@ -210,7 +213,7 @@ class BuildingHelper {
     static getMinLvlForAllResources(village){
         let resources = BuildingHelper.getResourceBuildings(village);
         const minBuilding = BuildingHelper.getMinBuildingLvl(resources);
-        return minBuilding.lvl + 1;
+        return minBuilding.lvl;
     }
 }
 
@@ -252,7 +255,7 @@ class CurrentlyBuildingHelper {
 
     static updateIfTaskDone(village){
         for (let currBuilding of village.currentlyBuilding){
-            CurrentlyBuildingHelper.currentlyBuildingTaskComplete(village.buildTasks, currBuilding.building);
+            CurrentlyBuildingHelper.currentlyBuildingTaskComplete(village.tasks.buildTasks, currBuilding.building);
         }
     }
 

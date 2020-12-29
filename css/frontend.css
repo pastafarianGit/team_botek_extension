@@ -1,3 +1,8 @@
+:root {
+    --hightlight: #ffbfff;
+    --primary: #ff4081;
+}
+
 .scrollable-menu {
     max-height: 200px;
     overflow-x: hidden;
@@ -25,31 +30,43 @@
 #build-container-existing{
     margin: 0 10px 10px;
 }
+#add-task-ul-existing{
+    margin-left: 60px;
+}
 
 #build-container-new{
     margin: 10px 10px 10px -15px;
+}
+#add-task-ul-new{
+    margin-left: 10px;
 }
 
 #build-container-train{
     margin-left: -15px;
 }
-
-#build-container-farm{
-    margin-left: 0;
-}
-
-#add-task-ul-existing{
-    margin-left: 60px;
-}
-
-#add-task-ul-new{
-    margin-left: 10px;
-}
-
 #add-task-ul-train{
     margin-left: 0;
 }
 
+#build-container-hero{
+    margin-top: 5px;
+    margin-bottom: 5px;
+    display: inline-flex;
+}
+#add-task-ul-hero{
+    margin-left: 15px;
+}
+
+#add-task-status-div-hero{
+    display: inline !important;
+}
+
+
+
+
+#build-container-farm{
+    margin-left: 0;
+}
 #add-task-ul-farm{
 }
 
@@ -57,5 +74,9 @@
 
 .highlight-task{
     /*color: #ff4081;*/
-    background-color: #ffbfff !important;
+    background-color: var(--hightlight) !important;
+}
+
+.highlight-placeholder{
+    stroke: var(--hightlight);
 }

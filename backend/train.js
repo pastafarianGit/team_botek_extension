@@ -1,12 +1,12 @@
 
 function addNewTrainTask(trainData) {
     let village = VillageHelper.findVillage(villages, trainData.did);
-    village.trainTasks.push(TrainHelper.createTask(trainData, village));
+    village.tasks.trainTasks.push(TrainHelper.createTask(trainData, village));
 }
 
 
 function addTrainTaskToQueue(village, isBuildTaskAdded) {
-       for(const task of village.trainTasks){
+       for(const task of village.tasks.trainTasks){
            const isOverdo = TaskHelper.isTaskOverdo(task);
            console.log("task timer - Date.now", (task.timerUpdate - Date.now()) / 1000);
 
@@ -66,13 +66,21 @@ function createUriComponentUnits(units){
 }
 
 async function simulateClickBuildingAndTrain(task) {
-    const building = task.building;
-    const params = building.locationId + AND_GID_PARAM + building.type;
-
+    const params = createParams(task);
     let buildingPageString = await getText(BUILD_PATH + PARAM_ID, params, 2000);
 
     const bodyData = createBodyDataTrain(task, buildingPageString);
-    return makePostRequest(baseServerUrl+ BUILD_PATH + PARAM_ID + params, bodyData, URL_ENCODED_CONTENT_TYPE);
+    return makePostRequest(urls.baseServerUrl + BUILD_PATH + PARAM_ID + params, bodyData, URL_ENCODED_CONTENT_TYPE);
+}
+
+function createParams(task) {
+    const building = task.building;
+    let params = building.locationId + AND_GID_PARAM + building.type;
+    if(building.type === RESIDENCE_BUILDING_ID || building.type === PALACE_BUILDING_ID){
+        params += "&s=1";
+    }
+
+    return params;
 }
 
 function createBodyDataTrain(task, pageString) {

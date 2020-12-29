@@ -1,18 +1,16 @@
 let allResources = {1: true, 2: true, 3: true, 4: true};
 
 function showBuildUI() {
-    // const pathname = window.location.pathname;
     console.log("response showBuildUI ", pathname);
-
     if(pathname === BUILD_PATH_F){
         showUIOnExistingBuilding();
         showUIOnNewBuilding();
     }else if(pathname === DORF1_PATHNAME){
-        showAllResourcesUI();
+        showUIAllResources();
     }
 }
 
-function showAllResourcesUI() {
+function showUIAllResources() {
     const productionContainer = getProductionTableBodyContainerF();
     let isCreatedDropDown = createAllResDropDown();
     if(isCreatedDropDown) {
@@ -27,14 +25,14 @@ function createAllResDropDown() {
     if(minLvl === maxLvl){
         return false;
     }
-    const selectOptions = createArrayWithItemsInRange(minLvl, maxLvl);
+    const selectOptions = createArrayWithItemsInRange(minLvl + 1, maxLvl);
     const dropDown = createDropDown(selectOptions, allResSelectedListener, WOOD_TYPE, DROPDOWN_EXTRA_NEW);
     let production = document.getElementsByClassName('production')[0];
     production.lastElementChild.replaceWith(dropDown);
     return true;
 }
 
-function allResSelectedListener(type, lvl) {
+function allResSelectedListener(lvl, type) {
     console.log("on all res", lvl, allResources);
     const locationId = ALL_RES_LOCATION_ID;
     const types = getSelectedTypes();
@@ -92,17 +90,35 @@ function highlightTasks() {
 function highlightBuildingsTasks() {
     let buildingElements = getBuildingsElements(document);
     for (let element of buildingElements){
-        const isOnLocation = BuildHelper.isTaskOnLocation(element.building.locationId, activeVillage.buildTasks)
-        const labelLayer = element.divContainer.getElementsByClassName('labelLayer')[0];
-        highlightElement(labelLayer, isOnLocation);
+        console.log("element,", element);
+        const isOnLocation = BuildHelper.isTaskOnLocation(element.building.locationId, activeVillage.tasks.buildTasks)
+
+        if(element.building.lvl === 0){
+            highlightUnBuildTask(element.divContainer, isOnLocation);
+        }else{
+            const labelLayer = element.divContainer.getElementsByClassName('labelLayer')[0];
+            highlightElement(labelLayer, isOnLocation);
+        }
+
     }
+}
+
+function highlightUnBuildTask(element, isOnLocation) {
+        const clickShape = element.getElementsByClassName("clickShape")[0];
+        if(isOnLocation){
+            clickShape.getElementsByTagName("path")[0].classList.add(HIGHLIGHT_PLACEHOLDER_CSS);
+        }else{
+            clickShape.getElementsByTagName("path")[0].classList.remove(HIGHLIGHT_PLACEHOLDER_CSS);
+        }
+        console.log("clickShape", clickShape);
+        console.log("shape path child2", clickShape.getElementsByTagName("path")[0]);
 }
 
 function highlightResourcesTasks() {
     let resourceElements = getResourceElements(document);
-    console.log("highlight active village", activeVillage.buildTasks);
+    console.log("highlight active village", activeVillage.tasks.buildTasks);
     for (let element of resourceElements) {
-        let isOnLocation = BuildHelper.isTaskOnLocation(element.building.locationId, activeVillage.buildTasks)
+        let isOnLocation = BuildHelper.isTaskOnLocation(element.building.locationId, activeVillage.tasks.buildTasks)
         highlightElement(element.divContainer.firstChild, isOnLocation);
     }
 }
@@ -196,7 +212,7 @@ function setHiddenChildToTakeSpace() {
 }
 
 
-function onBuildDropdownSelectedListener(type, lvl) {
+function onBuildDropdownSelectedListener(lvl, type) {
     const locationId = getParamFromUrl("id");
     const buildTask = {taskType: BUILD_TYPE, lvl: parseInt(lvl), type: parseInt(type), locationId: parseInt(locationId), did: activeVillage.did};
     modifyLocationForWall(buildTask);

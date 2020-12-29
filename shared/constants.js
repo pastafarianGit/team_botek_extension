@@ -22,14 +22,18 @@ const BUILDING_LEVEL = "level";
 const BUILDING_LOCATION_ID = "buildingSlot";
 const HOUR = "h";
 const MIN = "min";
+const HEALTH = "health";
 const DONE = 'done';
 const SELECT_OPTIONS_TRAIN = ['1 ' + MIN, '2 ' + MIN, '15 '+ MIN, '30 '+ MIN, '45 '+MIN, '1 '+HOUR, '2 '+HOUR];
 const SELECT_OPTIONS_FARM = ['1 ' + MIN, '15 '+ MIN, '30 '+ MIN, '45 '+MIN, '1 '+HOUR, '2 '+HOUR, '3 '+HOUR];
+const SELECT_OPTIONS_HERO = ['Never', '20% '+ HEALTH, '40% '+ HEALTH, '50% ' + HEALTH, '60% ' + HEALTH];
+
 const ALL_RES_LOCATION_ID = 100;
 const TYPES_NAMES = {1: "Wood", 2: "Clay", 3: "Iron", 4: "Crop"};
 // ACTIONS
 const CHANGE_VILLAGE_ACTION = 'change_village_action';
 const IS_TAB_ACTIVE_ACTION = "is_tab_active_action";
+const UPDATE_HERO_ACTION = "update_hero_action";
 const GET_IFRAME_URL_ACTION = "get_iframe_url_action";
 const UPDATE_TASKS_ACTION = "update_tasks_action";
 const UPDATE_VILLAGES_ACTION = "update_villages_action";
@@ -62,6 +66,7 @@ const ERROR_TASK_DIFF_TYPE_THAN_BUILDING = "task diff type than building";
 const ERROR_BUILDING_C = "no value c";
 const ERROR_NO_PREREQUISITE = "Not meeting prerequisite";
 const HIGHLIGHT_TASK_CSS = 'highlight-task';
+const HIGHLIGHT_PLACEHOLDER_CSS = 'highlight-placeholder';
 const TASK_OK = "TASK_ok";
 const ERROR_WAREHOUSE_TOO_LOW = "warehouse too low";
 const ERROR_NO_UNITS_TO_TRAIN = "no units to train";
@@ -85,6 +90,7 @@ const BUILD_PATH_F = "/build.php";
 const BUILD_PATH = "/build.php?";
 const PROFILE_PATHNAME ="/profile";
 const RAID_LIST_PATHNAME = '/api/v1/ajax/raidList';
+const HERO_PATH = "/hero";
 const AND_GID_PARAM = '&gid='
 const CATEGORY_PARAM = "&category=";
 const NEW_DID_PARAM = "?newdid="
@@ -122,16 +128,20 @@ const REGEX_TRIBE = 'tribe(\\d)"';
 const CONTRACT_BUILDING = 'contract_building';
 
 const MAIN_BUILDING_ID = 15;
+const RESIDENCE_BUILDING_ID = 25;
+const PALACE_BUILDING_ID = 26;
 const WOOD_TYPE = 1;
 
 const ADD_BUILDING_NAME = 'add building ';
 const ADD_UNITS_NAME = 'train per ';
 const SEND_FARMLIST_NAME = 'send every ';
+const SEND_HERO_NAME = 'send hero if ';
 
 const DROPDOWN_EXTRA_NEW = {css: "-new", name: ADD_BUILDING_NAME};
 const DROPDOWN_EXTRA_TRAIN = {css:  "-train", name: ADD_UNITS_NAME};
 const DROPDOWN_EXTRA_FARM = {css: "-farm", name: SEND_FARMLIST_NAME};
 const DROPDOWN_EXTRA_EXISTING = {css: "-existing", name: ADD_BUILDING_NAME};
+const DROPDOWN_EXTRA_HERO = {css: "-hero", name: SEND_HERO_NAME};
 
 //
 let DROP_DOWN = '    <div id="" class="bootstrap">\n' +

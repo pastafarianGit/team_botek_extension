@@ -1,28 +1,22 @@
-let queue = [];
-let referer;
-let baseServerUrl = "";
-let botTabId;
-let villages = [];
-let serverSettings = null;
-let tribe = -1;
-let urlForFrontEnd = "";
-let isBotOn = false;
-let guiPortConnection = null;
-let newBotOpen = {updateProfile: false, updateTribe: false};
-let botSleep = {isSleeping: true, timer: Date.now() + hoursToMiliSec(0)};
-let windowTab = "";
+let villages, hero, queue, tribe;
+let botTabId, windowTab;
+let guiPortConnection;
+let serverSettings;
+let botStatus;
+let urls;
 
 onStartUp();
 
 function onStartUp() {
-    setInterval(mainLoop, 15000);
-    // testStartup();
+    initGlobalVariables();
+    onTabCloseListener();
+    testStartup();
 }
 
 function testStartup() {
-        const windowId = 355;
+        const windowId = 4606;
 
-        let newURL = "https://tx3.travian.hu/";
+        let newURL = "https://tx3.balkans.travian.com/";
         chrome.tabs.getAllInWindow(windowId, function(tabs){  // remove prev bots
             for (let i = 0; i < tabs.length; i++) {
                 if(tabs[i].url === SERVER_URL){
@@ -43,32 +37,30 @@ function testStartup() {
 function openBot() {
 
     runOnActiveId((tab) => {
+
+        setInterval(mainLoop, 15000);
         closeBotIfAlreadyOpened(botTabId);
         console.log("tab", tab);
         let url = new URL(tab.url);
         console.log("open bot", tab);
         botTabId = tab.id;
-        baseServerUrl = url.origin;
-        initVariables();
+        urls.baseServerUrl = url.origin;
+
         windowTab = tab.windowId;
+        console.log("windowTab", windowTab);
         setFrontEndUrl(url, tab);
 
     })
 }
 
-function initVariables() {
-    newBotOpen.updateProfile = true;
-    newBotOpen.updateTribe = true;
-    isBotOn = false;
-}
 
 function mainLoop (){
 
-    if(villages.length === 0 || !isBotOn)//if(!isBotOn)
+    if(villages.length === 0 || !botStatus.isBotOn)//if(!isBotOn)
         return;
 
     updateWorkingBotStatus();
-    if(botSleep.isSleeping){
+    if(botStatus.isSleeping){
         return;
     }
 
@@ -97,14 +89,14 @@ function mainLoop (){
 }
 
 function toggleSleep() {
-    if(Date.now() > botSleep.timer){
-        if(botSleep.isSleeping){
-            botSleep.timer = Date.now() + hoursToMiliSec(0.4)
+    if(Date.now() > botStatus.timer){
+        if(botStatus.isSleeping){
+            botStatus.timer = Date.now() + hoursToMiliSec(0.4)
         }else{
-            botSleep.timer = Date.now() + hoursToMiliSec(0.1)
+            botStatus.timer = Date.now() + hoursToMiliSec(0.1)
         }
-        botSleep.isSleeping = ! botSleep.isSleeping;
-        console.log("bot is sleeping", botSleep.isSleeping, " until: ", miliSecondsToMins(Date.now() - botSleep.timer));
+        botStatus.isSleeping = ! botStatus.isSleeping;
+        console.log("bot is sleeping", botStatus.isSleeping, " until: ", miliSecondsToMins(Date.now() - botStatus.timer));
     }
 }
 
@@ -145,11 +137,30 @@ function setFrontEndUrl(url, tab) {
     if(url.hostname.includes('travian')){
         checkAndLogin()
             .then(r => {
-                urlForFrontEnd = url.origin + DORF1_PATHNAME;
-                openBotTab(tab.id);
+                urls.urlForFrontEnd = url.origin + DORF1_PATHNAME;
             }).catch(err =>{
-            urlForFrontEnd = url.origin + LOGIN_PATHNAME;
+                urls.urlForFrontEnd = url.origin + LOGIN_PATHNAME;
+        }).finally(() => {
             openBotTab(tab.id);
-        });
+        })
     }
+}
+
+function initGlobalVariables() {
+    queue = [];
+    botTabId = undefined;
+    villages = [];
+    serverSettings = null;
+    tribe = -1;
+    guiPortConnection = null;
+    botStatus = {
+        isSleeping: true,
+        isBotOn : false,
+        updateProfile: true,
+        updateTribe: true,
+        timer: Date.now(), // + hoursToMiliSec(0),
+    };
+    windowTab = "";
+    urls = {referer: undefined, urlForFrontEnd: "", baseServerUrl: ""};
+    hero = {option: SELECT_OPTIONS_HERO[0], timer: Date.now() };
 }

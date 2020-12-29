@@ -81,9 +81,24 @@ class TrainHelper {
         for(let unit of task.units){
             const index = this.getUnitId(unit);
             unit.typeNum = index;
-            unit.name = unitsData[index].name;
+            unit.name = unitsData[index - 1].name;
         }
     }
+
+    /*static addType(task){
+        if(!task.units){
+            return;
+        }
+        switch(tribe){
+            case (TRIBE_ROMANS):
+
+            case (TRIBE_GAULS):
+                return gaulTroops;
+            case (TRIBE_TEUTONS):
+                return teutonTroops;
+        }
+
+    }*/
 
     static getUnitId(unit){
         return parseInt(unit.type.substring(1));

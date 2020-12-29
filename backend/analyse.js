@@ -12,7 +12,7 @@ function analyseVillagesOnStart(sendResponse){
         .then(result => {
             villages = result;
             loadUserData();
-            sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn, tribe: tribe});
+            sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: botStatus.isBotOn, tribe: tribe});
             return analyseBuildingsInAllVillages();
         }).then(result => {
         if(sendResponse){
@@ -22,7 +22,7 @@ function analyseVillagesOnStart(sendResponse){
     }).catch(err=> {
         console.log("err updating villages", err);
     });
-    newBotOpen.updateProfile = false;
+    botStatus.updateProfile = false;
 }
 
 
@@ -42,9 +42,9 @@ function analysePageStringDorf12 (pageString, village,  isRes) {
 }
 
 function parseTribe (pageString) {
-    if(newBotOpen.updateTribe){
+    if(botStatus.updateTribe){
         tribe = parseInt(regexSearchOne(REGEX_TRIBE, pageString, "g"));
-        newBotOpen.updateTribe = false;
+        botStatus.updateTribe = false;
     }
 }
 
@@ -73,17 +73,15 @@ function parseAndUpdateDorf2 (pageString, village) {
     analyseBackgroundContent(village, pageString);
 }
 
-
-
 function analyseBackgroundContent (village, pageString) {
     village.resources = parseResources(pageString);
     village.currentlyBuilding = parseCurrentlyBuilding(pageString, village);
     TimersHelper.updateTimers(village.currentlyBuilding, village.timers);
     BuildHelper.addLvlForCurrentlyBuilding(village);
-    checkForNewVillage(pageString);
+    checkForNewVillage1(pageString);
 }
 
-function checkForNewVillage(pageString){
+function checkForNewVillage1(pageString){
     const sideBar = getSidebarVillageBox(pageString);
     let ul = sideBar.getElementsByTagName('ul')[0];
     if(ul.childElementCount !== villages.length){

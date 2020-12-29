@@ -15,22 +15,24 @@ async function logIn(isLogIn){
     let user = getUser();
     user.login = isLogIn;
     let bodyData = "name=" + encodeURIComponent(user.name) + "&password=" + encodeURIComponent(user.password) + "&s1=" + encodeURIComponent(user.s1) + "&w=" + encodeURIComponent(user.w) + "&login=" + encodeURIComponent(user.login);
-    return makePostRequest(baseServerUrl + LOGIN_PATHNAME, bodyData, URL_ENCODED_CONTENT_TYPE);
+    return makePostRequest(urls.baseServerUrl + LOGIN_PATHNAME, bodyData, URL_ENCODED_CONTENT_TYPE);
 }
 
 function saveUserData(){
-
-    setToStorage(baseServerUrl, villages);
+    setToStorage(urls.baseServerUrl, {villages: villages, hero: hero});
 }
 
 function loadUserData(){
-    getFromStorage(baseServerUrl)
+    getFromStorage(urls.baseServerUrl)
         .then(result => {
             console.log("saved villages", result);
-            if(result){
-                for(const savedVillage of result){
+            hero.option = result.hero.option;
+            if(result.villages){
+                for(const savedVillage of result.villages){
                     let village = VillageHelper.findVillage(villages, savedVillage.did);
-                    village.task
+                    if(savedVillage.did === village.did){
+                        village.tasks = savedVillage.tasks;
+                    }
                 }
             }
             sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
@@ -40,7 +42,7 @@ function loadUserData(){
 
 async function getFromStorage(data){
     let promise = new Promise( (resolve, reject) => {
-        chrome.storage.sync.get([data], (result) => {
+        chrome.storage.local.get([data], (result) => {
             resolve(result[data]);
         });
     });
@@ -49,7 +51,7 @@ async function getFromStorage(data){
 }
 
 function setToStorage(name , data){
-    chrome.storage.sync.set({[name]: data}, (result) => {
+    chrome.storage.local.set({[name]: data}, (result) => {
         console.log("saved to chrome exetension", result);
     });
 }
@@ -109,7 +111,7 @@ function miliSecondsToMins(miliSec){
 }
 
 async function callFetchWithBaseUrl (pathname, headers, time) {
-    const url = baseServerUrl + pathname;
+    const url = urls.baseServerUrl + pathname;
     let myPromise = await fetch(url, headers);
     await new Promise((resolve, reject) => setTimeout(resolve, time));
     return myPromise;
@@ -149,7 +151,7 @@ async function getUser(){
     }
 
     for (let user of users){
-        if(user.serverUrl === baseServerUrl){
+        if(user.serverUrl === urls.baseServerUrl){
             return user;
         }
     }
@@ -176,7 +178,7 @@ function createDropDown(options, onSelectedFun, extraInfo, type) {
         let li = getItemLI(options[i]);
         li.onclick = (event) => {
             let lvl = event.target.innerText;
-            onSelectedFun(extraInfo, lvl);
+            onSelectedFun(lvl, extraInfo);
         }
         ulNode.appendChild(li);
     }

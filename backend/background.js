@@ -50,10 +50,10 @@ function addBearerKey(info){
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
         //console.log("details", details);
-        if(details.method === "POST" && details.url === baseServerUrl + LOGIN_PATHNAME){
+        if(details.method === "POST" && details.url === urls.baseServerUrl + LOGIN_PATHNAME){
             const formData = details.requestBody.formData;
             if(formData !== undefined){
-                let newUser = {name: formData.name[0], password: formData.password[0], s1: formData.s1[0], w: formData.w[0], serverUrl : baseServerUrl};
+                let newUser = {name: formData.name[0], password: formData.password[0], s1: formData.s1[0], w: formData.w[0], serverUrl : urls.baseServerUrl};
                 chrome.storage.sync.get(['users'], (result) => {
                     console.log("result on before request", result);
                     let users = addUser(result, newUser);
@@ -116,23 +116,23 @@ function modifyHeaders (pathname, reqHeaders) {
 }
 
 function modifyHeaderOrigin (url, requestHeaders) {
-    if(referer !== undefined){
-        addHeader({name: 'referer', value: referer}, requestHeaders);
+    if(urls.referer !== undefined){
+        addHeader({name: 'referer', value: urls.referer}, requestHeaders);
     }else{
         addHeader({name: 'sec-fetch-site', value: 'none'}, requestHeaders)
     }
     if(url.includes('login')){
-        addHeader({name: 'origin', value: baseServerUrl}, requestHeaders)
+        addHeader({name: 'origin', value: urls.baseServerUrl}, requestHeaders)
     }
-    if(url.includes(baseServerUrl)){
+    if(url.includes(urls.baseServerUrl)){
         if(url.includes('.php') || url.endsWith('hero')){
-            referer = url;
+            urls.referer = url;
         }
     }
 }
 
 function handleNotCorrectBearerKey(){
-        chrome.windows.create({url: baseServerUrl + DORF1_PATHNAME, state: 'minimized'}, (window)=> {
+        chrome.windows.create({url: urls.baseServerUrl + DORF1_PATHNAME, state: 'minimized'}, (window)=> {
             backgroundWindow = window;
             console.log("opened new page on ", window);
         });

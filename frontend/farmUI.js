@@ -18,7 +18,7 @@ function showDropDownForFarm(){
         for(const container of dropContainers){
             const farmListId = container.children[0].getAttribute('data-listid')
             const name = getName(container);
-            const dropDownNode = createDropDown(SELECT_OPTIONS_FARM, onSelectedFarm, {villageDid: did, farmId: farmListId, name: name}, DROPDOWN_EXTRA_FARM);
+            const dropDownNode = createDropDown(SELECT_OPTIONS_FARM, onSelectedFarmListener, {villageDid: did, farmId: farmListId, name: name}, DROPDOWN_EXTRA_HERO);
             container.getElementsByClassName('listName')[0].append(dropDownNode, container.firstChild);
             console.log("drop container", container);
         }
@@ -33,7 +33,7 @@ function getName(container) {
     return span.innerText;
 }
 
-function onSelectedFarm(extraInfo, timeText) {
+function onSelectedFarmListener(timeText, extraInfo) {
     console.log("on selected farmlist", extraInfo.farmId);
     console.log("with time", extraInfo);
     let farmListTask = {taskType: FARM_TYPE, did: extraInfo.villageDid, id: extraInfo.farmId, name: extraInfo.name, timeText: timeText};

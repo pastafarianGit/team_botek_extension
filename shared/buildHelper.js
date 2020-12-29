@@ -69,14 +69,14 @@ class BuildHelper {
         }
 
         if(building.type !== task.building.type){ // wrong task type for building spot
-            BuildHelper.deleteTask(task.uuid, village.buildTasks);
+            BuildHelper.deleteTask(task.uuid, village.tasks.buildTasks);
             return true;
         }
         return false;
     }
 
     static getNextTaskGroup(village, timerType){
-        const tasks = village.buildTasks;
+        const tasks = village.tasks.buildTasks;
         if(timerType === BOTH_BUILD_ID){
             return BuildHelper.expandAllResTasks(tasks[0], village);
         }
@@ -106,7 +106,7 @@ class BuildHelper {
 
     static deleteAllResourceTaskIfDone(expandedTasks, task, village){
         if(BuildHelper.isExpandedTaskDone(expandedTasks)){
-            BuildHelper.deleteTask(task.uuid, village.buildTasks);
+            BuildHelper.deleteTask(task.uuid, village.tasks.buildTasks);
         }
     }
 
@@ -131,7 +131,7 @@ class BuildHelper {
                 return;
             }
         }
-        BuildHelper.deleteTask(task.uuid, village.buildTasks);
+        BuildHelper.deleteTask(task.uuid, village.tasks.buildTasks);
     }
 
     static isExpandedTaskDone(expandedTasks) {

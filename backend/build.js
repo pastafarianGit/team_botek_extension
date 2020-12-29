@@ -27,13 +27,13 @@ function handleBuildErrors(err, task, village){
             BuildHelper.deleteTaskIfDone(task, village);
             break;
         case ERROR_TASK_DIFF_TYPE_THAN_BUILDING:
-            BuildHelper.deleteTask(task.uuid, village.buildTasks);
+            BuildHelper.deleteTask(task.uuid, village.tasks.buildTasks);
             break;
         case ERROR_NO_PREREQUISITE:
-            BuildHelper.deleteTask(task.uuid, village.buildTasks);
+            BuildHelper.deleteTask(task.uuid, village.tasks.buildTasks);
             break;
         case ERROR_WAREHOUSE_TOO_LOW:
-            BuildHelper.deleteTask(task.uuid, village.buildTasks);
+            BuildHelper.deleteTask(task.uuid, village.tasks.buildTasks);
             break;
         default:
             console.error("unhandled error: ", err);
@@ -82,9 +82,8 @@ function isTaskCostSmallerThanWarehouse(cost, warehouse) {
 function addNewBuildTask(data) {
     let village = VillageHelper.findVillage(villages, data.did);
     let building = BuildingHelper.createBuilding(data.locationId, data.type, data.lvl);
-    let newBuildTask = BuildHelper.createTask(building, data.did, getUuidv4(), (village.buildTasks[0].length > 0));
-    //let newBuildTask = new BuildTask(building, data.did, getUuidv4(), (village.buildTasks[0].length > 0));
-    BuildHelper.addTask(newBuildTask, village.buildTasks);
+    let newBuildTask = BuildHelper.createTask(building, data.did, getUuidv4(), (village.tasks.buildTasks[0].length > 0));
+    BuildHelper.addTask(newBuildTask, village.tasks.buildTasks);
     TimersHelper.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask, village.timers);
 }
 
@@ -145,7 +144,7 @@ async function createNewBuilding(taskBuilding) {
 
 
 function addBuildTaskToQueue(village) {
-    if(village.buildTasks.length > 0){
+    if(village.tasks.buildTasks.length > 0){
         if(tribe === TRIBE_ROMANS){
             const b1 = buildTaskPushToQueue(village, ROMANS_DORF1_ID);
             const b2 = buildTaskPushToQueue(village, ROMANS_DORF2_ID);

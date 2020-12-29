@@ -1,14 +1,14 @@
 
 chrome.runtime.onMessage.addListener(  // from inside content extension
     function(request, sender, sendResponse) {
-        if(baseServerUrl === ""){
+        if(urls.baseServerUrl === ""){
             sendResponse(false);
             return false;
         }
         //console.log("sender ", sender);
         switch (request.action) {
             case IS_TAB_ACTIVE_ACTION:
-                if(newBotOpen.updateProfile){
+                if(botStatus.updateProfile){
                     analyseVillagesOnStart(sendResponse);
                     handleNoBearerKey();
                 }else{
@@ -16,18 +16,19 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 }
                 break;
             case GET_IFRAME_URL_ACTION:
-                console.log("urlForFrontEnd: ", urlForFrontEnd)
-                sendResponse(urlForFrontEnd);
-                sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: isBotOn, tribe: tribe});
+                console.log("urlForFrontEnd: ", urls.urlForFrontEnd)
+                sendResponse(urls.urlForFrontEnd);
+                sendMessageToGUI(UPDATE_ALL_GUI_BOT_DATA_ACTION, {villages, isBotOn: botStatus.isBotOn, tribe: tribe});
                 break;
             case CHANGE_VILLAGE_ACTION:
                 sendResponse(true);
-                sendMessageToGUI(CHANGE_VILLAGE_ACTION, request.data);
+                checkForNewVillage2(request.data);
+                if(request.data){
+                    console.log("change village", request.data);
+                    sendMessageToGUI(CHANGE_VILLAGE_ACTION, request.data);
+                }
                 break;
             case ADD_TASK_ACTION:
-                /*if(tribe === -1){
-
-                }*/
                 addTask(request.data);
                 sendMessageToGUI(UPDATE_VILLAGES_ACTION, villages);
                 sendResponse(true);
@@ -38,9 +39,22 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                     closeBackgroundWindow();
                 }
                 break;
+            case UPDATE_HERO_ACTION:
+                console.log("hero update", request.data);
+                hero.option = request.data.option;
+                break;
         }
         return true;
     });
+
+function checkForNewVillage2(did) {
+        if(!did) {
+            if(!botStatus.updateProfile){
+                botStatus.updateProfile = true;
+                queue.push(AnalyseHelper.createTask());
+            }
+        }
+}
 
 function addTask(taskData){
     switch(taskData.taskType){
@@ -64,9 +78,9 @@ chrome.runtime.onMessageExternal.addListener(   // from botkeGui
         switch (request.action) {
             case UPDATE_TASKS_ACTION:
                 let village = VillageHelper.findVillage(villages, request.data.village.did);
-                village.buildTasks = request.data.village.buildTasks;
-                village.trainTasks = request.data.village.trainTasks;
-                village.farmTasks = request.data.village.farmTasks;
+                village.tasks = request.data.village.tasks;
+                /*village.tasks.trainTasks = request.data.village.tasks.trainTasks;
+                village.tasks.farmTasks = request.data.village.tasks.farmTasks;*/
                 //village.trainTasks = TrainHelper.deserializationToTrainTaskObject(request.data.village.trainTasks);
                 sendMessageToBotTab(UPDATE_VILLAGES_ACTION, villages);
                 sendResponse(true);
@@ -77,7 +91,7 @@ chrome.runtime.onMessageExternal.addListener(   // from botkeGui
 
             case IS_ACTIVE_BOT_ACTION:
                 console.log("toggle bot", request.data);
-                isBotOn = request.data.isRunning;
+                botStatus.isBotOn = request.data.isRunning;
                 updateWorkingBotStatus();
                 sendResponse(true);
                 break;
@@ -100,9 +114,9 @@ function updateBotStatusGUI(data) {
 }
 
 function updateWorkingBotStatus() {
-    if(isBotOn){
+    if(botStatus.isBotOn){
         toggleSleep();
-        if(botSleep.isSleeping){
+        if(botStatus.isSleeping){
             updateBotStatusGUI(BOT_IS_SLEEPING_STATUS);
         }else{
             updateBotStatusGUI(BOT_IS_WORKING_STATUS);

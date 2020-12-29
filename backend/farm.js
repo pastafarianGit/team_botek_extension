@@ -2,13 +2,13 @@ function addNewFarmTask(data) {
     console.log("farm data", data);
     let village = VillageHelper.findVillage(villages, data.did);
     let farmTask = FarmHelper.createFarmTask(data);
-    village.farmTasks.push(farmTask);
+    village.tasks.farmTasks.push(farmTask);
     console.log("new farm task", farmTask);
 }
 
 
 function addFarmTaskToQueue(village) {
-    for(const task of village.farmTasks){
+    for(const task of village.tasks.farmTasks){
         const isOverdo = TaskHelper.isTaskOverdo(task);
 
         if(isOverdo && !task.isInQueue){
@@ -35,7 +35,7 @@ async function farm(task, village) {
     const farmPageString = await getTextFromPage(BUILD_PATH_F, FARM_LIST_PARAMS, randomTimer);
     const bodyData = createBodyDataFarm(task.id, farmPageString);
 
-    let postReq =  makePostRequest(baseServerUrl + RAID_LIST_PATHNAME, bodyData, APP_JSON_CONTENT_TYPE);
+    let postReq =  makePostRequest(urls.baseServerUrl + RAID_LIST_PATHNAME, bodyData, APP_JSON_CONTENT_TYPE);
 
     console.log("data", postReq);
 }
