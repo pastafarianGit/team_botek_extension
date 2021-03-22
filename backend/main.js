@@ -10,7 +10,7 @@ onStartUp();
 function onStartUp() {
     initGlobalVariables();
     onTabCloseListener();
-    testStartup();
+    //testStartup();
 }
 
 function testStartup() {

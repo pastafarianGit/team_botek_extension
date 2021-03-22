@@ -18,7 +18,12 @@ function parseBuildingInfoOnResource(divResource) {
             gid = parseInt(divClass.substring(BUILDING_GID.length));
         }
     }
-    lvl = parseInt(divResource.getElementsByTagName('div')[0].innerText);
+    if(divResource.getElementsByTagName('div')[0] !== null){
+        lvl = parseInt(divResource.getElementsByTagName('div')[0].innerText);
+    }else{
+        lvl = parseInt(divResource.getElementsByTagName('span')[0].innerText);
+    }
+
     return BuildingHelper.createBuilding(locationId, gid, lvl);
 }
 
@@ -92,7 +97,7 @@ function getResourceElements(doc) {
     let elements = [];
     const resContainer = doc.getElementById("resourceFieldContainer");
     for (let child of resContainer.childNodes){
-        if(child.tagName === 'DIV'){
+        if(child.tagName === 'A' && !child.classList.contains("villageCenter")){
             let building = parseBuildingInfoOnResource(child);
             elements.push({divContainer: child, building: building});
         }

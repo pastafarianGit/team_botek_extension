@@ -26,8 +26,8 @@ function loadUserData(){
     getFromStorage(urls.baseServerUrl)
         .then(result => {
             console.log("saved villages", result);
-            hero.option = result.hero.option;
-            if(result.villages){
+            if(result && result.villages){
+                hero.option = result.hero.option;
                 for(const savedVillage of result.villages){
                     let village = VillageHelper.findVillage(villages, savedVillage.did);
                     if(savedVillage.did === village.did){
