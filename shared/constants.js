@@ -5,8 +5,8 @@ const TRIBE_ROMANS = 1;
 const TRIBE_GAULS = 3;
 const TRIBE_TEUTONS = 2;
 //const SERVER_URL = "http://www.travianteambot.com/";
-//const SERVER_URL = "http://157.90.232.124:80";
-const SERVER_URL = "http://localhost:4200/";
+const SERVER_URL = "http://157.90.232.124:80";
+//const SERVER_URL = "http://localhost:4200/";
 const EXTENSION_ID = "jjjkphjjmnpilpnjdgochjgjefomllfd";
 //TASK VARIABLES
 //const taskType = 'taskTypeTest';
