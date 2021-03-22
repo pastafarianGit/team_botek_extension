@@ -5,9 +5,9 @@ const TRIBE_ROMANS = 1;
 const TRIBE_GAULS = 3;
 const TRIBE_TEUTONS = 2;
 //const SERVER_URL = "http://www.travianteambot.com/";
-//const SERVER_URL = "http://168.119.157.162:80";
+//const SERVER_URL = "http://157.90.232.124:80";
 const SERVER_URL = "http://localhost:4200/";
-const EXTENSION_ID = "cbnloeijbkamkdkpnieednoedeakkdga";
+const EXTENSION_ID = "jjjkphjjmnpilpnjdgochjgjefomllfd";
 //TASK VARIABLES
 //const taskType = 'taskTypeTest';
 
@@ -111,7 +111,7 @@ const REGEX_VILLAGE_NAME = "<span class=\"name\">(.*)<\\/span>";
 const REGEX_COORDINATE_Y = "<span class=\"coordinateY\">(.*)\\)";*/
 const REGEX_COORDINATE_XY = "(−?‭\\d+)";
 const XPATH_PROFILE_VILLAGES = "//*[@id='villages']/tbody/tr";
-const XPATH_CURRENTLY_BUILDING = "//*[@id='content']/div[2]/ul";
+const XPATH_CURRENTLY_BUILDING = "//div[contains(@class, 'buildingList')]";
 const REGEX_VILLAGE_LINK = '<a  href="\\?newdid=(.*)&';
 const REGEX_VILLAGE_LINK_TEXT = 'newdid=(.*)&';
 const REGEX_RESOURCES_VAR = 'var resources = (\\{.*?)<\\/script>';

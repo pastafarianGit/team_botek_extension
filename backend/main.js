@@ -12,11 +12,11 @@ function onStartUp() {
     onTabCloseListener();
     //testStartup();
 }
-
+/*
 function testStartup() {
-        const windowId = 4606;
+        const windowId = 78;
 
-        let newURL = "https://tx3.balkans.travian.com/";
+        let newURL = "https://ts1.x1.europe.travian.com/";
         chrome.tabs.getAllInWindow(windowId, function(tabs){  // remove prev bots
             for (let i = 0; i < tabs.length; i++) {
                 if(tabs[i].url === SERVER_URL){
@@ -32,7 +32,7 @@ function testStartup() {
             }, 2000)
         });
 
-}
+}*/
 
 function openBot() {
 
@@ -45,7 +45,6 @@ function openBot() {
         console.log("open bot", tab);
         botTabId = tab.id;
         urls.baseServerUrl = url.origin;
-
         windowTab = tab.windowId;
         console.log("windowTab", windowTab);
         setFrontEndUrl(url, tab);

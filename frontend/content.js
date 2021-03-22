@@ -38,7 +38,7 @@ function isLoginPage() {
 function isBotPage() {
     const hostname = window.location.hostname;
     console.log("is bot page ", hostname);
-    return (hostname.includes('teambot') || hostname.includes('localhost') || hostname.includes('168.119.157.162'));
+    return (hostname.includes('teambot') || hostname.includes('localhost') || hostname.includes('157.90.232.124'));
 }
 
 function handleBotPageOpened(){
@@ -135,7 +135,7 @@ function setElementVisibility(element, visibility){
 
 function addBorderToBotActiveVillage(did) {
 
-   const sidebarBoxVillageList =  document.getElementById("sidebarBoxVillagelist");
+   const sidebarBoxVillageList = document.getElementById("sidebarBoxVillagelist");
    const allLinks = sidebarBoxVillageList.getElementsByTagName('a');
    for(let a of allLinks){
        if(a.href.includes(did)){
