@@ -18,7 +18,7 @@ function showDropDownForFarm(){
         for(const container of dropContainers){
             const farmListId = container.children[0].getAttribute('data-listid')
             const name = getName(container);
-            const dropDownNode = createDropDown(SELECT_OPTIONS_FARM, onSelectedFarmListener, {villageDid: did, farmId: farmListId, name: name}, DROPDOWN_EXTRA_HERO);
+            const dropDownNode = createDropDown(SELECT_OPTIONS_FARM, onSelectedFarmListener, {villageDid: did, farmId: farmListId, name: name}, DROPDOWN_EXTRA_FARM);
             container.getElementsByClassName('listName')[0].append(dropDownNode, container.firstChild);
             console.log("drop container", container);
         }

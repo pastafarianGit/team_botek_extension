@@ -5,7 +5,7 @@ const TRIBE_ROMANS = 1;
 const TRIBE_GAULS = 3;
 const TRIBE_TEUTONS = 2;
 //const SERVER_URL = "http://www.travianteambot.com/";
-const SERVER_URL = "http://157.90.232.124:80";
+const SERVER_URL = "http://157.90.232.124";
 //const SERVER_URL = "http://localhost:4200/";
 const EXTENSION_ID = "jjjkphjjmnpilpnjdgochjgjefomllfd";
 //TASK VARIABLES
@@ -24,8 +24,8 @@ const HOUR = "h";
 const MIN = "min";
 const HEALTH = "health";
 const DONE = 'done';
-const SELECT_OPTIONS_TRAIN = ['1 ' + MIN, '2 ' + MIN, '15 '+ MIN, '30 '+ MIN, '45 '+MIN, '1 '+HOUR, '2 '+HOUR];
-const SELECT_OPTIONS_FARM = ['1 ' + MIN, '15 '+ MIN, '30 '+ MIN, '45 '+MIN, '1 '+HOUR, '2 '+HOUR, '3 '+HOUR];
+const SELECT_OPTIONS_TRAIN = ['1 ' + MIN, '15 '+ MIN, '30 '+ MIN, '45 '+MIN, '1 '+HOUR, '2 '+HOUR];
+const SELECT_OPTIONS_FARM = ['1 ' + MIN, '15 '+ MIN, '20 '+ MIN, '30 '+ MIN, '45 '+MIN, '1 '+HOUR, '2 '+HOUR, '3 '+HOUR];
 const SELECT_OPTIONS_HERO = ['Never', '20% '+ HEALTH, '40% '+ HEALTH, '50% ' + HEALTH, '60% ' + HEALTH];
 
 const ALL_RES_LOCATION_ID = 100;

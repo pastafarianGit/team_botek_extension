@@ -69,7 +69,7 @@ function getRaidList(id, pageString) {
     const doc = toHtmlElement(pageString);
     const raidLists = doc.getElementsByClassName('raidList');
     for(const raidL of raidLists){
-        if(raidL.getAttribute('data-listid')){
+        if(raidL.getAttribute('data-listid') === id){
             return raidL;
         }
     }

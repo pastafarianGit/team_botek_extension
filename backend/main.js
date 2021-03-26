@@ -12,14 +12,15 @@ function onStartUp() {
     onTabCloseListener();
     //testStartup();
 }
-/*
-function testStartup() {
-        const windowId = 78;
 
-        let newURL = "https://ts1.x1.europe.travian.com/";
+function testStartup() {
+        const windowId = 1837;
+
+        let newURL = "https://ts30.x3.europe.travian.com/";
         chrome.tabs.getAllInWindow(windowId, function(tabs){  // remove prev bots
             for (let i = 0; i < tabs.length; i++) {
-                if(tabs[i].url === SERVER_URL){
+
+                if(tabs[i].url.includes(SERVER_URL)){
                     chrome.tabs.remove(tabs[i].id, ()=> {});
                 }
             }
@@ -32,7 +33,7 @@ function testStartup() {
             }, 2000)
         });
 
-}*/
+}
 
 function openBot() {
 
