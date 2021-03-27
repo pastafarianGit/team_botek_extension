@@ -19,6 +19,10 @@ class VillageHelper {
 
     static isEnoughRes(task, village){
         const cost = BuildingHelper.getBuildingCost(task, village);
+        if(cost === undefined){
+            BuildHelper.deleteTask(task.uuid, village.tasks.buildTasks);
+            return  false;
+        }
         return VillageHelper.checkCostVsStorage(cost, village);
     }
 
