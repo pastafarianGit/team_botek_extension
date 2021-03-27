@@ -120,7 +120,7 @@ class BuildingHelper {
         let building = {};
 
         console.log("create building ", locationId, type, lvl, buildingsData[type]);
-        if(buildingsData[type]  == null){
+        if(buildingsData[type]  === null && !Array.isArray(type)){
             return null;
         }
 
