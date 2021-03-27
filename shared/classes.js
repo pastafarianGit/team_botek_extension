@@ -170,6 +170,14 @@ class BuildingHelper {
         return null;
     }
 
+    static setBuildingOnLocation(updatedBuilding, village){
+        for (let i = 0; i < village.buildingsInfo.length; i++) {
+            if(village.buildingsInfo[i].locationId === updatedBuilding.location){
+                village.buildingsInfo[i] = updatedBuilding;
+            }
+        }
+    }
+
     static isResource(building) {
         return (building.locationId <= RES_MAX_LOCATION || building.locationId === ALL_RES_LOCATION_ID);
     }
@@ -204,7 +212,7 @@ class BuildingHelper {
         for(const updateB of updatedBuildings){
             let building = this.getBuildingOnLocation(updateB.locationId, village);
             if(building){
-                building = updateB;
+                this.setBuildingOnLocation(updateB);
             }else
                 village.buildingsInfo.push(updateB);
         }
