@@ -114,6 +114,12 @@ class BuildingHelper {
 
     static createBuilding(locationId, type, lvl) {
         let building = {};
+
+        console.log("create building ", locationId, type, lvl, buildingsData[type]);
+        if(buildingsData[type]  == null){
+            return null;
+        }
+
         building.locationId = locationId;
         building.type = BuildingHelper.getType(type);
         building.lvl = BuildingHelper.getLvl(lvl, building);
@@ -212,9 +218,10 @@ class BuildingHelper {
         for(const updateB of updatedBuildings){
             let building = this.getBuildingOnLocation(updateB.locationId, village);
             if(building){
-                this.setBuildingOnLocation(updateB);
-            }else
+                this.setBuildingOnLocation(updateB, village);
+            }else {
                 village.buildingsInfo.push(updateB);
+            }
         }
     }
 

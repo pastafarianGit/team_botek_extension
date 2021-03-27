@@ -82,9 +82,12 @@ function isTaskCostSmallerThanWarehouse(cost, warehouse) {
 function addNewBuildTask(data) {
     let village = VillageHelper.findVillage(villages, data.did);
     let building = BuildingHelper.createBuilding(data.locationId, data.type, data.lvl);
-    let newBuildTask = BuildHelper.createTask(building, data.did, getUuidv4(), (village.tasks.buildTasks[0].length > 0));
-    BuildHelper.addTask(newBuildTask, village.tasks.buildTasks);
-    TimersHelper.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask, village.timers);
+    if(building !== null){
+        let newBuildTask = BuildHelper.createTask(building, data.did, getUuidv4(), (village.tasks.buildTasks[0].length > 0));
+        BuildHelper.addTask(newBuildTask, village.tasks.buildTasks);
+        TimersHelper.updateTimerOnNewTask(village.currentlyBuilding, newBuildTask, village.timers);
+    }
+
 }
 
 function calcTimeToBuild (village, building, serverSpeed) {

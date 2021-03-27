@@ -140,10 +140,12 @@ class BuildHelper {
 
     static newExpandTask(task, building){
         const newBuilding = BuildingHelper.createBuilding(building.locationId, building.type, task.building.lvl);
-        let createdTask = BuildHelper.createTask(newBuilding, task.did, task.uuid, true);
-
-        createdTask.sortLvl = building.lvl;
-        return createdTask;
+        if(newBuilding !== null){
+            let createdTask = BuildHelper.createTask(newBuilding, task.did, task.uuid, true);
+            createdTask.sortLvl = building.lvl;
+            return createdTask;
+        }
+        return null;
     }
 
     static expandAllResourcesTask(task, buildingsInfo){
@@ -154,7 +156,9 @@ class BuildHelper {
             if(taskBuilding.type.includes(building.type)){
                 if(taskBuilding.lvl > building.lvl){
                     const createdTask = BuildHelper.newExpandTask(task, building);
-                    newTasks.push(createdTask);
+                    if(createdTask !== null){
+                        newTasks.push(createdTask);
+                    }
                 }
             }
         }

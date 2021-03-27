@@ -122,7 +122,10 @@ function getBuildingsElements(doc) {
                     if(labelLayer){
                         lvl = parseInt(labelLayer.innerText);
                     }
-                    elements.push({divContainer: child, building: BuildingHelper.createBuilding(locationId, gid, lvl)});
+                    let building = BuildingHelper.createBuilding(locationId, gid, lvl);
+                    if(building !== null){
+                        elements.push({divContainer: child, building: building});
+                    }
                 }
             }
         }
@@ -230,7 +233,10 @@ function parseCurrentlyBuildingJS (pageString) {
     const buildingsJson = JSON.parse(currentlyText);
     if(buildingsJson !== null){
         for(let building of buildingsJson){
-            buildings.push(BuildingHelper.createBuilding(parseInt(building.aid), building.gid, parseInt(building.stufe)));
+            let newBuilding = BuildingHelper.createBuilding(parseInt(building.aid), building.gid, parseInt(building.stufe));
+            if(newBuilding !== null){
+                buildings.push(newBuilding);
+            }
         }
     }
     return buildings;
