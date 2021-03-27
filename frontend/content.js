@@ -17,7 +17,6 @@ function init() {
 }
 
 function onPageLoad(){
-    debugger;
     if(isBotPage()){
         console.log("bot page");
         handleBotPageOpened();

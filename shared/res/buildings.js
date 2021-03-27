@@ -5797,7 +5797,7 @@ let buildingsData = {
 
   36: {
     name: "Trapper",
-    category: BUILDING_CATEGORY.INFRASTRUCTURE,
+    category: BUILDING_CATEGORY.ARMY,
     buildingType: BUILDING_TYPE.BUILDING,
     cost: {
 
