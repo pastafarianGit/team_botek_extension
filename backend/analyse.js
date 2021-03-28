@@ -8,6 +8,7 @@ async function analyseVillageProfile () { //get all villages -> link, name, coor
 function analyseVillagesOnStart(sendResponse){
     console.log("analyse villages on start");
     updateBotStatusGUI(BOT_IS_ANALYSING_VILLAGES);
+    botStatus.updateProfile = false;
     analyseVillageProfile()
         .then(result => {
             villages = result;
@@ -22,7 +23,7 @@ function analyseVillagesOnStart(sendResponse){
     }).catch(err=> {
         console.log("err updating villages", err);
     });
-    botStatus.updateProfile = false;
+
 }
 
 

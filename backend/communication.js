@@ -22,8 +22,8 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
                 break;
             case CHANGE_VILLAGE_ACTION:
                 sendResponse(true);
-                checkForNewVillage2(request.data);
                 if(request.data){
+                    checkForNewVillage2(request.data);
                     console.log("change village", request.data);
                     sendMessageToGUI(CHANGE_VILLAGE_ACTION, request.data);
                 }
@@ -48,6 +48,7 @@ chrome.runtime.onMessage.addListener(  // from inside content extension
     });
 
 function checkForNewVillage2(did) {
+        console.log("check for village did: ", did);
         if(!did) {
             if(!botStatus.updateProfile){
                 botStatus.updateProfile = true;
