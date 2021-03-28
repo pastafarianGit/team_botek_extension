@@ -51,6 +51,9 @@ async function train(task, village) {
 
     await analyseAndSwitchTo(task.building, village);
     const pageStringOnPOST = await simulateClickBuildingAndTrain(task, village);
+    if(pageStringOnPOST === null){
+        return Promise.reject(ERROR_PAGE_STRING_NOT_CONTAINING_CORRECT_INFO);
+    }
     console.log("page string on POST", pageStringOnPOST);
     if(pageStringOnPOST.status === 200){
         TrainHelper.subtractDoneUnits(task);
@@ -70,6 +73,9 @@ async function simulateClickBuildingAndTrain(task) {
     let buildingPageString = await getText(BUILD_PATH + PARAM_ID, params, 2000);
 
     const bodyData = createBodyDataTrain(task, buildingPageString);
+    if(bodyData == null){
+        return null;
+    }
     return makePostRequest(urls.baseServerUrl + BUILD_PATH + PARAM_ID + params, bodyData, URL_ENCODED_CONTENT_TYPE);
 }
 
@@ -85,6 +91,9 @@ function createParams(task) {
 
 function createBodyDataTrain(task, pageString) {
     const {z, a, s, did} = analyseTrainBuilding(pageString);
+    if(z === undefined){
+        return null;
+    }
     const hiddenValues = "z=" + encodeURIComponent(z) + "&a=" + encodeURIComponent(a) + "&s=" + encodeURIComponent(s) + "&did=" + encodeURIComponent(did);
     const units = createUriComponentUnits(task.units);
     return hiddenValues + units + "&s1="+encodeURIComponent('ok');

@@ -70,6 +70,7 @@ const HIGHLIGHT_PLACEHOLDER_CSS = 'highlight-placeholder';
 const TASK_OK = "TASK_ok";
 const ERROR_WAREHOUSE_TOO_LOW = "warehouse too low";
 const ERROR_NO_UNITS_TO_TRAIN = "no units to train";
+const ERROR_PAGE_STRING_NOT_CONTAINING_CORRECT_INFO = "error page string not containing correct info train";
 
 const BOTH_BUILD_ID = 0;
 const RES_ID = 1;
