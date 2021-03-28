@@ -57,6 +57,7 @@ function parseHiddenInputValuesOnTrain(pageString) {
     const buildActionDiv = doc.getElementsByClassName("buildActionOverview")[0];
     let hiddenInput = {};
     if(buildActionDiv === undefined){
+        console.error("hidden input pageString: ", pageString);
         return hiddenInput;
     }
 
