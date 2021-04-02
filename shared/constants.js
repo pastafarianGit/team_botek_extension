@@ -12,7 +12,7 @@ const EXTENSION_ID = "jjjkphjjmnpilpnjdgochjgjefomllfd";
 //const taskType = 'taskTypeTest';
 
 // FRONTEND
-const XPATH_ACTIVE_VILLAGE_F = '//*[@id="sidebarBoxVillagelist"]/div[2]/ul/li[@class=" active"]/a';
+const XPATH_ACTIVE_VILLAGE_F = '//*[@id="sidebarBoxVillagelist"]//li[contains(@class, "active")]/a[@class="active"]';
 const REGEX_VILLAGE_LINK_F = 'newdid=(.*?)&';
 const MAX_RESOURCE_LVL = 10;
 const MAX_CAPITAL_RESOURCE_LVL = 20;
